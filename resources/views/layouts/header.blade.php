@@ -9,9 +9,7 @@
 <body>
 
     <header>
-        <div class="logo">
-            <img src="{{asset('images/logo.png')}}" alt="Club Med Logo" />
-        </div>
+        <div class="logo">Club Med Logo</div>
         <nav class="nav-menu-left">
             <ul>
                 <!-- Menu Découvrir Club Med -->
