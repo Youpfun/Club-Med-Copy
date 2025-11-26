@@ -6,6 +6,8 @@ use App\Http\Controllers\ResortController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\TypeclubController;
 use App\Http\Controllers\LocalisationController;
+use App\Http\Controllers\FicheResort; 
+
 
 /*
 |--------------------------------------------------------------------------
@@ -21,6 +23,8 @@ use App\Http\Controllers\LocalisationController;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/ficheresort/{numresort}', [FicheResort::class, 'fiche']);
 
 Route::get('/resorts', [ResortController::class, 'index']);
 

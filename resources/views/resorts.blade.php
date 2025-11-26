@@ -8,8 +8,8 @@
     </style> </head> <body> <h1>Liste des Resorts Club Med</h1> <table> <thead> <tr> <th>Nom du 
                 Resort</th> <th>Pays (Code)</th> <th>Tridents</th> <th>Note Moyenne</th> 
                 <th>Chambres</th> <th>Description</th>
-            </tr> </thead> <tbody> @foreach($resorts as $resort) <tr> <td><button><strong>{{ 
-                    $resort->nomresort }}</strong></td></button>
+            </tr> </thead> <tbody> @foreach($resorts as $resort) <tr> <td><a href="/ficheresort/{{ $resort->numresort }}"><strong>{{ 
+                    $resort->nomresort }}</strong></td></a>
                     
                     <td>{{ $resort->codepays }}</td>
                     
