@@ -23,43 +23,6 @@ composer install
 npm install
 ```
 
-### 2️⃣ Configuration du fichier .env
-
-Si le fichier `.env` n'existe pas, copie le fichier exemple :
-
-```powershell
-Copy-Item .env.example .env
-```
-
-#### Option A : Utiliser SQLite (Recommandé pour débuter)
-
-Modifie le fichier `.env` :
-```env
-DB_CONNECTION=sqlite
-# DB_HOST=127.0.0.1
-# DB_PORT=3306
-# DB_DATABASE=laravel
-# DB_USERNAME=root
-# DB_PASSWORD=
-```
-
-Puis crée le fichier de base de données :
-```powershell
-New-Item -Path "database\database.sqlite" -ItemType File
-```
-
-#### Option B : Utiliser MySQL
-
-Modifie le fichier `.env` :
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=nom_de_ta_base
-DB_USERNAME=root
-DB_PASSWORD=ton_mot_de_passe
-```
-
 ### 3️⃣ Génération de la clé d'application
 
 ```powershell
@@ -70,12 +33,6 @@ php artisan key:generate
 
 ```powershell
 php artisan storage:link
-```
-
-### 5️⃣ Migration de la base de données
-
-```powershell
-php artisan migrate
 ```
 
 ---

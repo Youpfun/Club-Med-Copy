@@ -1,0 +1,138 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+}
+
+header {
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 70px;
+    position: relative;
+}
+
+header .logo img {
+    height: 50px;
+    width: auto;
+}
+
+header nav ul {
+    list-style: none;
+    display: flex;
+    gap: 30px;
+    margin: 0;
+    padding: 0;
+}
+
+header nav ul li {
+    list-style: none;
+    position: relative;
+}
+
+header nav ul li a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    font-size: 16px;
+    transition: all 0.3s;
+    padding: 10px 20px;
+    border-radius: 25px;
+    display: inline-block;
+}
+
+header nav ul li a:hover {
+    background-color: #000;
+    color: #fff;
+}
+
+.dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: -200px; 
+    background-color: #fff;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    border-radius: 8px;
+    padding: 30px;
+    display: none;
+    min-width: 900px;
+    z-index: 1000;
+    margin-top: 10px;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: flex;
+    gap: 40px;
+}
+
+.dropdown-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dropdown-column h4 {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #000;
+}
+
+.dropdown-column a {
+    color: #555;
+    text-decoration: none;
+    font-size: 14px;
+    padding: 5px 0;
+    transition: color 0.2s;
+}
+
+.dropdown-column a:hover {
+    color: #007bff;
+    background-color: transparent;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.icon-btn {
+    width: 45px;
+    height: 45px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #333;
+    border-radius: 50% !important;
+    font-size: 20px;
+    padding: 0 !important;
+}
+
+.icon-btn:hover {
+    background-color: #000 !important;
+    border-color: #000;
+}
+
+.btn-offres {
+    background-color: #1a1a2e;
+    color: white !important;
+    padding: 12px 24px !important;
+}
+
+.btn-offres:hover {
+    background-color: #000 !important;
+}
