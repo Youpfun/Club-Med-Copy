@@ -1,39 +1,35 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-	<link href="style.css" rel="stylesheet" />
-        <title>Laravel</title>
+@extends('layouts.header')
 
-    </head>
-    <body class="antialiased">
-		<h1> Bienvenue sur le site du Club Med</h1>
-		<div style="text-align: center; margin-top: 50px;">
-    <a href="{{ url('/resorts') }}" 
-       style="background-color: #007BFF; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-size: 18px; font-family: sans-serif;">
-         Accéder à la liste des Resorts
-    </a>
-</div>
-<div style="text-align: center; margin-top: 50px;">
-    <a href="{{ url('/clients') }}" 
-       style="background-color: #007BFF; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-size: 18px; font-family: sans-serif;">
-         Accéder à la liste des Clients
-    </a>
-</div>
+@section('title', 'Séjour tout compris dans les plus belles destinations | Club Med')
 
-<div style="text-align: center; margin-top: 50px;">
-    <a href="{{ url('/typeclubs') }}" 
-       style="background-color: #007BFF; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-size: 18px; font-family: sans-serif;">
-         Accéder à la liste des TypeClubs
-    </a>
-</div>
-<div style="text-align: center; margin-top: 50px;">
-    <a href="{{ url('/localisations') }}" 
-       style="background-color: #007BFF; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-size: 18px; font-family: sans-serif;">
-         Accéder à la liste des localisations
-    </a>
-</div>
+@section('content')
+    <h1 style="text-align: center;">Bienvenue sur le site du Club Med</h1>
+    
+    <div style="text-align: center; margin-top: 50px;">
+        <a href="{{ url('/resorts') }}" 
+           style="background-color: #007BFF; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-size: 18px; font-family: sans-serif;">
+            Accéder à la liste des Resorts
+        </a>
+    </div>
 
-    </body>
-</html>
+    <div style="text-align: center; margin-top: 50px;">
+        <a href="{{ url('/clients') }}" 
+           style="background-color: #007BFF; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-size: 18px; font-family: sans-serif;">
+            Accéder à la liste des Clients
+        </a>
+    </div>
+
+    <div style="text-align: center; margin-top: 50px;">
+        <a href="{{ url('/typeclubs') }}" 
+           style="background-color: #007BFF; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-size: 18px; font-family: sans-serif;">
+            Accéder à la liste des TypeClubs
+        </a>
+    </div>
+
+    <div style="text-align: center; margin-top: 50px;">
+        <a href="{{ url('/localisations') }}" 
+           style="background-color: #007BFF; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-size: 18px; font-family: sans-serif;">
+            Accéder à la liste des localisations
+        </a>
+    </div>
+@endsection
