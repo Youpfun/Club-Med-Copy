@@ -3,7 +3,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ResortController;
-
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\TypeclubController;
+use App\Http\Controllers\LocalisationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,6 +23,12 @@ Route::get('/', function () {
 });
 
 Route::get('/resorts', [ResortController::class, 'index']);
+
+Route::get('/clients', [ClientController::class, 'index']);
+
+Route::get('/typeclubs', [TypeclubController::class, 'index']);
+
+Route::get('/localisations', [LocalisationController::class, 'index']);
 
 Route::middleware([
     'auth:sanctum',

@@ -11,6 +11,8 @@ class Resort extends Model
 
 	protected $primaryKey = 'numresort';
 
+	public $timestamps = false;
+
 	protected $fillable =[
 		'codepays', 'numdomaine', 'numdocumentation', 'nomresort', 'descriptionresort', 'moyenneavis', 'nbchambrestotal', 'nbtridents'];
 }
