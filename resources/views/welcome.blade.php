@@ -1,35 +1,299 @@
-@extends('layouts.header')
-
-@section('title', 'Séjour tout compris dans les plus belles destinations | Club Med')
-
-@section('content')
-    <h1 style="text-align: center;">Bienvenue sur le site du Club Med</h1>
-    
-    <div style="text-align: center; margin-top: 50px;">
-        <a href="{{ url('/resorts') }}" 
-           style="background-color: #007BFF; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-size: 18px; font-family: sans-serif;">
-            Accéder à la liste des Resorts
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Séjours tout compris ou voyage all-inclusive | Club Med</title>
+    <meta name="description" content="Trouvez la destination de vos rêves pour vos prochaines vacances parmi près de 80 Resorts Club Med en Europe, Asie, Amérique ou dans les Caraïbes.">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        :root {
+            --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-family-serif: 'Newsreader', Georgia, serif;
+        }
+        body { font-family: var(--font-family-sans); }
+        .font-serif { font-family: var(--font-family-serif); }
+    </style>
+</head>
+<body class="bg-white">
+    <!-- Header -->
+    <header class="flex items-center justify-between gap-x-4 overflow-x-clip bg-white p-4 px-4 lg:px-8 relative isolate z-5 border-b border-gray-100" role="banner">
+        <a href="{{ url('/') }}" class="w-32 md:w-40">
+            <span class="sr-only">Club Med Luxury All Inclusive Resorts & Holiday Packages</span>
+            <span class="text-2xl font-bold text-blue-700">Club Med</span>
         </a>
-    </div>
+        <nav class="hidden md:flex items-center gap-x-6 px-4">
+            <a href="{{ url('/resorts') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">Nos Resorts</a>
+            <a href="{{ url('/clients') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">Clients</a>
+            <a href="{{ url('/typeclubs') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">Types de clubs</a>
+            <a href="{{ url('/localisations') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">Localisations</a>
+        </nav>
+        <div class="flex gap-x-4">
+            <a href="{{ url('/resorts') }}" class="flex items-center justify-center px-4 py-2 md:px-6 md:py-2.5 bg-yellow-500 hover:bg-yellow-600 text-black rounded-full font-semibold text-sm transition-colors">
+                <span class="hidden md:inline">Nos Offres</span>
+                <span class="md:hidden text-xl">%</span>
+            </a>
+        </div>
+    </header>
 
-    <div style="text-align: center; margin-top: 50px;">
-        <a href="{{ url('/clients') }}" 
-           style="background-color: #007BFF; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-size: 18px; font-family: sans-serif;">
-            Accéder à la liste des Clients
-        </a>
-    </div>
+    <!-- Main Content -->
+    <main id="main" role="main" tabindex="-1">
+        <!-- Hero Section -->
+        <section class="relative isolate overflow-hidden bg-gradient-to-b from-blue-50 to-white">
+            <div class="px-4 lg:px-8 xl:px-16 py-16 lg:py-20">
+                <div class="mx-auto max-w-7xl">
+                    <div class="grid md:grid-cols-2 gap-12 items-center">
+                        <div class="space-y-6">
+                            <h1 class="font-serif text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                                That's L'Esprit Libre
+                            </h1>
+                            <p class="text-base lg:text-lg text-gray-700 leading-relaxed">
+                                Club Med, pionnier des vacances tout inclus, réinvente l'art de l'évasion pour faire de chaque instant une promesse de liberté, de partage et d'émotion. Vivez vos vacances à votre rythme, sans compromis et avec l'Esprit Libre.
+                            </p>
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <a href="{{ url('/resorts') }}" class="inline-flex items-center justify-center px-8 py-3 bg-yellow-500 hover:bg-yellow-600 text-black rounded-full font-semibold text-base transition-colors">
+                                    Découvrir nos Resorts
+                                </a>
+                            </div>
+                        </div>
+                        <div class="relative aspect-square rounded-lg overflow-hidden bg-gray-200">
+                            <div class="absolute inset-0 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                                <span class="text-white text-6xl font-serif">🏖️</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    <div style="text-align: center; margin-top: 50px;">
-        <a href="{{ url('/typeclubs') }}" 
-           style="background-color: #007BFF; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-size: 18px; font-family: sans-serif;">
-            Accéder à la liste des TypeClubs
-        </a>
-    </div>
+        <!-- Search Section -->
+        <section class="px-4 lg:px-8 xl:px-16 py-12 lg:py-16 bg-white">
+            <div class="mx-auto max-w-7xl">
+                <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 lg:p-8">
+                    <h2 class="font-serif text-2xl lg:text-3xl font-bold text-gray-900 mb-6 text-center">
+                        Trouvez vos vacances idéales
+                    </h2>
+                    <form action="{{ url('/resorts') }}" method="GET" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="localisation" class="block text-sm font-medium text-gray-700 mb-2">Localisation</label>
+                                <select name="localisation" id="localisation" class="w-full h-12 px-4 py-2 border border-gray-300 rounded-full text-sm font-semibold text-gray-900 focus:outline-none focus:border-gray-900 transition-colors">
+                                    <option value="">Où souhaitez-vous partir ?</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="typeclub" class="block text-sm font-medium text-gray-700 mb-2">Type de club</label>
+                                <select name="typeclub" id="typeclub" class="w-full h-12 px-4 py-2 border border-gray-300 rounded-full text-sm font-semibold text-gray-900 focus:outline-none focus:border-gray-900 transition-colors">
+                                    <option value="">Type de séjour</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="pays" class="block text-sm font-medium text-gray-700 mb-2">Pays</label>
+                                <select name="pays" id="pays" class="w-full h-12 px-4 py-2 border border-gray-300 rounded-full text-sm font-semibold text-gray-900 focus:outline-none focus:border-gray-900 transition-colors">
+                                    <option value="">Tous les pays</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex justify-center">
+                            <button type="submit" class="px-10 py-3 bg-yellow-500 hover:bg-yellow-600 text-black rounded-full font-semibold text-base transition-colors">
+                                Voir tous les produits
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
 
-    <div style="text-align: center; margin-top: 50px;">
-        <a href="{{ url('/localisations') }}" 
-           style="background-color: #007BFF; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-size: 18px; font-family: sans-serif;">
-            Accéder à la liste des localisations
-        </a>
-    </div>
-@endsection
+        <!-- Destinations Section -->
+        <section class="px-4 lg:px-8 xl:px-16 py-12 lg:py-20 bg-gray-50">
+            <div class="mx-auto max-w-7xl">
+                <div class="mb-12">
+                    <h2 class="font-serif text-3xl lg:text-4xl font-bold text-gray-900 mb-12">
+                        Plus de 80 <span class="text-blue-600">destinations de rêve</span>
+                    </h2>
+                    <p class="text-base text-gray-700 max-w-xl">
+                        Soleil ou neige, près ou loin, vous trouverez certainement le Resort de vos rêves pour vos prochaines vacances.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Card 1 -->
+                    <article class="group relative isolate overflow-hidden rounded-lg bg-white shadow-sm hover:shadow-xl transition-all duration-300">
+                        <div class="aspect-horizontal bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                            <span class="text-white text-5xl">🏝️</span>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="font-serif text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                                Europe & Méditerranée
+                            </h3>
+                            <p class="text-sm text-gray-600 mb-4">
+                                Découvrez nos resorts en Europe et Méditerranée
+                            </p>
+                            <a href="{{ url('/resorts') }}" class="inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700">
+                                Découvrir →
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- Card 2 -->
+                    <article class="group relative isolate overflow-hidden rounded-lg bg-white shadow-sm hover:shadow-xl transition-all duration-300">
+                        <div class="aspect-horizontal bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
+                            <span class="text-white text-5xl">🏔️</span>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="font-serif text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                                Alpes
+                            </h3>
+                            <p class="text-sm text-gray-600 mb-4">
+                                Nos resorts de ski dans les Alpes
+                            </p>
+                            <a href="{{ url('/resorts') }}" class="inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700">
+                                Découvrir →
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- Card 3 -->
+                    <article class="group relative isolate overflow-hidden rounded-lg bg-white shadow-sm hover:shadow-xl transition-all duration-300">
+                        <div class="aspect-horizontal bg-gradient-to-br from-teal-400 to-cyan-600 flex items-center justify-center">
+                            <span class="text-white text-5xl">🌴</span>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="font-serif text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                                Océan Indien
+                            </h3>
+                            <p class="text-sm text-gray-600 mb-4">
+                                Paradis tropicaux et plages de rêve
+                            </p>
+                            <a href="{{ url('/resorts') }}" class="inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700">
+                                Découvrir →
+                            </a>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="mt-12 text-center">
+                    <a href="{{ url('/resorts') }}" class="inline-flex items-center justify-center px-8 py-3 border border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white rounded-full font-semibold text-sm transition-colors">
+                        Voir plus
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="px-4 lg:px-8 xl:px-16 py-12 lg:py-20 bg-white">
+            <div class="mx-auto max-w-7xl">
+                <h2 class="font-serif text-3xl lg:text-4xl font-bold text-gray-900 mb-12 text-center">
+                    Club Med, créateur du tout compris et du lâcher prise
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                    <div class="text-center">
+                        <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-blue-100 flex items-center justify-center">
+                            <span class="text-4xl">🏖️</span>
+                        </div>
+                        <h3 class="font-serif text-xl font-semibold text-gray-900 mb-3">
+                            60+ destinations mer & montagne d’exception
+                        </h3>
+                        <p class="text-sm text-gray-600">
+                            Des destinations uniques partout dans le monde
+                        </p>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-yellow-100 flex items-center justify-center">
+                            <span class="text-4xl">👨‍👩‍👧‍👦</span>
+                        </div>
+                        <h3 class="font-serif text-xl font-semibold text-gray-900 mb-3">
+                            Bonheur & complicité en famille
+                        </h3>
+                        <p class="text-sm text-gray-600">
+                            Des activités pour tous les âges
+                        </p>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
+                            <span class="text-4xl">🎾</span>
+                        </div>
+                        <h3 class="font-serif text-xl font-semibold text-gray-900 mb-3">
+                            Évasion sportive & bien-être
+                        </h3>
+                        <p class="text-sm text-gray-600">
+                            Sports et spa pour se ressourcer
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Temporary Admin Links (à supprimer plus tard) -->
+        <section class="px-4 lg:px-8 xl:px-16 py-12 bg-gray-100">
+            <div class="mx-auto max-w-7xl">
+                <h3 class="font-serif text-xl font-semibold text-gray-700 mb-6 text-center">
+                    Liens temporaires (admin)
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <a href="{{ url('/resorts') }}" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-center rounded-lg font-semibold text-sm transition-colors">
+                        Resorts
+                    </a>
+                    <a href="{{ url('/clients') }}" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-center rounded-lg font-semibold text-sm transition-colors">
+                        Clients
+                    </a>
+                    <a href="{{ url('/typeclubs') }}" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-center rounded-lg font-semibold text-sm transition-colors">
+                        TypeClubs
+                    </a>
+                    <a href="{{ url('/localisations') }}" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-center rounded-lg font-semibold text-sm transition-colors">
+                        Localisations
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white py-12 border-t border-gray-200" role="contentinfo">
+        <div class="px-4 lg:px-8 xl:px-16">
+            <div class="mx-auto max-w-7xl">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                    <div>
+                        <h4 class="font-semibold text-gray-900 mb-4">Club Med & vous</h4>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li><a href="#" class="hover:text-gray-900">Inscription à la Newsletter</a></li>
+                            <li><a href="#" class="hover:text-gray-900">Programme Great Members</a></li>
+                            <li><a href="#" class="hover:text-gray-900">Assurance Voyage</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900 mb-4">Nos inspirations</h4>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li><a href="{{ url('/resorts') }}" class="hover:text-gray-900">Vacances en famille</a></li>
+                            <li><a href="{{ url('/resorts') }}" class="hover:text-gray-900">Voyage de noces</a></li>
+                            <li><a href="{{ url('/resorts') }}" class="hover:text-gray-900">Vacances au soleil</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900 mb-4">Nos destinations</h4>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li><a href="{{ url('/resorts') }}" class="hover:text-gray-900">Europe & Méditerranée</a></li>
+                            <li><a href="{{ url('/resorts') }}" class="hover:text-gray-900">Alpes</a></li>
+                            <li><a href="{{ url('/resorts') }}" class="hover:text-gray-900">Océan Indien</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900 mb-4">Contact</h4>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li>0810 810 810</li>
+                            <li>Du lundi au samedi : 9h-19h</li>
+                            <li>Service 0,05€/min + prix appel</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="pt-8 border-t border-gray-200 text-center">
+                    <p class="text-sm text-gray-600">&copy; {{ date('Y') }} Club Med - Tous droits réservés</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
