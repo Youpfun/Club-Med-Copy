@@ -48,4 +48,8 @@ class Resort extends Model
 	{
 		return $this->belongsToMany('App\Models\Localisation', 'situer2', 'numresort', 'numlocalisation');
 	}
+    public function photos()
+    {
+        return $this->hasMany(Photo::class, 'numresort', 'numresort');
+    }
 }
