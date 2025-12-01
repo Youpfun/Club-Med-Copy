@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Pays;
 use App\Models\Documentation;
 use App\Models\Avis;
+use App\Models\Localisation;
 
 class Resort extends Model
 {
