@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class localisation extends Model
+class Localisation extends Model
 {
     protected $table = 'localisation';
 
@@ -15,4 +15,9 @@ class localisation extends Model
 
     protected $fillable = [
 	'nomlocalisation'];
+
+	public function resorts()
+	{
+		return $this->belongsToMany('App\Models\Resort', 'situer2', 'numlocalisation', 'numresort');
+	}
 }
