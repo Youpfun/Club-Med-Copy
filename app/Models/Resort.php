@@ -27,10 +27,22 @@ class Resort extends Model
 			return $this->belongsTo(Pays::class, 'codepays', 'codepays');
 	}
 
+	public function documentation()
+    {
+        return $this->belongsTo(Documentation::class, 'numdocumentation', 'numdocumentation');
+    }
+
 	public function avis()
     {
         return $this->hasMany(Avis::class, 'numresort', 'numresort');
     }
+
+	public static function resortPaysDocumentationAvis($numresort) 
+	{
+		return self::with(['pays', 'documentation', 'avis' => function($query) 
+		{$query->orderBy('datepublication', 'desc')->take(3);
+		}])->find($numresort);
+	}
 
 	public static function resortPaysAvis($numresort) 
 	{

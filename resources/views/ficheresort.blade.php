@@ -31,6 +31,14 @@
             <hr>
             <div>pays : {{ $resort->pays->nompays ?? 'pas de pays défini' }}</div> 
             <hr>
+            
+            @php
+                // Correspondance nom resort -> fichier image (en minuscules sans espaces)
+                $imageName = strtolower(str_replace(' ', '', $resort->nomresort)) . '.webp';
+                $imagePath = 'img/ressort/' . $imageName;
+                $fullPath = public_path($imagePath);
+            @endphp
+            
 	<div class="resort-visual-container" style="margin: 40px auto; max-width: 1100px; padding: 0 20px;">
     
     <div style="
@@ -39,8 +47,8 @@
         box-shadow: 0 20px 40px rgba(0,0,0,0.15); 
         border: 1px solid rgba(0,0,0,0.05);
     ">
-        @if($resort->photos->isNotEmpty())
-            <img src="{{ asset($resort->photos->first()->cheminfichierphoto) }}" 
+        @if(file_exists($fullPath))
+            <img src="{{ asset($imagePath) }}" 
                  alt="{{ $resort->nomresort }}" 
                  style="
                     display: block;
@@ -54,7 +62,7 @@
                  onmouseout="this.style.transform='scale(1)'">
         @else
             <div style="height: 500px; background: linear-gradient(45deg, #f3f4f6, #e5e7eb); display: flex; align-items: center; justify-content: center; color: #9ca3af;">
-                <span>Aucune image disponible</span>
+                <span>Aucune image disponible<br><small style="font-size: 0.8em;">Fichier attendu : {{ $imageName }}</small></span>
             </div>
         @endif
     </div>
