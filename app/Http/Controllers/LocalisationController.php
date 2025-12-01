@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\localisation;
+use App\Models\Localisation;
 
 class LocalisationController extends Controller
 {
