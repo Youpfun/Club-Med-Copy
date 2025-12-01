@@ -9,7 +9,7 @@ class FicheResort extends Controller
 {
     public function fiche($numresort)
     {
-        $resort = Resort::resortPaysDocumentationAvis($numresort);
+        $resort = Resort::resortPaysAvis($numresort);
 
         return view('ficheresort', ['resort' => $resort]);
     }
