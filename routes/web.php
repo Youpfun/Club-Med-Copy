@@ -6,7 +6,8 @@ use App\Http\Controllers\ResortController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\TypeclubController;
 use App\Http\Controllers\LocalisationController;
-use App\Http\Controllers\FicheResort; 
+use App\Http\Controllers\FicheResort;
+use App\Http\Controllers\ActiviteController;
 
 
 /*
@@ -33,6 +34,8 @@ Route::get('/clients', [ClientController::class, 'index']);
 Route::get('/typeclubs', [TypeclubController::class, 'index']);
 
 Route::get('/localisations', [LocalisationController::class, 'index']);
+
+Route::get('/resort/{id}/activites', [ActiviteController::class, 'index'])->name('resort.activites');
 
 Route::middleware([
     'auth:sanctum',

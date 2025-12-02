@@ -38,6 +38,11 @@
                 $imagePath = 'img/ressort/' . $imageName;
                 $fullPath = public_path($imagePath);
             @endphp
+
+            <a href="{{ route('resort.activites', ['id' => $resort->numresort]) }}" 
+            style="display: inline-block; padding: 10px 20px; background-color: #00457C; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+            Voir les activités
+            </a>
             
 	<div class="resort-visual-container" style="margin: 40px auto; max-width: 1100px; padding: 0 20px;">
     
