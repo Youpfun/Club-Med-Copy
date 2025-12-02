@@ -3,9 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class Client extends Model
+class Client extends Authenticatable
 {
     protected $table = 'client';
 
@@ -14,6 +15,31 @@ class Client extends Model
     public $timestamps = false;
 
     protected $fillable = [
-	'nomclient', 'prenomclient', 'emailclient', 'login', 'password', 'ville', 'numrue', 'nomrue', 'codepostal', 'telephone', 'genreclient', 'datenaissance'];
+        'nomclient', 
+        'prenomclient', 
+        'emailclient', 
+        'login', 
+        'password', 
+        'ville', 
+        'numrue', 
+        'nomrue', 
+        'codepostal', 
+        'telephone', 
+        'genreclient', 
+        'datenaissance'
+    ];
 
+    protected $hidden = [
+        'password',
+    ];
+
+    protected $casts = [
+        'password' => 'hashed',
+        'datenaissance' => 'date',
+    ];
+
+    public function getEmailForPasswordReset()
+    {
+        return $this->emailclient;
+    }
 }

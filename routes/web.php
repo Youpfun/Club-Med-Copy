@@ -2,12 +2,14 @@
 
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ResortController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\TypeclubController;
 use App\Http\Controllers\LocalisationController;
 use App\Http\Controllers\FicheResort;
-use App\Http\Controllers\ActiviteController;
+use App\Http\Controllers\InscriptionController;
+use App\Http\Controllers\ConnexionController;
 
 
 /*
@@ -35,7 +37,18 @@ Route::get('/typeclubs', [TypeclubController::class, 'index']);
 
 Route::get('/localisations', [LocalisationController::class, 'index']);
 
-Route::get('/resort/{id}/activites', [ActiviteController::class, 'index'])->name('resort.activites');
+Route::get('/inscription', [InscriptionController::class, 'create'])->name('inscription.create');
+Route::post('/inscription', [InscriptionController::class, 'store'])->name('inscription.store');
+
+Route::post('/logout', function () {
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return redirect('/');
+})->name('logout');
+
+Route::get('/login', [ConnexionController::class, 'show'])->name('login');
+Route::post('/login', [ConnexionController::class, 'login'])->name('login.submit');
 
 Route::middleware([
     'auth:sanctum',
