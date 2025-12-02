@@ -1,48 +1,68 @@
-<x-guest-layout>
-    <x-authentication-card>
-        <x-slot name="logo">
-            <x-authentication-card-logo />
-        </x-slot>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Club Med</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        clubmed: { DEFAULT: '#113559' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-clubmed">
 
-        <x-validation-errors class="mb-4" />
+<div class="min-h-screen flex flex-col justify-center items-center px-4">
+    <div class="bg-white p-8 rounded-sm shadow-lg w-full max-w-md border-t-4 border-clubmed">
+        
+        <div class="text-center mb-8">
+            <h2 class="text-2xl font-bold uppercase tracking-wider">Espace Client</h2>
+            <p class="text-sm text-gray-500 mt-2">Connectez-vous pour accéder à vos réservations</p>
+        </div>
 
-        @if (session('status'))
-            <div class="mb-4 font-medium text-sm text-green-600">
-                {{ session('status') }}
+        @if ($errors->any())
+            <div class="mb-4 p-3 bg-red-50 text-red-700 text-sm border-l-4 border-red-500">
+                {{ $errors->first('email') }}
             </div>
         @endif
 
-        <form method="POST" action="{{ route('login') }}">
+        <form action="{{ route('login.submit') }}" method="POST">
             @csrf
 
-            <div>
-                <x-label for="email" value="{{ __('Email') }}" />
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-gray-700 mb-1 uppercase">E-mail ou Login</label>
+                <input type="email" name="email" value="{{ old('email') }}" class="w-full border-gray-300 border p-3 text-sm focus:border-clubmed focus:ring-1 focus:ring-clubmed outline-none" required autofocus>
             </div>
 
-            <div class="mt-4">
-                <x-label for="password" value="{{ __('Password') }}" />
-                <x-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="current-password" />
+            <div class="mb-6">
+                <label class="block text-xs font-bold text-gray-700 mb-1 uppercase">Mot de passe</label>
+                <input type="password" name="password" class="w-full border-gray-300 border p-3 text-sm focus:border-clubmed focus:ring-1 focus:ring-clubmed outline-none" required>
             </div>
 
-            <div class="block mt-4">
-                <label for="remember_me" class="flex items-center">
-                    <x-checkbox id="remember_me" name="remember" />
-                    <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-                </label>
-            </div>
-
-            <div class="flex items-center justify-end mt-4">
-                @if (Route::has('password.request'))
-                    <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                        {{ __('Forgot your password?') }}
-                    </a>
-                @endif
-
-                <x-button class="ms-4">
-                    {{ __('Log in') }}
-                </x-button>
-            </div>
+            <button type="submit" class="w-full bg-clubmed text-white p-3 rounded font-bold uppercase tracking-wide hover:bg-opacity-90 transition shadow-lg">
+                Se connecter
+            </button>
         </form>
-    </x-authentication-card>
-</x-guest-layout>
+
+        <div class="mt-6 text-center border-t border-gray-100 pt-4">
+            <p class="text-sm text-gray-600">Pas encore de compte ?</p>
+            <a href="{{ route('inscription.create') }}" class="text-clubmed font-bold text-sm hover:underline mt-1 block">
+                Créer un compte maintenant
+            </a>
+        </div>
+        
+        <div class="mt-4 text-center">
+             <a href="/" class="text-xs text-gray-400 hover:text-gray-600">← Retour à l'accueil</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
