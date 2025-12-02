@@ -15,17 +15,7 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Header -->
-    <header class="flex items-center justify-between gap-x-4 overflow-x-clip bg-white p-4 px-4 lg:px-8 relative isolate z-5 border-b border-gray-100" role="banner">
-        <a href="{{ url('/') }}" class="w-32 md:w-40">
-            <span class="sr-only">Club Med</span>
-            <span class="text-2xl font-bold text-blue-700">Club Med</span>
-        </a>
-        <nav class="flex items-center gap-x-12 px-8">
-            <a href="{{ url('/') }}" class="text-sm font-semibold text-gray-600 hover:text-blue-600 transition-colors">← Accueil</a>
-            <a href="{{ url('/resorts') }}" class="text-sm font-semibold text-blue-600">Nos Resorts</a>
-        </nav>
-    </header>
+    @include('layouts.header')
 
     <!-- Main Content -->
     <main id="main" role="main" tabindex="-1">
