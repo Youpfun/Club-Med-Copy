@@ -12,36 +12,18 @@
     <main class="max-w-6xl mx-auto px-4 py-10">
         <h1 class="text-3xl font-bold text-[#113559] mb-6">Mes réservations</h1>
 
-        @if(empty($reservations))
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
-                <p class="text-gray-600 mb-4">
-                    Vous n'avez pas encore de réservation en cours.
-                </p>
-                <a href="{{ url('/resorts') }}"
-                   class="inline-flex items-center px-6 py-3 bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] rounded-full font-bold text-sm transition-colors shadow-md">
-                    Découvrir nos resorts
-                </a>
-            </div>
-        @else
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
-                @foreach($reservations as $reservation)
-                    <div class="flex items-center justify-between border-b last:border-0 border-gray-100 py-3">
-                        <div>
-                            <h2 class="text-lg font-semibold text-[#113559]">
-                                {{ $reservation['nom'] }}
-                            </h2>
-                            <p class="text-sm text-gray-500">
-                                {{ $reservation['pays'] ?? 'Pays non renseigné' }} •
-                                {{ $reservation['nb_chambres'] }} chambres
-                            </p>
-                        </div>
-                        <span class="inline-flex items-center px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">
-                            En cours de préparation
-                        </span>
-                    </div>
-                @endforeach
-            </div>
-        @endif
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
+            <p class="text-gray-600 mb-4">
+                Vous n'avez pas encore de réservations finalisées.
+            </p>
+            <p class="text-sm text-gray-500 mb-4">
+                Ajoutez des resorts à votre panier depuis leur fiche, puis finalisez votre réservation ultérieurement.
+            </p>
+            <a href="{{ route('cart.index') }}"
+               class="inline-flex items-center px-6 py-3 bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] rounded-full font-bold text-sm transition-colors shadow-md">
+                Voir mon panier
+            </a>
+        </div>
     </main>
 
     @include('layouts.footer')

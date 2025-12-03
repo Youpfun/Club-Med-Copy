@@ -34,13 +34,13 @@ class PanierController extends Controller
     }
 
     /**
-     * Afficher les réservations (panier) de l'utilisateur.
+     * Afficher le panier (réservations en cours) de l'utilisateur.
      */
     public function index(Request $request)
     {
         $cart = $request->session()->get('cart', []);
 
-        return view('reservations', [
+        return view('panier', [
             'reservations' => $cart,
         ]);
     }

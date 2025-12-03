@@ -121,7 +121,7 @@
 
                 {{-- Boutons actions --}}
                 <div class="mt-6 flex flex-wrap gap-3">
-                    <a href="{{ route('resort.activites', ['id' => $resort->numresort]) }}"
+                    <a href="{{ route('resort.types', ['id' => $resort->numresort]) }}"
                        class="inline-flex items-center px-5 py-2.5 rounded-full bg-sky-700 hover:bg-sky-800 text-white font-semibold text-sm shadow-md transition">
                         Voir les types d'activités disponibles
                     </a>

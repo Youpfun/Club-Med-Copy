@@ -45,6 +45,9 @@
                             Mon tableau de bord
                         </a>
                         <a href="{{ route('cart.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-900">
+                            Panier
+                        </a>
+                        <a href="{{ route('reservations.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-900">
                             Mes réservations
                         </a>
                         
