@@ -31,7 +31,35 @@
             <hr>
             <div>pays : {{ $resort->pays->nompays ?? 'pas de pays défini' }}</div> 
             <hr>
-            
+
+            <div class="resort-map-container" style="margin: 30px 0;">
+                <h2 style="margin-bottom: 10px; color:#00457C;">Localisation du resort</h2>
+                <p style="margin-bottom: 10px; color:#4b5563;">
+                    La carte ci-dessous indique l’emplacement approximatif de
+                    <strong>{{ $resort->nomresort }}</strong>
+                    @if($resort->pays && $resort->pays->nompays)
+                        , {{ $resort->pays->nompays }}
+                    @endif
+                    .
+                </p>
+                <div style="
+                    border-radius: 16px;
+                    overflow: hidden;
+                    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+                    border: 1px solid rgba(0,0,0,0.05);
+                ">
+                    <iframe
+                        width="100%"
+                        height="400"
+                        style="border:0;"
+                        loading="lazy"
+                        allowfullscreen
+                        referrerpolicy="no-referrer-when-downgrade"
+                        src="https://www.google.com/maps?q={{ urlencode($resort->nomresort . ' ' . ($resort->pays->nompays ?? '')) }}&output=embed">
+                    </iframe>
+                </div>
+            </div>
+
             @php
                 // Correspondance nom resort -> fichier image (en minuscules sans espaces)
                 $imageName = strtolower(str_replace(' ', '', $resort->nomresort)) . '.webp';
