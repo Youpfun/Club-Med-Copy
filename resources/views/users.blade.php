@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Liste Complète des Utilisateurs</title>
+    <link rel="icon" type="image/png" href="/img/logo-clubmed.png"/>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f4f4f9; color: #333; }
         

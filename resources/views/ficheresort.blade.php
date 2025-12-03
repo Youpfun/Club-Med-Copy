@@ -2,7 +2,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Activités </title>
+    <link rel="icon" type="image/png" href="/img/logo-clubmed.png"/>
 </head>
 <body>
     <a href="/resorts">← Retour à la liste</a>

@@ -6,6 +6,7 @@
     <title>Séjours tout compris ou voyage all-inclusive | Club Med</title>
     <meta name="description" content="Trouvez la destination de vos rêves pour vos prochaines vacances parmi près de 80 Resorts Club Med en Europe, Asie, Amérique ou dans les Caraïbes.">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="icon" type="image/png" href="/img/logo-clubmed.png"/>
     <style>
         :root {
             --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -18,9 +19,8 @@
 <body class="bg-white">
     @include('layouts.header')
 
-    <!-- Main Content -->
+
     <main id="main" role="main" tabindex="-1">
-        <!-- Hero Section -->
         <section class="relative isolate overflow-hidden bg-gradient-to-b from-blue-50 to-white">
             <div class="px-4 lg:px-8 xl:px-16 py-16 lg:py-20">
                 <div class="mx-auto max-w-7xl">

@@ -7,8 +7,6 @@
     <nav class="hidden md:flex items-center gap-x-6 px-4">
         <a href="{{ url('/resorts') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">Nos Resorts</a>
         <a href="{{ url('/clients') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">Clients (Admin)</a>
-        <a href="{{ url('/typeclubs') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">Types de clubs</a>
-        <a href="{{ url('/localisations') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">Localisations</a>
     </nav>
 
     <div class="flex gap-x-4 items-center">
