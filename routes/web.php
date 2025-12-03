@@ -10,7 +10,7 @@ use App\Http\Controllers\LocalisationController;
 use App\Http\Controllers\FicheResort;
 use App\Http\Controllers\InscriptionController;
 use App\Http\Controllers\ConnexionController;
-
+use App\Http\Controllers\ActiviteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +39,8 @@ Route::get('/localisations', [LocalisationController::class, 'index']);
 
 Route::get('/inscription', [InscriptionController::class, 'create'])->name('inscription.create');
 Route::post('/inscription', [InscriptionController::class, 'store'])->name('inscription.store');
+
+Route::get('/resort/{id}/activites', [ActiviteController::class, 'index'])->name('resort.activites');
 
 Route::post('/logout', function () {
     Auth::logout();
