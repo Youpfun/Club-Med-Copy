@@ -40,7 +40,9 @@ Route::get('/localisations', [LocalisationController::class, 'index']);
 Route::get('/inscription', [InscriptionController::class, 'create'])->name('inscription.create');
 Route::post('/inscription', [InscriptionController::class, 'store'])->name('inscription.store');
 
-Route::get('/resort/{id}/activites', [ActiviteController::class, 'index'])->name('resort.activites');
+Route::get('/resort/{id}/types-activites', [ActiviteController::class, 'indexTypes'])->name('resort.types');
+
+Route::get('/resort/{id}/type/{typeId}/activites', [ActiviteController::class, 'indexActivitesParType'])->name('resort.activites.detail');
 
 Route::post('/logout', function () {
     Auth::logout();
