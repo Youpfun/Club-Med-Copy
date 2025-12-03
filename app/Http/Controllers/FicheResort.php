@@ -9,7 +9,9 @@ class FicheResort extends Controller
 {
     public function fiche($numresort)
     {
-        $resort = Resort::resortPaysAvis($numresort);
+        $resort = Resort::with(['pays', 'avis' => function($query) {
+            $query->orderBy('datepublication', 'desc')->take(3);
+        }, 'typechambres'])->find($numresort);
 
         return view('ficheresort', ['resort' => $resort]);
     }

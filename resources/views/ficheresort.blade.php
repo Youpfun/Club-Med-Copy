@@ -69,6 +69,43 @@
 
                 <hr class="border-slate-200">
 
+                {{-- Types de chambres --}}
+                <div class="space-y-4">
+                    <h2 class="text-xl font-semibold text-slate-900">Types de chambres disponibles</h2>
+                    @if($resort->typechambres->isEmpty())
+                        <p class="text-slate-500 italic">Aucun type de chambre défini pour ce resort.</p>
+                    @else
+                        <div class="grid md:grid-cols-2 gap-4">
+                            @foreach($resort->typechambres as $typeChambre)
+                                <div class="bg-white border border-slate-200 rounded-xl p-5 space-y-3 hover:shadow-md transition-shadow">
+                                    <h3 class="text-lg font-bold text-sky-700">
+                                        {{ $typeChambre->nomtype }}
+                                    </h3>
+                                    
+                                    <div class="flex gap-6 text-sm text-slate-600">
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-semibold">Surface :</span>
+                                            <span>{{ $typeChambre->surface }} m²</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-semibold">Capacité :</span>
+                                            <span>{{ $typeChambre->capacitemax }} pers.</span>
+                                        </div>
+                                    </div>
+
+                                    @if($typeChambre->textepresentation)
+                                        <p class="text-slate-700 leading-relaxed text-sm">
+                                            {{ $typeChambre->textepresentation }}
+                                        </p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+
+                <hr class="border-slate-200">
+
                 {{-- Carte --}}
                 <div class="space-y-3">
                     <h2 class="text-xl font-semibold text-slate-900">Localisation du resort</h2>

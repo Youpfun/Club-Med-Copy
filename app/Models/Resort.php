@@ -68,4 +68,12 @@ class Resort extends Model
     {
         return $this->belongsToMany(TypeActivite::class, 'partager', 'numresort', 'numtypeactivite');
     }
+
+	/**
+	 * Relation avec les types de chambres via la table proposer
+	 */
+	public function typechambres()
+	{
+		return $this->belongsToMany(TypeChambre::class, 'proposer', 'numresort', 'numtype');
+	}
 }
