@@ -130,7 +130,6 @@
                                     
                                     {{-- MODIFICATION ICI : Chiffre + 1 Trident --}}
                                     <div class="flex items-center justify-between mb-4">
-                                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Catégorie</span>
                                         <div class="flex items-center gap-1">
                                             {{-- Le chiffre en gros --}}
                                             <span class="font-bold text-xl text-[#113559]">{{ $resort->nbtridents }} 🔱</span>

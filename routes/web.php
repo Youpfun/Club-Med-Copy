@@ -11,6 +11,7 @@ use App\Http\Controllers\FicheResort;
 use App\Http\Controllers\InscriptionController;
 use App\Http\Controllers\ConnexionController;
 use App\Http\Controllers\ActiviteController;
+use App\Http\Controllers\PanierController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +44,20 @@ Route::post('/inscription', [InscriptionController::class, 'store'])->name('insc
 Route::get('/resort/{id}/types-activites', [ActiviteController::class, 'indexTypes'])->name('resort.types');
 
 Route::get('/resort/{id}/type/{typeId}/activites', [ActiviteController::class, 'indexActivitesParType'])->name('resort.activites.detail');
+
+// Panier / réservations en cours
+Route::post('/panier/resort/{numresort}', [PanierController::class, 'add'])
+    ->middleware('auth')
+    ->name('cart.addResort');
+
+Route::get('/panier', [PanierController::class, 'index'])
+    ->middleware('auth')
+    ->name('cart.index');
+
+// Mes réservations (réservations finalisées) - placeholder pour l'instant
+Route::get('/mes-reservations', function () {
+    return view('reservations');
+})->middleware('auth')->name('reservations.index');
 
 Route::post('/logout', function () {
     Auth::logout();
