@@ -7,16 +7,12 @@ use App\Models\Resort;
 
 class PanierController extends Controller
 {
-    /**
-     * Ajouter un resort au panier (stocké en session).
-     */
     public function add(Request $request, $numresort)
     {
         $resort = Resort::findOrFail($numresort);
 
         $cart = $request->session()->get('cart', []);
 
-        // On évite les doublons : une entrée par resort
         $cart[$numresort] = [
             'id'          => $resort->numresort,
             'nom'         => $resort->nomresort,
@@ -26,16 +22,10 @@ class PanierController extends Controller
 
         $request->session()->put('cart', $cart);
 
-        // Après réservation (utilisateur déjà connecté), on l'emmène
-        // directement sur la page "Mes réservations" pour visualiser.
         return redirect()
             ->route('cart.index')
             ->with('success', 'Le resort a été ajouté à vos réservations.');
     }
-
-    /**
-     * Afficher le panier (réservations en cours) de l'utilisateur.
-     */
     public function index(Request $request)
     {
         $cart = $request->session()->get('cart', []);
@@ -44,6 +34,18 @@ class PanierController extends Controller
             'reservations' => $cart,
         ]);
     }
+
+    public function remove($numresort)
+{
+    $cart = session()->get('cart', []);
+
+    if(isset($cart[$numresort])) {
+        unset($cart[$numresort]);
+        session()->put('cart', $cart);
+    }
+
+    return back()->with('success', 'Le resort a été retiré du panier.');
+}
 }
 
 
