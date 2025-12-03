@@ -7,7 +7,6 @@
 
     {{-- Tailwind via CDN (pour simplifier sur ce projet) --}}
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Activités </title>
     <link rel="icon" type="image/png" href="/img/logo-clubmed.png"/>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-900">
