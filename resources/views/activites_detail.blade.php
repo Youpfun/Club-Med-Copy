@@ -21,6 +21,7 @@
     </script>
 </head>
 <body class="bg-gray-50 min-h-screen font-sans text-gray-800 pb-20">
+    @include('layouts.header')
 
     <div class="max-w-4xl mx-auto p-6 pt-8">
         <a href="{{ route('resort.types', ['id' => $resort->numresort]) }}" 
