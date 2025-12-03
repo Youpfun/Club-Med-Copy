@@ -96,4 +96,12 @@ class Resort extends Model
 	{
 		return $this->belongsToMany(TypeChambre::class, 'proposer', 'numresort', 'numtype');
 	}
+
+	/**
+	 * Relation avec le domaine skiable
+	 */
+	public function domaineskiable()
+	{
+		return $this->hasOne(DomaineSkiable::class, 'numresort', 'numresort');
+	}
 }

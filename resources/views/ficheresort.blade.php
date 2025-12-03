@@ -107,6 +107,78 @@
 
                 <hr class="border-slate-200">
 
+                {{-- Domaine skiable --}}
+                @if($resort->domaineskiable)
+                <div class="space-y-4">
+                    <h2 class="text-xl font-semibold text-slate-900">Domaine skiable</h2>
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 space-y-4">
+                        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                            <div class="space-y-1">
+                                <h3 class="text-2xl font-bold text-[#113559]">
+                                    {{ $resort->domaineskiable->nomdomaine }}
+                                </h3>
+                                @if($resort->domaineskiable->nomstation)
+                                    <p class="text-base text-slate-600">
+                                        Station : <span class="font-semibold">{{ $resort->domaineskiable->nomstation }}</span>
+                                    </p>
+                                @endif
+                            </div>
+                            
+                            @if($resort->domaineskiable->skiaupied)
+                                <div class="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
+                                    <span>⛷️</span>
+                                    <span>Ski au pied</span>
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-blue-200">
+                            @if($resort->domaineskiable->altitudeclub)
+                                <div class="bg-white rounded-lg p-4 text-center shadow-sm">
+                                    <p class="text-xs text-slate-500 mb-1">Altitude du club</p>
+                                    <p class="text-2xl font-bold text-[#113559]">{{ number_format($resort->domaineskiable->altitudeclub, 0, ',', ' ') }}</p>
+                                    <p class="text-xs text-slate-600">mètres</p>
+                                </div>
+                            @endif
+                            
+                            @if($resort->domaineskiable->altitudestation)
+                                <div class="bg-white rounded-lg p-4 text-center shadow-sm">
+                                    <p class="text-xs text-slate-500 mb-1">Altitude station</p>
+                                    <p class="text-2xl font-bold text-[#113559]">{{ number_format($resort->domaineskiable->altitudestation, 0, ',', ' ') }}</p>
+                                    <p class="text-xs text-slate-600">mètres</p>
+                                </div>
+                            @endif
+                            
+                            @if($resort->domaineskiable->longueurpiste)
+                                <div class="bg-white rounded-lg p-4 text-center shadow-sm">
+                                    <p class="text-xs text-slate-500 mb-1">Longueur des pistes</p>
+                                    <p class="text-2xl font-bold text-[#113559]">{{ number_format($resort->domaineskiable->longueurpiste, 0, ',', ' ') }}</p>
+                                    <p class="text-xs text-slate-600">km</p>
+                                </div>
+                            @endif
+                            
+                            @if($resort->domaineskiable->nbpiste)
+                                <div class="bg-white rounded-lg p-4 text-center shadow-sm">
+                                    <p class="text-xs text-slate-500 mb-1">Nombre de pistes</p>
+                                    <p class="text-2xl font-bold text-[#113559]">{{ $resort->domaineskiable->nbpiste }}</p>
+                                    <p class="text-xs text-slate-600">pistes</p>
+                                </div>
+                            @endif
+                        </div>
+
+                        @if($resort->domaineskiable->descriptiondomaine)
+                            <div class="pt-4 border-t border-blue-200">
+                                <p class="text-slate-700 leading-relaxed">
+                                    {{ $resort->domaineskiable->descriptiondomaine }}
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <hr class="border-slate-200">
+                @endif
+
                 {{-- Carte --}}
                 <div class="space-y-3">
                     <h2 class="text-xl font-semibold text-slate-900">Localisation du resort</h2>
