@@ -14,16 +14,12 @@ class ResortController extends Controller
 		$localisation = $request->input('localisation');
 		$pays = $request->input('pays');
 
-		// Types de clubs pour le menu déroulant
 		$typeclubs = DB::table('typeclub')->pluck('nomtypeclub', 'numtypeclub');
 		
-		// Localisations pour le menu déroulant
 		$localisations = DB::table('localisation')->pluck('nomlocalisation', 'numlocalisation');
 		
-		// Pays pour le menu déroulant
 		$paysList = DB::table('pays')->pluck('nompays', 'codepays');
 
-		// Resorts avec filtres optionnels
 		$resorts = Resort::when($typeclub, function($query, $typeclub) {
 			return $query->whereHas('typeclubs', function($q) use ($typeclub) {
 				$q->where('typeclub.numtypeclub', $typeclub);
