@@ -91,26 +91,19 @@
                     @foreach($resorts as $resort)
                         <article class="group relative isolate flex flex-col h-full bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
                             
-                            {{-- LOGIQUE IMAGE PHP --}}
                             @php
-                                // Nettoyage du nom pour trouver l'image (minuscules, sans espaces)
                                 $imageName = strtolower(str_replace(' ', '', $resort->nomresort)) . '.webp';
-                                // Chemin public pour asset()
                                 $imagePath = 'img/ressort/' . $imageName;
-                                // Chemin système complet pour file_exists()
                                 $fullPath = public_path($imagePath);
                             @endphp
 
-                            {{-- Conteneur Image --}}
                             <div class="relative h-64 w-full overflow-hidden bg-gray-200">
                                 @if(file_exists($fullPath))
                                     <img src="{{ asset($imagePath) }}" 
                                          alt="{{ $resort->nomresort }}" 
                                          class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105">
-                                    {{-- Dégradé léger en bas de l'image --}}
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
                                 @else
-                                    {{-- Fallback si image inexistante --}}
                                     <div class="h-full w-full bg-gradient-to-br from-slate-100 to-slate-200 flex flex-col items-center justify-center text-slate-400 p-4">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -120,7 +113,6 @@
                                     </div>
                                 @endif
 
-                                {{-- Badge Pays en haut à gauche sur l'image --}}
                                 <div class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-[#113559] shadow-sm flex items-center gap-1">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -130,20 +122,17 @@
                                 </div>
                             </div>
 
-                            {{-- Contenu de la carte --}}
                             <div class="relative p-6 flex flex-col flex-grow">
                                 <a href="/ficheresort/{{ $resort->numresort }}" class="flex flex-col mb-2">
                                     <h3 class="font-serif text-2xl font-bold text-[#113559] mb-1 group-hover:text-blue-600 transition-colors">
                                         {{ $resort->nomresort }}
                                     </h3>
                                     
-                                    {{-- Tridents --}}
-                                    <div class="flex items-center text-[#113559] mb-4">
-                                        <span class="text-xs font-bold uppercase mr-2 tracking-wider">Catégorie</span>
-                                        <div class="flex text-[#ffc000]">
-                                            @for($i = 0; $i < $resort->nbtridents; $i++)
-                                                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C9 2 7 3.5 7 5.5V10C7 11.5 8 13 9.5 13.5V17H6V22H8V18H16V22H18V17H14.5V13.5C16 13 17 11.5 17 10V5.5C17 3.5 15 2 12 2M12 4C13.5 4 15 5 15 6V10C15 11 14 11.5 13.5 11.5H10.5C10 11.5 9 11 9 10V6C9 5 10.5 4 12 4Z"/></svg>
-                                            @endfor
+                                    {{-- MODIFICATION ICI : Chiffre + 1 Trident --}}
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div class="flex items-center gap-1">
+                                            {{-- Le chiffre en gros --}}
+                                            <span class="font-bold text-xl text-[#113559]">{{ $resort->nbtridents }} 🔱</span>
                                         </div>
                                     </div>
                                 </a>
@@ -182,7 +171,6 @@
                     @endforeach
                 </div>
 
-                {{-- Cas où aucun résultat --}}
                 @if(count($resorts) === 0)
                     <div class="text-center py-16 bg-white rounded-3xl border border-gray-100 shadow-sm">
                         <div class="mb-4 text-gray-300">

@@ -64,4 +64,8 @@ class Resort extends Model
     {
         return $this->hasMany(Photo::class, 'numresort', 'numresort');
     }
+	public function typesActivites()
+    {
+        return $this->belongsToMany(TypeActivite::class, 'partager', 'numresort', 'numtypeactivite');
+    }
 }
