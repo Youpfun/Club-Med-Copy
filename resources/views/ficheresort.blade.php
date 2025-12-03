@@ -119,17 +119,118 @@
                     </div>
                 </div>
 
-                {{-- Bouton activités --}}
-                <div class="mt-6">
+                {{-- Boutons actions --}}
+                <div class="mt-6 flex flex-wrap gap-3">
                     <a href="{{ route('resort.activites', ['id' => $resort->numresort]) }}"
                        class="inline-flex items-center px-5 py-2.5 rounded-full bg-sky-700 hover:bg-sky-800 text-white font-semibold text-sm shadow-md transition">
                         Voir les activités
                     </a>
+
+                    {{-- Bouton réserver : si non connecté, ouvre le pop-up de connexion --}}
+                    @guest
+                        <button type="button"
+                                id="open-login-modal"
+                                class="inline-flex items-center px-6 py-2.5 rounded-full bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] font-bold text-sm shadow-md transition">
+                            Réserver ce resort
+                        </button>
+                    @endguest
+
+                    @auth
+                        {{-- Si connecté : envoie une requête POST pour ajouter au panier --}}
+                        <form action="{{ route('cart.addResort', ['numresort' => $resort->numresort]) }}" method="POST">
+                            @csrf
+                            <button type="submit"
+                                    class="inline-flex items-center px-6 py-2.5 rounded-full bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] font-bold text-sm shadow-md transition">
+                                Réserver ce resort
+                            </button>
+                        </form>
+                    @endauth
                 </div>
 
             </div>
         </div>
     </div>
+
+    {{-- Pop-up de connexion si l'utilisateur n'est pas connecté --}}
+    @guest
+        <div id="login-modal-overlay"
+             class="fixed inset-0 bg-black/40 flex items-center justify-center z-40 hidden">
+            <div class="relative bg-white rounded-3xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
+                {{-- Bouton fermer --}}
+                <button id="close-login-modal"
+                        class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-100">
+                    ✕
+                </button>
+
+                <div class="px-8 pt-10 pb-8">
+                    <div class="flex justify-center mb-4">
+                        <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 text-3xl">
+                            👤
+                        </div>
+                    </div>
+
+                    <h2 class="text-center text-xl font-semibold text-[#b46320] mb-4">
+                        Déjà client ? Gagnez du temps !
+                    </h2>
+
+                    <ul class="space-y-2 text-sm text-slate-700 mb-5">
+                        <li class="flex items-start gap-2">
+                            <span class="mt-1 text-green-500">✔</span>
+                            <span>Vos informations seront complétées automatiquement</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="mt-1 text-green-500">✔</span>
+                            <span>Sélectionnez vos accompagnants parmi vos compagnons enregistrés</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="mt-1 text-green-500">✔</span>
+                            <span>Passez à l'étape suivante en quelques clics</span>
+                        </li>
+                    </ul>
+
+                    <div class="mb-6">
+                        <p class="text-xs text-slate-500 text-center">
+                            Connectez-vous et utilisez vos informations enregistrées pour finaliser votre réservation plus rapidement.
+                        </p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <a href="{{ route('login', ['reserve_resort' => $resort->numresort]) }}"
+                           class="block w-full text-center px-6 py-3 bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] font-bold text-sm rounded-full shadow-md transition">
+                            SE CONNECTER
+                        </a>
+                        <p class="text-xs text-slate-500 text-center">
+                            Vous n'avez pas encore de compte ? Vous recevrez un e-mail pour créer votre compte une fois votre réservation finalisée.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const openBtn = document.getElementById('open-login-modal');
+                const closeBtn = document.getElementById('close-login-modal');
+                const overlay = document.getElementById('login-modal-overlay');
+
+                if (openBtn && closeBtn && overlay) {
+                    openBtn.addEventListener('click', () => {
+                        overlay.classList.remove('hidden');
+                    });
+
+                    closeBtn.addEventListener('click', () => {
+                        overlay.classList.add('hidden');
+                    });
+
+                    overlay.addEventListener('click', (e) => {
+                        if (e.target === overlay) {
+                            overlay.classList.add('hidden');
+                        }
+                    });
+                }
+            });
+        </script>
+    @endguest
 
 </body>
 </html>
