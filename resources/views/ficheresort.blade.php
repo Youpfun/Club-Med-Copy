@@ -10,6 +10,7 @@
     <link rel="icon" type="image/png" href="/img/logo-clubmed.png"/>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-900">
+    @include('layouts.header')
 
     <div class="max-w-6xl mx-auto px-4 py-8">
         <a href="/resorts" class="inline-flex items-center text-sm text-slate-600 hover:text-slate-900 mb-6">

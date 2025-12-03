@@ -21,6 +21,26 @@ class Resort extends Model
 	protected $fillable =[
 		'codepays', 'numdomaine', 'numdocumentation', 'nomresort', 'descriptionresort', 'moyenneavis', 'nbchambrestotal', 'nbtridents'];
 
+	/**
+	 * Calcul dynamique de la moyenne des avis à partir de la table "avis".
+	 * On surcharge l'attribut "moyenneavis" pour qu'il reflète toujours
+	 * la moyenne réelle des notes (noteavis) en base.
+	 */
+	public function getMoyenneavisAttribute()
+	{
+		// Si la relation "avis" est déjà chargée, on utilise la collection en mémoire
+		$avisCollection = $this->relationLoaded('avis')
+			? $this->avis
+			: $this->avis()->get();
+
+		if ($avisCollection->isEmpty()) {
+			return null;
+		}
+
+		// Moyenne arrondie à 1 décimale
+		return round($avisCollection->avg('noteavis'), 1);
+	}
+
 		
 	public function pays()
 	{

@@ -18,6 +18,7 @@
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col font-sans text-gray-800">
+    @include('layouts.header')
 
     <div class="w-full max-w-7xl mx-auto p-6">
         <a href="/ficheresort/{{ $resort->numresort }}" class="inline-flex items-center text-gray-500 hover:text-clubmed transition-colors duration-300 font-medium">
