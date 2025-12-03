@@ -8,38 +8,40 @@ use Illuminate\Notifications\Notifiable;
 
 class Client extends Authenticatable
 {
-    protected $table = 'client';
+    /*protected $table = 'users';
 
-    protected $primaryKey = 'numclient';
+    protected $primaryKey = 'id';
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $fillable = [
-        'nomclient', 
-        'prenomclient', 
-        'emailclient', 
-        'login', 
-        'password', 
-        'ville', 
-        'numrue', 
-        'nomrue', 
-        'codepostal', 
-        'telephone', 
-        'genreclient', 
-        'datenaissance'
+        'name',
+        'email',
+        'password',
+        'role',
+        'genre',
+        'datenaissance',
+        'telephone',
+        'numrue',
+        'nomrue',
+        'codepostal',
+        'ville',
+        'idcarte'
     ];
 
     protected $hidden = [
         'password',
+        'remember_token',
     ];
 
     protected $casts = [
         'password' => 'hashed',
         'datenaissance' => 'date',
+        'email_verified_at' => 'datetime',
     ];
 
     public function getEmailForPasswordReset()
     {
-        return $this->emailclient;
-    }
+        return $this->email;
+    }*/
 }

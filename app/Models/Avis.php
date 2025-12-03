@@ -15,5 +15,5 @@ class Avis extends Model
 
 	public $timestamps = false;
 
-	protected $fillable =['numclient', 'numresort', 'noteavis', 'commentaire', 'datepublication'];
+	protected $fillable =['id', 'numresort', 'noteavis', 'commentaire', 'datepublication'];
 }

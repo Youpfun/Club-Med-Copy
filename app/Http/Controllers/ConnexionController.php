@@ -20,7 +20,7 @@ class ConnexionController extends Controller
         ]);
 
         $credentials = [
-            'emailclient' => $request->email,
+            'email' => $request->email,
             'password' => $request->password,
         ];
 

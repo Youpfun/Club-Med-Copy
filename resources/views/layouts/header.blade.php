@@ -25,7 +25,7 @@
                 </svg>
                 
                 @auth
-                    {{ Auth::user()->prenomclient }}
+                    {{ Auth::user()->name }}
                 @else
                     Espace Client
                 @endauth
@@ -41,7 +41,7 @@
                     <div class="py-2">
                         <div class="px-4 py-2 text-xs text-gray-500 border-b border-gray-100 mb-2">
                             Connecté en tant que<br>
-                            <span class="font-bold text-blue-900">{{ Auth::user()->emailclient }}</span>
+                            <span class="font-bold text-blue-900">{{ Auth::user()->email }}</span>
                         </div>
                         <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-900">
                             Mon tableau de bord

@@ -4,7 +4,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ResortController;
-use App\Http\Controllers\ClientController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\TypeclubController;
 use App\Http\Controllers\LocalisationController;
 use App\Http\Controllers\FicheResort;
@@ -31,7 +31,7 @@ Route::get('/ficheresort/{numresort}', [FicheResort::class, 'fiche']);
 
 Route::get('/resorts', [ResortController::class, 'index']);
 
-Route::get('/clients', [ClientController::class, 'index']);
+Route::get('/clients', [UserController::class, 'index']);
 
 Route::get('/typeclubs', [TypeclubController::class, 'index']);
 
