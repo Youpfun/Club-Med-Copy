@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class InscriptionController extends Controller
@@ -42,10 +41,13 @@ class InscriptionController extends Controller
             'ville' => $request->ville,
             'password' => Hash::make($request->password),
             'role' => 'Utilisateur',
+            'two_factor_preference' => 'email',
         ]);
 
-        Auth::login($user);
+        $user->sendTwoFactorCode();
 
-        return redirect('/')->with('success', 'Votre compte a été créé avec succès !');
+        $request->session()->put('user_2fa_id', $user->id);
+        
+        return redirect()->route('2fa.verify');
     }
 }

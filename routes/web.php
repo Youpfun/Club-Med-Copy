@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-
 use App\Http\Controllers\ResortController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\TypeclubController;
@@ -11,15 +10,10 @@ use App\Http\Controllers\FicheResort;
 use App\Http\Controllers\InscriptionController;
 use App\Http\Controllers\ConnexionController;
 use App\Http\Controllers\ActiviteController;
+use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\PanierController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\AvisController;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
 
 Route::get('/', function () {
     return view('welcome');
@@ -30,18 +24,21 @@ Route::get('/ficheresort/{numresort}', [FicheResort::class, 'fiche'])->name('res
 
 Route::get('/resort/{id}/types-activites', [ActiviteController::class, 'indexTypes'])->name('resort.types');
 Route::get('/resort/{id}/type/{typeId}/activites', [ActiviteController::class, 'indexActivitesParType'])->name('resort.activites.detail');
+Route::get('/resort/{id}/activites', [ActiviteController::class, 'index'])->name('resort.activites');
 
 Route::get('/typeclubs', [TypeclubController::class, 'index']);
 Route::get('/localisations', [LocalisationController::class, 'index']);
-Route::get('/clients', [UserController::class, 'index']);
-
-Route::get('/resort/{id}/activites', [ActiviteController::class, 'index'])->name('resort.activites');
+Route::get('/clients', [UserController::class, 'index']); 
 
 Route::get('/inscription', [InscriptionController::class, 'create'])->name('inscription.create');
 Route::post('/inscription', [InscriptionController::class, 'store'])->name('inscription.store');
 
 Route::get('/login', [ConnexionController::class, 'show'])->name('login');
 Route::post('/login', [ConnexionController::class, 'login'])->name('login.submit');
+
+Route::get('verify/otp', [TwoFactorController::class, 'index'])->name('2fa.verify');
+Route::post('verify/otp', [TwoFactorController::class, 'store'])->name('2fa.store');
+Route::post('verify/resend', [TwoFactorController::class, 'resend'])->name('2fa.resend');
 
 Route::middleware([
     'auth:sanctum',
@@ -54,7 +51,7 @@ Route::middleware([
     })->name('dashboard');
 
     Route::post('/logout', function () {
-        Auth::logout();
+        Auth::guard('web')->logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
         return redirect('/');
