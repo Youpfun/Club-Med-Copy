@@ -250,10 +250,7 @@
                     @endguest
 
                     @auth
-                        <form action="{{ route('cart.addResort', ['numresort' => $resort->numresort]) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="inline-flex items-center px-6 py-2.5 rounded-full bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] font-bold text-sm shadow-md transition">Réserver ce resort</button>
-                        </form>
+                        <a href="{{ route('reservation.step1', ['numresort' => $resort->numresort]) }}" class="inline-flex items-center px-6 py-2.5 rounded-full bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] font-bold text-sm shadow-md transition">Réserver ce resort</a>
                     @endauth
                 </div>
 

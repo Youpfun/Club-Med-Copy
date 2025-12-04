@@ -1,51 +1,76 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon panier | Club Med</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="bg-gray-50">
-    @include('layouts.header')
+@extends('layouts.app')
 
-    <main class="max-w-6xl mx-auto px-4 py-10">
-        <h1 class="text-3xl font-bold text-[#113559] mb-6">Mon panier</h1>
-
-        @if(empty($reservations))
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
-                <p class="text-gray-600 mb-4">
-                    Votre panier est vide pour le moment.
-                </p>
-                <a href="{{ url('/resorts') }}"
-                   class="inline-flex items-center px-6 py-3 bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] rounded-full font-bold text-sm transition-colors shadow-md">
-                    Découvrir nos resorts
-                </a>
-            </div>
-        @else
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
-                @foreach($reservations as $reservation)
-                    <div class="flex items-center justify-between border-b last:border-0 border-gray-100 py-3">
+@section('content')
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">Mon Panier</h1>
+    
+    @if(session('success'))
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            {{ session('success') }}
+        </div>
+    @endif
+    
+    @if($reservations->count() > 0)
+        <div class="space-y-4">
+            @foreach($reservations as $reservation)
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex justify-between items-start">
                         <div>
-                            <h2 class="text-lg font-semibold text-[#113559]">
-                                {{ $reservation['nom'] }}
-                            </h2>
-                            <p class="text-sm text-gray-500">
-                                {{ $reservation['pays'] ?? 'Pays non renseigné' }} •
-                                {{ $reservation['nb_chambres'] }} chambres
-                            </p>
+                            <h3 class="text-xl font-semibold">{{ $reservation->nomresort }}</h3>
+                            <p class="text-gray-500">{{ $reservation->nompays ?? '' }}</p>
+                            
+                            <div class="mt-3 text-sm text-gray-600">
+                                <p><strong>Dates:</strong> {{ \Carbon\Carbon::parse($reservation->datedebut)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($reservation->datefin)->format('d/m/Y') }}</p>
+                                <p><strong>Voyageurs:</strong> {{ $reservation->nbpersonnes }} personne(s)</p>
+                                <p><strong>Chambre:</strong> {{ $reservation->nomtype }}</p>
+                                @if($reservation->nomtransport)
+                                    <p><strong>Transport:</strong> {{ $reservation->nomtransport }}</p>
+                                @endif
+                            </div>
                         </div>
-                        <span class="inline-flex items-center px-3 py-1 text-xs font-semibold text-amber-700 bg-amber-100 rounded-full">
-                            Réservation à finaliser
-                        </span>
+                        
+                        <div class="text-right">
+                            <p class="text-2xl font-bold text-blue-600">{{ number_format($reservation->prixtotal, 2, ',', ' ') }} €</p>
+                            <p class="text-sm text-gray-500">TTC</p>
+                            
+                            <div class="mt-4 space-x-2">
+                                <a href="{{ route('panier.show', $reservation->numreservation) }}" 
+                                   class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">
+                                    Voir détail
+                                </a>
+                                <form action="{{ route('panier.remove', $reservation->numreservation) }}" method="POST" class="inline-block">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 text-sm"
+                                            onclick="return confirm('Supprimer cette réservation ?')">
+                                        Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                @endforeach
+                </div>
+            @endforeach
+        </div>
+        
+        <div class="mt-6 bg-white rounded-lg shadow p-6">
+            <div class="flex justify-between items-center">
+                <span class="text-xl font-bold">Total</span>
+                <span class="text-2xl font-bold text-blue-600">{{ number_format($reservations->sum('prixtotal'), 2, ',', ' ') }} €</span>
             </div>
-        @endif
-    </main>
-
-    @include('layouts.footer')
-</body>
-</html>
+            <button class="mt-4 w-full bg-green-600 text-white py-3 rounded hover:bg-green-700 font-semibold">
+                Procéder au paiement
+            </button>
+        </div>
+    @else
+        <div class="bg-white rounded-lg shadow p-12 text-center">
+            <p class="text-gray-500 text-lg">Votre panier est vide</p>
+            <a href="{{ route('resorts.index') }}" class="inline-block mt-4 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+                Explorer nos resorts
+            </a>
+        </div>
+    @endif
+</div>
+@endsection
 
 

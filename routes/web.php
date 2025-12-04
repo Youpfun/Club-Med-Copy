@@ -11,28 +11,21 @@ use App\Http\Controllers\FicheResort;
 use App\Http\Controllers\InscriptionController;
 use App\Http\Controllers\ConnexionController;
 use App\Http\Controllers\ActiviteController;
-
-
+use App\Http\Controllers\PanierController;
+use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\AvisController;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
 */
-use App\Http\Controllers\PanierController;
-use App\Http\Controllers\ReservationController;
-use App\Http\Controllers\AvisController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/resorts', [ResortController::class, 'index']);
+Route::get('/resorts', [ResortController::class, 'index'])->name('resorts.index');
 Route::get('/ficheresort/{numresort}', [FicheResort::class, 'fiche'])->name('resort.show');
 
 Route::get('/resort/{id}/types-activites', [ActiviteController::class, 'indexTypes'])->name('resort.types');
@@ -67,15 +60,21 @@ Route::middleware([
         return redirect('/');
     })->name('logout');
 
+    // Panier
     Route::get('/panier', [PanierController::class, 'index'])->name('cart.index');
-    Route::post('/panier/resort/{numresort}', [PanierController::class, 'add'])->name('cart.addResort');
-    Route::delete('/panier/remove/{numresort}', [PanierController::class, 'remove'])->name('cart.remove');
+    Route::get('/panier/{numreservation}', [PanierController::class, 'show'])->name('panier.show');
+    Route::delete('/panier/remove/{numreservation}', [PanierController::class, 'remove'])->name('panier.remove');
 
+    // Réservations
     Route::get('/mes-reservations', [ReservationController::class, 'index'])->name('reservations.index');
     
-    Route::get('/reservation/{id}/participants', function () { return "Page modification participants"; })->name('reservation.participants');
-    Route::get('/reservation/{id}/activites', function () { return "Page ajout activités"; })->name('reservation.activities');
+    // Étapes de réservation
+    Route::get('/reservation/{numresort}/step1', [ReservationController::class, 'step1'])->name('reservation.step1');
+    Route::get('/reservation/{numresort}/step2', [ReservationController::class, 'step2'])->name('reservation.step2');
+    Route::get('/reservation/{numresort}/step3', [ReservationController::class, 'step3'])->name('reservation.step3');
+    Route::post('/reservation/{numresort}/addToCart', [ReservationController::class, 'addToCart'])->name('reservation.addToCart');
 
+    // Avis
     Route::get('/reservation/{id}/avis', [AvisController::class, 'create'])->name('reservation.review');
     Route::post('/avis', [AvisController::class, 'store'])->name('avis.store');
 

@@ -21,7 +21,7 @@
         <x-banner />
 
         <div class="min-h-screen bg-gray-100">
-            @livewire('navigation-menu')
+            @include('layouts.header')
 
             <!-- Page Heading -->
             @if (isset($header))
@@ -34,7 +34,11 @@
 
             <!-- Page Content -->
             <main>
-                {{ $slot }}
+                @if (isset($slot))
+                    {{ $slot }}
+                @else
+                    @yield('content')
+                @endif
             </main>
         </div>
 
