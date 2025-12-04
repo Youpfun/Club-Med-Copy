@@ -2,15 +2,25 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Photo extends Model
 {
+    use HasFactory;
+
     protected $table = 'photo';
     protected $primaryKey = 'numfichierphoto';
     public $timestamps = false;
 
-    protected $fillable = ['numresort', 'nomfichierphoto', 'cheminfichierphoto', 'formatphoto', 'taillephoto'];
+    protected $fillable = [
+        'numresort',
+        'numavis',
+        'nomfichierphoto',
+        'cheminfichierphoto',
+        'formatphoto',
+        'taillephoto'
+    ];
 
     public function resort()
     {

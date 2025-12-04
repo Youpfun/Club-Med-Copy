@@ -7,8 +7,6 @@
     <nav class="hidden md:flex items-center gap-x-6 px-4">
         <a href="{{ url('/resorts') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">Nos Resorts</a>
         <a href="{{ url('/clients') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">Clients (Admin)</a>
-        <a href="{{ url('/typeclubs') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">Types de clubs</a>
-        <a href="{{ url('/localisations') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">Localisations</a>
     </nav>
 
     <div class="flex gap-x-4 items-center">
@@ -25,7 +23,7 @@
                 </svg>
                 
                 @auth
-                    {{ Auth::user()->prenomclient }}
+                    {{ Auth::user()->name }}
                 @else
                     Espace Client
                 @endauth
@@ -41,12 +39,15 @@
                     <div class="py-2">
                         <div class="px-4 py-2 text-xs text-gray-500 border-b border-gray-100 mb-2">
                             Connecté en tant que<br>
-                            <span class="font-bold text-blue-900">{{ Auth::user()->emailclient }}</span>
+                            <span class="font-bold text-blue-900">{{ Auth::user()->email }}</span>
                         </div>
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-900">
+                        <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-900">
                             Mon tableau de bord
                         </a>
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-900">
+                        <a href="{{ route('cart.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-900">
+                            Panier
+                        </a>
+                        <a href="{{ route('reservations.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-900">
                             Mes réservations
                         </a>
                         
