@@ -13,6 +13,7 @@ class FicheResort extends Controller
             'pays', 
             'domaineskiable', 
             'typechambres', 
+            'restaurants',
             'avis' => function($query) {
                 $query->orderBy('datepublication', 'desc');
             },
