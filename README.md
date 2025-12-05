@@ -46,8 +46,6 @@ Terminal 2 :
 ```bash
 npm run dev
 ```
-Appli : http://localhost:8000 — Assets Vite : http://localhost:5173
-
 ## Tests
 ```bash
 php artisan test
