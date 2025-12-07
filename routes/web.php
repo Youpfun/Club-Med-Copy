@@ -21,18 +21,16 @@ Route::get('/', function () {
 
 Route::get('/resorts', [ResortController::class, 'index']);
 Route::get('/ficheresort/{numresort}', [FicheResort::class, 'fiche'])->name('resort.show');
-
 Route::get('/resort/{id}/types-activites', [ActiviteController::class, 'indexTypes'])->name('resort.types');
 Route::get('/resort/{id}/type/{typeId}/activites', [ActiviteController::class, 'indexActivitesParType'])->name('resort.activites.detail');
 Route::get('/resort/{id}/activites', [ActiviteController::class, 'index'])->name('resort.activites');
 
 Route::get('/typeclubs', [TypeclubController::class, 'index']);
 Route::get('/localisations', [LocalisationController::class, 'index']);
-Route::get('/clients', [UserController::class, 'index']); 
+Route::get('/clients', [UserController::class, 'index']);
 
 Route::get('/inscription', [InscriptionController::class, 'create'])->name('inscription.create');
 Route::post('/inscription', [InscriptionController::class, 'store'])->name('inscription.store');
-
 Route::get('/login', [ConnexionController::class, 'show'])->name('login');
 Route::post('/login', [ConnexionController::class, 'login'])->name('login.submit');
 
@@ -49,6 +47,8 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    Route::put('/user/update-custom', [UserController::class, 'updateCustom'])->name('user.update.custom');
 
     Route::post('/logout', function () {
         Auth::guard('web')->logout();
