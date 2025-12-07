@@ -89,9 +89,35 @@ class PanierController extends Controller
         }
         $nbPersonnes = $nbAdultes + $nbEnfants;
         
-        // Prix chambre
+        // Récupérer les activités depuis la BDD
+        $activitesReservation = DB::table('reservation_activite')
+            ->where('numreservation', $reservation->numreservation)
+            ->get();
+        
+        $activites = [];
+        $prixActivites = 0;
+        
+        if ($activitesReservation->count() > 0) {
+            // Récupérer les détails des activités
+            $activitesIds = $activitesReservation->pluck('numactivite')->toArray();
+            
+            $activites = DB::table('activite')
+                ->join('activitealacarte', 'activite.numactivite', '=', 'activitealacarte.numactivite')
+                ->whereIn('activite.numactivite', $activitesIds)
+                ->select('activite.numactivite', 'activite.nomactivite', 'activitealacarte.prixmin')
+                ->get();
+            
+            // Calculer le prix total des activités
+            foreach ($activitesReservation as $actRes) {
+                $prixActivites += $actRes->prix_unitaire * $actRes->quantite;
+            }
+        }
+        
+        // Prix chambre - calculer le nombre de chambres nécessaires pour l'affichage
+        $capaciteMax = $typeChambre->capacitemax ?? 2;
+        $nbChambres = ceil($nbPersonnes / $capaciteMax);
         $prixParNuit = $this->getPrixChambre($reservation->numtype, $reservation->datedebut);
-        $prixChambre = $prixParNuit * $nbNuits;
+        $prixChambre = $prixParNuit * $nbNuits * $nbChambres;
         
         // Prix transport
         $prixTransportParPersonne = $transport ? floatval($transport->prixtransport) : 0;
@@ -99,10 +125,12 @@ class PanierController extends Controller
         $prixTransportEnfants = $prixTransportParPersonne * $nbEnfants;
         $prixTransportTotal = $prixTransportAdultes + $prixTransportEnfants;
         
-        // Sous-total et TVA
-        $sousTotal = $prixChambre + $prixTransportTotal;
-        $tva = $sousTotal * 0.2;
-        $total = $sousTotal + $tva;
+        // Utiliser le prix total enregistré dans la BDD (fixé au moment de la réservation)
+        $total = floatval($reservation->prixtotal);
+        
+        // Décomposer le total pour affichage (avec TVA 20%)
+        $sousTotal = $total / 1.2;
+        $tva = $total - $sousTotal;
 
         return view('panier.detail', [
             'reservation' => $reservation,
@@ -113,12 +141,15 @@ class PanierController extends Controller
             'nbAdultes' => $nbAdultes,
             'nbEnfants' => $nbEnfants,
             'nbPersonnes' => $nbPersonnes,
+            'nbChambres' => $nbChambres,
             'prixParNuit' => $prixParNuit,
             'prixChambre' => $prixChambre,
             'prixTransportParPersonne' => $prixTransportParPersonne,
             'prixTransportAdultes' => $prixTransportAdultes,
             'prixTransportEnfants' => $prixTransportEnfants,
             'prixTransportTotal' => $prixTransportTotal,
+            'activites' => $activites,
+            'prixActivites' => $prixActivites,
             'sousTotal' => $sousTotal,
             'tva' => $tva,
             'total' => $total,
@@ -160,8 +191,14 @@ class PanierController extends Controller
             ->first();
 
         if ($reservation) {
+            DB::table('reservation_activite')->where('numreservation', $numreservation)->delete();
             DB::table('choisir')->where('numreservation', $numreservation)->delete();
             DB::table('reservation')->where('numreservation', $numreservation)->delete();
+            
+            // Nettoyer aussi la session
+            $reservationDetails = session('reservation_details', []);
+            unset($reservationDetails[$numreservation]);
+            session(['reservation_details' => $reservationDetails]);
         }
 
         return back()->with('success', 'Réservation supprimée.');

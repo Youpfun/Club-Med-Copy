@@ -73,15 +73,19 @@
                     </h4>
                     <div class="bg-gray-50 rounded p-4 space-y-2 text-sm">
                         <div class="flex justify-between">
-                            <span class="text-gray-600">Prix par nuit</span>
+                            <span class="text-gray-600">Prix par nuit et par chambre</span>
                             <span>{{ number_format($prixParNuit, 2, ',', ' ') }} €</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>Nombre de chambres ({{ $nbPersonnes }} pers. ÷ {{ $typeChambre->capacitemax ?? 2 }})</span>
+                            <span>× {{ $nbChambres }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Nombre de nuits</span>
                             <span>× {{ $nbNuits }}</span>
                         </div>
                         <div class="flex justify-between font-medium border-t pt-2">
-                            <span>Sous-total hébergement</span>
+                            <span>Sous-total hébergement ({{ $nbChambres }} chambre(s) × {{ $nbNuits }} nuit(s))</span>
                             <span>{{ number_format($prixChambre, 2, ',', ' ') }} €</span>
                         </div>
                     </div>
@@ -119,6 +123,31 @@
                 </div>
                 @endif
                 
+                <!-- Activités optionnelles -->
+                @if(!empty($activites) && count($activites) > 0)
+                <div class="border-2 border-purple-200 bg-purple-50 rounded-lg p-4 mt-4">
+                    <h4 class="font-medium text-purple-800 mb-3 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Activités optionnelles
+                    </h4>
+                    <div class="space-y-2 text-sm">
+                        @foreach($activites as $activite)
+                        <div class="flex justify-between text-gray-700">
+                            <span>{{ $activite->nomactivite }} ({{ $nbPersonnes }} pers.)</span>
+                            <span>{{ number_format($activite->prixmin * $nbPersonnes, 2, ',', ' ') }} €</span>
+                        </div>
+                        @endforeach
+                        <div class="flex justify-between font-medium border-t pt-2 border-purple-200">
+                            <span>Sous-total activités</span>
+                            <span>{{ number_format($prixActivites, 2, ',', ' ') }} €</span>
+                        </div>
+                    </div>
+                </div>
+                @endif
+                
                 <!-- Récapitulatif Final -->
                 <div class="border-t-2 border-gray-200 pt-4 mt-4">
                     <h4 class="font-medium text-gray-800 mb-3">Récapitulatif</h4>
@@ -131,6 +160,12 @@
                         <div class="flex justify-between">
                             <span class="text-gray-600">Transport</span>
                             <span>{{ number_format($prixTransportTotal, 2, ',', ' ') }} €</span>
+                        </div>
+                        @endif
+                        @if(!empty($activites) && count($activites) > 0)
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Activités</span>
+                            <span>{{ number_format($prixActivites, 2, ',', ' ') }} €</span>
                         </div>
                         @endif
                         <div class="flex justify-between border-t pt-2">
@@ -192,8 +227,14 @@
                         <span>{{ number_format($prixTransportTotal, 2, ',', ' ') }} €</span>
                     </div>
                     @endif
-                    <div class="flex justify-between">
-                        <span>TVA</span>
+                    @if(!empty($activites) && count($activites) > 0)
+                    <div class="flex justify-between text-purple-700">
+                        <span>Activités ({{ count($activites) }})</span>
+                        <span>{{ number_format($prixActivites, 2, ',', ' ') }} €</span>
+                    </div>
+                    @endif
+                    <div class="flex justify-between border-t pt-1 mt-1">
+                        <span>TVA (20%)</span>
                         <span>{{ number_format($tva, 2, ',', ' ') }} €</span>
                     </div>
                 </div>
