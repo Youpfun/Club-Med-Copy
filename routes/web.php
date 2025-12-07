@@ -19,7 +19,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/resorts', [ResortController::class, 'index']);
+Route::get('/resorts', [ResortController::class, 'index'])->name('resorts.index');
 Route::get('/ficheresort/{numresort}', [FicheResort::class, 'fiche'])->name('resort.show');
 Route::get('/resort/{id}/types-activites', [ActiviteController::class, 'indexTypes'])->name('resort.types');
 Route::get('/resort/{id}/type/{typeId}/activites', [ActiviteController::class, 'indexActivitesParType'])->name('resort.activites.detail');
@@ -57,15 +57,21 @@ Route::middleware([
         return redirect('/');
     })->name('logout');
 
+    // Panier
     Route::get('/panier', [PanierController::class, 'index'])->name('cart.index');
-    Route::post('/panier/resort/{numresort}', [PanierController::class, 'add'])->name('cart.addResort');
-    Route::delete('/panier/remove/{numresort}', [PanierController::class, 'remove'])->name('cart.remove');
+    Route::get('/panier/{numreservation}', [PanierController::class, 'show'])->name('panier.show');
+    Route::delete('/panier/remove/{numreservation}', [PanierController::class, 'remove'])->name('panier.remove');
 
+    // Réservations
     Route::get('/mes-reservations', [ReservationController::class, 'index'])->name('reservations.index');
     
-    Route::get('/reservation/{id}/participants', function () { return "Page modification participants"; })->name('reservation.participants');
-    Route::get('/reservation/{id}/activites', function () { return "Page ajout activités"; })->name('reservation.activities');
+    // Étapes de réservation
+    Route::get('/reservation/{numresort}/step1', [ReservationController::class, 'step1'])->name('reservation.step1');
+    Route::get('/reservation/{numresort}/step2', [ReservationController::class, 'step2'])->name('reservation.step2');
+    Route::get('/reservation/{numresort}/step3', [ReservationController::class, 'step3'])->name('reservation.step3');
+    Route::post('/reservation/{numresort}/addToCart', [ReservationController::class, 'addToCart'])->name('reservation.addToCart');
 
+    // Avis
     Route::get('/reservation/{id}/avis', [AvisController::class, 'create'])->name('reservation.review');
     Route::post('/avis', [AvisController::class, 'store'])->name('avis.store');
 

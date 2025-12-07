@@ -104,4 +104,12 @@ class Resort extends Model
 	{
 		return $this->hasOne(DomaineSkiable::class, 'numresort', 'numresort');
 	}
+
+	/**
+	 * Relation avec les restaurants
+	 */
+	public function restaurants()
+	{
+		return $this->hasMany(Restaurant::class, 'numresort', 'numresort');
+	}
 }

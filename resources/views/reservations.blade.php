@@ -92,7 +92,7 @@
                                     </a>
                                     
                                     {{-- Bouton Supprimer --}}
-                                    <form action="{{ route('cart.remove', $resort->numresort) }}" method="POST">
+                                    <form action="{{ route('panier.remove', $resort->numreservation) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="px-6 py-3 bg-white border border-gray-200 hover:border-red-500 text-gray-500 hover:text-red-600 rounded-xl font-bold text-sm transition-all flex items-center gap-2">

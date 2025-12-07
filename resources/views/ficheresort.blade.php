@@ -215,6 +215,48 @@
                 <hr class="border-slate-200">
                 @endif
 
+                {{-- Restaurants et Bars --}}
+                @if($resort->restaurants->isNotEmpty())
+                <div class="space-y-4">
+                    <h2 class="text-xl font-semibold text-slate-900">Restaurants et Bars</h2>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        @foreach($resort->restaurants as $restaurant)
+                            <div class="bg-white border border-slate-200 rounded-xl p-5 space-y-3 hover:shadow-md transition-shadow">
+                                <div class="flex items-start justify-between gap-3">
+                                    <h3 class="text-lg font-bold text-[#113559] flex-1">
+                                        {{ $restaurant->nomrestaurant }}
+                                    </h3>
+                                    
+                                    @if($restaurant->typerestaurant)
+                                        @php
+                                            $typeConfig = match($restaurant->typerestaurant) {
+                                                'Gourmet' => ['icon' => '🍽️', 'bg' => 'bg-purple-100', 'text' => 'text-purple-700'],
+                                                'Buffet' => ['icon' => '🍴', 'bg' => 'bg-orange-100', 'text' => 'text-orange-700'],
+                                                'Snack' => ['icon' => '🥪', 'bg' => 'bg-yellow-100', 'text' => 'text-yellow-700'],
+                                                'Bar' => ['icon' => '🍸', 'bg' => 'bg-blue-100', 'text' => 'text-blue-700'],
+                                                default => ['icon' => '🍽️', 'bg' => 'bg-gray-100', 'text' => 'text-gray-700']
+                                            };
+                                        @endphp
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 {{ $typeConfig['bg'] }} {{ $typeConfig['text'] }} rounded-full text-xs font-semibold whitespace-nowrap">
+                                            <span>{{ $typeConfig['icon'] }}</span>
+                                            <span>{{ $restaurant->typerestaurant }}</span>
+                                        </span>
+                                    @endif
+                                </div>
+
+                                @if($restaurant->descriptionrestaurant)
+                                    <p class="text-slate-700 leading-relaxed text-sm">
+                                        {{ $restaurant->descriptionrestaurant }}
+                                    </p>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <hr class="border-slate-200">
+                @endif
+
                 {{-- Carte --}}
                 <div class="space-y-3">
                     <h2 class="text-xl font-semibold text-slate-900">Localisation du resort</h2>
@@ -250,10 +292,7 @@
                     @endguest
 
                     @auth
-                        <form action="{{ route('cart.addResort', ['numresort' => $resort->numresort]) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="inline-flex items-center px-6 py-2.5 rounded-full bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] font-bold text-sm shadow-md transition">Réserver ce resort</button>
-                        </form>
+                        <a href="{{ route('reservation.step1', ['numresort' => $resort->numresort]) }}" class="inline-flex items-center px-6 py-2.5 rounded-full bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] font-bold text-sm shadow-md transition">Réserver ce resort</a>
                     @endauth
                 </div>
 
