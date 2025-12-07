@@ -24,7 +24,7 @@ class ReservationController extends Controller
             ->join('choisir', 'reservation.numreservation', '=', 'choisir.numreservation')
             ->join('typechambre', 'choisir.numtype', '=', 'typechambre.numtype')
             ->where('reservation.user_id', $userId)
-            ->whereIn('reservation.statut', ['payee', 'confirmee'])
+            ->whereIn('reservation.statut', ['payee', 'confirmee', 'Terminée'])
             ->select(
                 'reservation.*', 
                 'resort.nomresort', 
