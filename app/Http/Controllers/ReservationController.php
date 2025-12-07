@@ -131,14 +131,19 @@ class ReservationController extends Controller
         }
 
         $nbNuits = Carbon::parse($dateDebut)->diffInDays(Carbon::parse($dateFin));
+        $nbPersonnes = $nbAdultes + $nbEnfants;
+        
+        // Calculer le nombre de chambres nécessaires
+        $capaciteMax = $typeChambre->capacitemax ?? 2;
+        $nbChambres = ceil($nbPersonnes / $capaciteMax);
         
         $prixParNuit = $this->getPrixChambre($numtype, $dateDebut);
-        $prixChambre = $prixParNuit * $nbNuits;
-        $prixTransport = $transport ? $transport->prixtransport * ($nbAdultes + $nbEnfants) : 0;
+        $prixChambre = $prixParNuit * $nbNuits * $nbChambres;
+        $prixTransport = $transport ? $transport->prixtransport * $nbPersonnes : 0;
 
         return view('reservation.step3', compact(
             'resort', 'activites', 'dateDebut', 'dateFin', 'numtype', 'numtransport',
-            'nbAdultes', 'nbEnfants', 'typeChambre', 'transport', 'nbNuits', 'prixChambre', 'prixTransport'
+            'nbAdultes', 'nbEnfants', 'typeChambre', 'transport', 'nbNuits', 'nbChambres', 'prixChambre', 'prixTransport'
         ));
     }
 
@@ -163,8 +168,13 @@ class ReservationController extends Controller
         $nbNuits = Carbon::parse($dateDebut)->diffInDays(Carbon::parse($dateFin));
         $nbPersonnes = $nbAdultes + $nbEnfants;
 
+        // Calculer le nombre de chambres nécessaires
+        $typeChambre = Typechambre::find($numtype);
+        $capaciteMax = $typeChambre->capacitemax ?? 2;
+        $nbChambres = ceil($nbPersonnes / $capaciteMax);
+        
         $prixParNuit = $this->getPrixChambre($numtype, $dateDebut);
-        $prixChambre = $prixParNuit * $nbNuits;
+        $prixChambre = $prixParNuit * $nbNuits * $nbChambres;
 
         $transport = $numtransport ? Transport::find($numtransport) : null;
         $prixTransport = $transport ? $transport->prixtransport * $nbPersonnes : 0;
@@ -199,7 +209,21 @@ class ReservationController extends Controller
             'numtype' => $numtype,
         ]);
 
-        // Stocker les détails des voyageurs en session
+        // Stocker les activités dans la BDD
+        foreach ($activites as $numactivite) {
+            $activite = DB::table('activitealacarte')->where('numactivite', $numactivite)->first();
+            if ($activite) {
+                DB::table('reservation_activite')->insert([
+                    'numreservation' => $numreservation,
+                    'numactivite' => $numactivite,
+                    'prix_unitaire' => $activite->prixmin,
+                    'quantite' => $nbPersonnes,
+                    'created_at' => now(),
+                ]);
+            }
+        }
+
+        // Stocker les détails des voyageurs en session (car colonnes absentes de la BDD)
         $reservationDetails = session('reservation_details', []);
         $reservationDetails[$numreservation] = [
             'nbAdultes' => $nbAdultes,

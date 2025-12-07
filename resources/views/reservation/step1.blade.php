@@ -272,12 +272,30 @@
                                 </div>
                                 
                                 <!-- Détail des prix (caché par défaut) -->
-                                <div id="prix-detail" class="hidden">
+                                <div id="prix-detail" class="hidden space-y-3">
+                                    <!-- Prix HT -->
+                                    <div class="flex justify-between items-center text-gray-600">
+                                        <span>Total HT</span>
+                                        <span class="font-semibold" id="recap-total-ht">--</span>
+                                    </div>
+                                    
+                                    <!-- TVA -->
+                                    <div class="flex justify-between items-center text-sm text-gray-500">
+                                        <span>TVA (20%)</span>
+                                        <span id="recap-tva">--</span>
+                                    </div>
+                                    
+                                    <!-- Ligne de séparation -->
+                                    <div class="border-t border-gray-300 my-2"></div>
+                                    
+                                    <!-- Total TTC -->
                                     <div class="flex justify-between items-center mb-3">
-                                        <span class="text-gray-600">Total</span>
+                                        <span class="text-gray-800 font-semibold">Total TTC</span>
                                         <span class="text-2xl font-bold text-orange-500" id="recap-total">--</span>
                                     </div>
-                                    <div class="flex justify-between items-center text-sm text-gray-500">
+                                    
+                                    <!-- Prix par personne -->
+                                    <div class="flex justify-between items-center text-sm text-gray-500 pt-2 border-t border-gray-200">
                                         <span>Par personne</span>
                                         <span id="recap-prix-personne">--</span>
                                     </div>
@@ -492,8 +510,17 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.prixParNuit) {
                 const prixNuitUnitaire = parseFloat(data.prixParNuit);
                 const prixNuitTotal = prixNuitUnitaire * nbChambres;
-                const prixTotal = prixNuitTotal * nuits;
-                const prixParPersonne = totalPersonnes > 0 ? Math.round(prixTotal / totalPersonnes) : 0;
+                const prixChambreTotal = prixNuitTotal * nuits;
+                
+                // Prix HT
+                const prixTotalHT = prixChambreTotal;
+                
+                // Calcul TVA (20%)
+                const tva = prixTotalHT * 0.2;
+                
+                // Prix TTC
+                const prixTotalTTC = prixTotalHT + tva;
+                const prixParPersonne = totalPersonnes > 0 ? Math.round(prixTotalTTC / totalPersonnes) : 0;
                 
                 // Afficher le détail des prix
                 prixPlaceholder.classList.add('hidden');
@@ -502,9 +529,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Mettre à jour le prix sur la carte de la chambre
                 document.getElementById('prix-' + selectedType.value).textContent = prixNuitUnitaire.toFixed(0);
                 
-                // Mettre à jour le récapitulatif
+                // Mettre à jour le récapitulatif avec décomposition HT/TVA/TTC
+                document.getElementById('recap-total-ht').textContent = prixTotalHT.toFixed(2) + ' €';
+                document.getElementById('recap-tva').textContent = tva.toFixed(2) + ' €';
+                document.getElementById('recap-total').textContent = prixTotalTTC.toFixed(2) + ' €';
                 document.getElementById('recap-prix-personne').textContent = prixParPersonne + ' €';
-                document.getElementById('recap-total').textContent = prixTotal.toFixed(0) + ' €';
             }
         })
         .catch(err => {
