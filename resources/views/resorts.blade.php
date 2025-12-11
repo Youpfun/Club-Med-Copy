@@ -171,6 +171,13 @@
                     @endforeach
                 </div>
 
+                {{-- Pagination --}}
+                @if(method_exists($resorts, 'links'))
+                    <div class="mt-10 flex justify-center">
+                        {{ $resorts->links() }}
+                    </div>
+                @endif
+
                 @if(count($resorts) === 0)
                     <div class="text-center py-16 bg-white rounded-3xl border border-gray-100 shadow-sm">
                         <div class="mb-4 text-gray-300">
