@@ -25,6 +25,9 @@ Route::get('/resort/{id}/types-activites', [ActiviteController::class, 'indexTyp
 Route::get('/resort/{id}/type/{typeId}/activites', [ActiviteController::class, 'indexActivitesParType'])->name('resort.activites.detail');
 Route::get('/resort/{id}/activites', [ActiviteController::class, 'index'])->name('resort.activites');
 
+// Signalement d'avis (accessible à tous les visiteurs)
+Route::post('/avis/{numavis}/signaler', [AvisController::class, 'report'])->name('avis.report');
+
 Route::get('/typeclubs', [TypeclubController::class, 'index']);
 Route::get('/localisations', [LocalisationController::class, 'index']);
 Route::get('/clients', [UserController::class, 'index']);
