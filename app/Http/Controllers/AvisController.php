@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Avis;
 use App\Models\Photo;
+use App\Models\Signalement;
 use Carbon\Carbon;
 
 class AvisController extends Controller
@@ -64,5 +65,36 @@ class AvisController extends Controller
 
         return redirect()->route('reservations.index')
             ->with('success', 'Merci ! Votre avis a été publié avec succès.');
+    }
+
+    /**
+     * Signaler un avis sur un resort
+     */
+    public function report(Request $request, $numavis)
+    {
+        // Vérifier que l'avis existe
+        $avis = Avis::find($numavis);
+        if (!$avis) {
+            return redirect()->back()
+                ->with('error', 'Avis introuvable.');
+        }
+
+        // Validation des données
+        $request->validate([
+            'message' => 'required|string|max:1000',
+        ]);
+
+        // Créer le signalement avec numresort, numavis et message
+        Signalement::create([
+            'numresort' => $avis->numresort, // ID du resort depuis l'avis
+            'numavis' => $numavis, // ID de l'avis signalé
+            'user_id' => Auth::id(), // null si visiteur anonyme
+            'message' => $request->message,
+            'datesignalement' => Carbon::now(),
+            'traite' => false,
+        ]);
+
+        return redirect()->back()
+            ->with('success', 'Merci ! Votre signalement a été enregistré. Nous allons examiner cet avis.');
     }
 }

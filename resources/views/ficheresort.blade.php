@@ -22,6 +22,29 @@
             Retour à la liste
         </a>
 
+        {{-- Messages de succès/erreur --}}
+        @if(session('success'))
+            <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg flex items-center justify-between">
+                <span>{{ session('success') }}</span>
+                <button onclick="this.parentElement.remove()" class="text-green-700 hover:text-green-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-center justify-between">
+                <span>{{ session('error') }}</span>
+                <button onclick="this.parentElement.remove()" class="text-red-700 hover:text-red-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        @endif
+
         <div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
             <div class="p-6 md:p-8 space-y-6">
 
@@ -65,9 +88,19 @@
                                                 Publié le : {{ \Carbon\Carbon::parse($unAvis->datepublication)->format('d/m/Y') }}
                                             </p>
                                         </div>
-                                        <div class="flex text-[#ffc000] text-sm">
-                                            @for($i=0; $i < $unAvis->noteavis; $i++) ★ @endfor
-                                            @for($i=$unAvis->noteavis; $i < 5; $i++) <span class="text-slate-300">★</span> @endfor
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex text-[#ffc000] text-sm">
+                                                @for($i=0; $i < $unAvis->noteavis; $i++) ★ @endfor
+                                                @for($i=$unAvis->noteavis; $i < 5; $i++) <span class="text-slate-300">★</span> @endfor
+                                            </div>
+                                            <button onclick="openReportModal({{ $unAvis->numavis }})" 
+                                                    class="text-xs text-red-600 hover:text-red-800 hover:underline flex items-center gap-1 transition-colors"
+                                                    title="Signaler cet avis">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                </svg>
+                                                Signaler
+                                            </button>
                                         </div>
                                     </div>
 
@@ -323,6 +356,34 @@
         </div>
     @endguest
 
+    {{-- MODAL SIGNALEMENT --}}
+    <div id="report-modal-overlay" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 hidden">
+        <div class="relative bg-white rounded-3xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
+            <button id="close-report-modal" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-100">✕</button>
+            <div class="px-8 pt-10 pb-8">
+                <h2 class="text-center text-xl font-semibold text-[#113559] mb-4">Signaler cet avis</h2>
+                <p class="text-sm text-slate-600 mb-6 text-center">Aidez-nous à maintenir la qualité des avis en signalant tout contenu inapproprié.</p>
+                
+                <form id="report-form" method="POST" action="">
+                    @csrf
+                    <div class="space-y-4">
+                        <div>
+                            <label for="message" class="block text-sm font-medium text-slate-700 mb-2">Message du signalement <span class="text-red-500">*</span></label>
+                            <textarea id="message" name="message" rows="4" maxlength="1000" required
+                                      class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                                      placeholder="Décrivez le problème rencontré avec cet avis..."></textarea>
+                            <p class="text-xs text-slate-500 mt-1">Maximum 1000 caractères</p>
+                        </div>
+                        
+                        <button type="submit" class="w-full px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold text-sm rounded-full shadow-md transition">
+                            Envoyer le signalement
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     {{-- SCRIPTS --}}
     <script>
         function togglePhotos(id) {
@@ -354,6 +415,22 @@
             }
         });
 
+        function openReportModal(numavis) {
+            const modal = document.getElementById('report-modal-overlay');
+            const form = document.getElementById('report-form');
+            form.action = '{{ url("/avis") }}/' + numavis + '/signaler';
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeReportModal() {
+            const modal = document.getElementById('report-modal-overlay');
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            // Réinitialiser le formulaire
+            document.getElementById('report-form').reset();
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             const openBtn = document.getElementById('open-login-modal');
             const closeBtn = document.getElementById('close-login-modal');
@@ -363,6 +440,17 @@
                 openBtn.addEventListener('click', () => overlay.classList.remove('hidden'));
                 closeBtn.addEventListener('click', () => overlay.classList.add('hidden'));
                 overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.add('hidden'); });
+            }
+
+            // Gestion du modal de signalement
+            const reportCloseBtn = document.getElementById('close-report-modal');
+            const reportOverlay = document.getElementById('report-modal-overlay');
+            
+            if (reportCloseBtn && reportOverlay) {
+                reportCloseBtn.addEventListener('click', closeReportModal);
+                reportOverlay.addEventListener('click', (e) => { 
+                    if (e.target === reportOverlay) closeReportModal(); 
+                });
             }
         });
     </script>
