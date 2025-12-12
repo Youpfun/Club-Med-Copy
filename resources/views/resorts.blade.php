@@ -79,7 +79,8 @@
             <section class="px-4 lg:px-8 xl:px-16 mb-6">
                 <div class="mx-auto max-w-7xl">
                     <p class="text-sm text-gray-600 bg-blue-50 inline-block px-4 py-2 rounded-full">
-                        <span class="font-bold text-[#113559]">{{ count($resorts) }}</span> resort(s) trouvé(s) correspondant à votre recherche.
+                        {{-- Attention: avec paginate, count($resorts) donne le nombre sur la page, $resorts->total() donne le total --}}
+                        <span class="font-bold text-[#113559]">{{ $resorts->total() }}</span> resort(s) trouvé(s) correspondant à votre recherche.
                     </p>
                 </div>
             </section>
@@ -128,10 +129,8 @@
                                         {{ $resort->nomresort }}
                                     </h3>
                                     
-                                    {{-- MODIFICATION ICI : Chiffre + 1 Trident --}}
                                     <div class="flex items-center justify-between mb-4">
                                         <div class="flex items-center gap-1">
-                                            {{-- Le chiffre en gros --}}
                                             <span class="font-bold text-xl text-[#113559]">{{ $resort->nbtridents }} 🔱</span>
                                         </div>
                                     </div>
@@ -171,8 +170,11 @@
                     @endforeach
                 </div>
 
+                <div class="mt-12 px-4">
+                    {{ $resorts->links() }}
+                </div>
                 @if(count($resorts) === 0)
-                    <div class="text-center py-16 bg-white rounded-3xl border border-gray-100 shadow-sm">
+                    <div class="text-center py-16 bg-white rounded-3xl border border-gray-100 shadow-sm mt-8">
                         <div class="mb-4 text-gray-300">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

@@ -8,33 +8,35 @@ use Illuminate\Support\Facades\DB;
 
 class ResortController extends Controller
 {
-	public function index(Request $request)
-	{
-		$typeclub = $request->input('typeclub');
-		$localisation = $request->input('localisation');
-		$pays = $request->input('pays');
+    public function index(Request $request)
+    {
+        $typeclub = $request->input('typeclub');
+        $localisation = $request->input('localisation');
+        $pays = $request->input('pays');
 
-		$typeclubs = DB::table('typeclub')->pluck('nomtypeclub', 'numtypeclub');
-		
-		$localisations = DB::table('localisation')->pluck('nomlocalisation', 'numlocalisation');
-		
-		$paysList = DB::table('pays')->pluck('nompays', 'codepays');
+        $typeclubs = DB::table('typeclub')->pluck('nomtypeclub', 'numtypeclub');
+        $localisations = DB::table('localisation')->pluck('nomlocalisation', 'numlocalisation');
+        $paysList = DB::table('pays')->pluck('nompays', 'codepays');
 
-		$resorts = Resort::when($typeclub, function($query, $typeclub) {
-			return $query->whereHas('typeclubs', function($q) use ($typeclub) {
-				$q->where('typeclub.numtypeclub', $typeclub);
-			});
-		})
-		->when($localisation, function($query, $localisation) {
-			return $query->whereHas('localisations', function($q) use ($localisation) {
-				$q->where('localisation.numlocalisation', $localisation);
-			});
-		})
-		->when($pays, function($query, $pays) {
-			return $query->where('resort.codepays', $pays);
-		})
-		->orderBy('nomresort')->get();
+        // MODIFICATION ICI : Ajout de 'avis' dans le tableau with()
+        $resorts = Resort::with(['typeclubs', 'localisations', 'pays', 'avis'])
+            ->when($typeclub, function($query, $typeclub) {
+                return $query->whereHas('typeclubs', function($q) use ($typeclub) {
+                    $q->where('typeclub.numtypeclub', $typeclub);
+                });
+            })
+            ->when($localisation, function($query, $localisation) {
+                return $query->whereHas('localisations', function($q) use ($localisation) {
+                    $q->where('localisation.numlocalisation', $localisation);
+                });
+            })
+            ->when($pays, function($query, $pays) {
+                return $query->where('resort.codepays', $pays);
+            })
+            ->orderBy('nomresort')
+            ->paginate(15)
+            ->withQueryString();
 
-		return view('resorts', compact('resorts', 'typeclubs', 'localisations', 'paysList'));
-	}
+        return view('resorts', compact('resorts', 'typeclubs', 'localisations', 'paysList'));
+    }
 }
