@@ -14,6 +14,8 @@ use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\PanierController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\AvisController;
+use App\Http\Controllers\StayConfirmationController;
+use App\Http\Controllers\VenteController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -73,9 +75,29 @@ Route::middleware([
     Route::get('/reservation/{numresort}/step2', [ReservationController::class, 'step2'])->name('reservation.step2');
     Route::get('/reservation/{numresort}/step3', [ReservationController::class, 'step3'])->name('reservation.step3');
     Route::post('/reservation/{numresort}/addToCart', [ReservationController::class, 'addToCart'])->name('reservation.addToCart');
+    
+    // Routes for adding/modifying activities and participants (placeholder redirects)
+    Route::get('/reservation/{id}/activities', function ($id) {
+        return redirect("/reservation/{$id}/step3");
+    })->name('reservation.activities');
+    Route::get('/reservation/{id}/participants', function ($id) {
+        return redirect("/reservation/{$id}/step2");
+    })->name('reservation.participants');
 
     // Avis
     Route::get('/reservation/{id}/avis', [AvisController::class, 'create'])->name('reservation.review');
     Route::post('/avis', [AvisController::class, 'store'])->name('avis.store');
+
+    // Confirmation de séjour (Service Vente)
+    Route::get('/stay-confirmation/{numreservation}', [StayConfirmationController::class, 'showConfirmationForm'])->name('stay-confirmation.form');
+    Route::post('/stay-confirmation/{numreservation}', [StayConfirmationController::class, 'sendConfirmation'])->name('stay-confirmation.send');
+
+    // Tableau de bord Service Vente
+    Route::prefix('vente')->middleware('vente')->group(function () {
+        Route::get('/dashboard', [VenteController::class, 'dashboard'])->name('vente.dashboard');
+        Route::get('/pending-partners', [VenteController::class, 'pendingPartnerValidation'])->name('vente.pending-partners');
+        Route::get('/reject-reservation/{numreservation}', [VenteController::class, 'showRejectForm'])->name('vente.reject-form');
+        Route::post('/reject-reservation/{numreservation}', [VenteController::class, 'rejectReservation'])->name('vente.reject');
+    });
 
 });

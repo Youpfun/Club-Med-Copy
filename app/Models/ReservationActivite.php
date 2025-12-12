@@ -22,25 +22,16 @@ class ReservationActivite extends Model
         'quantite' => 'integer',
     ];
 
-    /**
-     * Relation avec la réservation
-     */
     public function reservation()
     {
         return $this->belongsTo(Reservation::class, 'numreservation', 'numreservation');
     }
 
-    /**
-     * Relation avec l'activité
-     */
     public function activite()
     {
         return $this->belongsTo(Activite::class, 'numactivite', 'numactivite');
     }
 
-    /**
-     * Calculer le prix total (prix unitaire × quantité)
-     */
     public function getPrixTotalAttribute()
     {
         return $this->prix_unitaire * $this->quantite;

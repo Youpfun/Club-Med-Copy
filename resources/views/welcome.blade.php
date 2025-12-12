@@ -36,6 +36,13 @@
                                 <a href="{{ url('/resorts') }}" class="inline-flex items-center justify-center px-8 py-3 bg-yellow-500 hover:bg-yellow-600 text-black rounded-full font-semibold text-base transition-colors">
                                     Découvrir nos Resorts
                                 </a>
+                                @auth
+                                    @if(Auth::user() && strpos(strtolower(Auth::user()->role ?? ''), 'vente') !== false)
+                                        <a href="{{ route('vente.dashboard') }}" class="inline-flex items-center justify-center px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-semibold text-base transition-colors">
+                                            📊 Tableau de Bord Vente
+                                        </a>
+                                    @endif
+                                @endauth
                             </div>
                         </div>
                         <div class="relative aspect-square rounded-lg overflow-hidden bg-gray-200">
