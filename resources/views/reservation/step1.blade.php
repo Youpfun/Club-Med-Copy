@@ -2,7 +2,6 @@
 
 @section('content')
 <div class="min-h-screen bg-gradient-to-br from-sky-50 via-white to-orange-50">
-    <!-- Header -->
     <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
         <div class="container mx-auto px-4 py-6">
             <nav class="flex items-center text-white/80 text-sm mb-2">
@@ -29,7 +28,6 @@
         </div>
     </div>
 
-    <!-- Étapes de progression -->
     <div class="bg-white border-b shadow-sm">
         <div class="container mx-auto px-4 py-4">
             <div class="flex items-center justify-center space-x-4 md:space-x-8">
@@ -55,10 +53,8 @@
         <form id="step1Form" action="{{ route('reservation.step2', $resort->numresort) }}" method="GET">
             <div class="flex flex-col lg:flex-row gap-8">
                 
-                <!-- Formulaire principal (gauche) -->
                 <div class="flex-1 space-y-6">
                     
-                    <!-- Section Dates -->
                     <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                         <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
                             <span class="w-8 h-8 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center mr-3">
@@ -86,7 +82,6 @@
                         </div>
                     </div>
 
-                    <!-- Section Voyageurs -->
                     <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                         <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
                             <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center mr-3">
@@ -97,7 +92,6 @@
                             Voyageurs
                         </h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Adultes -->
                             <div class="bg-gray-50 rounded-xl p-4">
                                 <div class="flex items-center justify-between">
                                     <div>
@@ -122,7 +116,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Enfants -->
                             <div class="bg-gray-50 rounded-xl p-4">
                                 <div class="flex items-center justify-between">
                                     <div>
@@ -150,7 +143,6 @@
                         </div>
                     </div>
 
-                    <!-- Section Chambres -->
                     <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                         <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
                             <span class="w-8 h-8 rounded-full bg-purple-100 text-purple-500 flex items-center justify-center mr-3">
@@ -167,8 +159,10 @@
                                 @endphp
                                 <div class="chambre-card cursor-pointer rounded-xl border-2 border-gray-200 transition-all duration-200 hover:border-gray-300 hover:shadow-sm {{ $isSelected ? 'selected border-orange-500 bg-orange-50 shadow-md' : '' }}"
                                      data-numtype="{{ $type->numtype }}" onclick="selectChambre(this, {{ $type->numtype }})">
+                                    
                                     <input type="radio" name="numtype" value="{{ $type->numtype }}" 
                                            id="chambre-{{ $type->numtype }}" class="hidden" required {{ $isSelected ? 'checked' : '' }}>
+                                    
                                     <div class="p-5">
                                         <div class="flex items-start justify-between">
                                             <div class="flex-1">
@@ -176,27 +170,32 @@
                                                 <div class="mt-2 flex flex-wrap gap-3">
                                                     @if($type->surface)
                                                         <span class="inline-flex items-center text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-                                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
-                                                            </svg>
                                                             {{ $type->surface }} m²
                                                         </span>
                                                     @endif
                                                     @if($type->capacitemax)
                                                         <span class="inline-flex items-center text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-                                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                            </svg>
                                                             Max {{ $type->capacitemax }} pers.
                                                         </span>
                                                     @endif
                                                 </div>
                                             </div>
-                                            <div class="text-right ml-4">
-                                                <div class="text-2xl font-bold text-orange-500" id="prix-{{ $type->numtype }}">--</div>
+                                            
+                                            <div class="text-right ml-4 flex flex-col items-end">
+                                                <span id="badge-promo-{{ $type->numtype }}" class="hidden bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full mb-1">
+                                                    PROMO
+                                                </span>
+
+                                                <div id="prix-barre-{{ $type->numtype }}" class="hidden text-xs text-gray-400 line-through mb-0.5">
+                                                    --
+                                                </div>
+
+                                                <div class="text-2xl font-bold text-orange-500 transition-colors duration-200" id="container-prix-{{ $type->numtype }}">
+                                                    <span id="prix-{{ $type->numtype }}">--</span>
+                                                </div>
                                                 <div class="text-sm text-gray-500">€ / nuit</div>
                                             </div>
-                                        </div>
+                                            </div>
                                     </div>
                                 </div>
                             @endforeach
@@ -204,40 +203,25 @@
                     </div>
                 </div>
 
-                <!-- Récapitulatif (droite) -->
                 <div class="lg:w-96">
                     <div class="sticky top-4">
                         <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                            <!-- Header du récap -->
                             <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-5 text-white">
                                 <h3 class="font-bold text-lg">Récapitulatif</h3>
                                 <p class="text-orange-100 text-sm">{{ $resort->nomresort }}</p>
                             </div>
                             
-                            <!-- Contenu du récap -->
                             <div class="p-5 space-y-4">
-                                <!-- Dates -->
                                 <div class="flex items-center text-gray-600" id="recap-dates">
-                                    <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                    </svg>
                                     <span class="text-gray-400 italic">Sélectionnez vos dates</span>
                                 </div>
                                 
-                                <!-- Nuits -->
                                 <div class="flex items-center justify-between py-3 border-t border-gray-100">
                                     <span class="text-gray-600">Nombre de nuits</span>
                                     <span class="font-bold text-gray-800" id="recap-nuits">--</span>
                                 </div>
 
-                                <!-- Voyageurs -->
                                 <div class="py-3 border-t border-gray-100">
-                                    <div class="flex items-center text-gray-600 mb-2">
-                                        <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                        </svg>
-                                        Voyageurs
-                                    </div>
                                     <div class="grid grid-cols-2 gap-2 ml-7">
                                         <div class="bg-gray-50 rounded-lg px-3 py-2 text-center">
                                             <span class="text-lg font-bold text-gray-800" id="recap-adultes">{{ request('nbAdultes', 2) }}</span>
@@ -250,78 +234,43 @@
                                     </div>
                                 </div>
 
-                                <!-- Chambre sélectionnée -->
                                 <div class="py-3 border-t border-gray-100">
                                     <div class="flex items-center text-gray-600 mb-1">
-                                        <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                                        </svg>
                                         Hébergement
                                     </div>
                                     <p class="font-semibold text-gray-800 ml-7" id="recap-chambre">{{ $typeChambres->first()->nomtype ?? '--' }}</p>
-                                    <p class="text-sm text-orange-600 ml-7 mt-1 hidden" id="recap-nb-chambres"></p>
                                 </div>
                                 <input type="hidden" name="nbChambres" id="nbChambres" value="1">
                             </div>
 
-                            <!-- Section Prix -->
                             <div class="bg-gray-50 p-5 border-t border-gray-100">
-                                <!-- Message si pas de dates -->
                                 <div id="prix-placeholder" class="text-center py-4">
                                     <p class="text-gray-400 text-sm">Sélectionnez vos dates pour voir le prix</p>
                                 </div>
                                 
-                                <!-- Détail des prix (caché par défaut) -->
                                 <div id="prix-detail" class="hidden space-y-3">
-                                    <!-- Prix HT -->
                                     <div class="flex justify-between items-center text-gray-600">
                                         <span>Total HT</span>
                                         <span class="font-semibold" id="recap-total-ht">--</span>
                                     </div>
-                                    
-                                    <!-- TVA -->
                                     <div class="flex justify-between items-center text-sm text-gray-500">
                                         <span>TVA (20%)</span>
                                         <span id="recap-tva">--</span>
                                     </div>
-                                    
-                                    <!-- Ligne de séparation -->
                                     <div class="border-t border-gray-300 my-2"></div>
-                                    
-                                    <!-- Total TTC -->
                                     <div class="flex justify-between items-center mb-3">
                                         <span class="text-gray-800 font-semibold">Total TTC</span>
                                         <span class="text-2xl font-bold text-orange-500" id="recap-total">--</span>
                                     </div>
-                                    
-                                    <!-- Prix par personne -->
-                                    <div class="flex justify-between items-center text-sm text-gray-500 pt-2 border-t border-gray-200">
-                                        <span>Par personne</span>
-                                        <span id="recap-prix-personne">--</span>
-                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Bouton -->
                             <div class="p-5 border-t border-gray-100">
                                 <button type="submit" 
-                                        class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 rounded-xl font-bold text-lg
-                                               hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-lg hover:shadow-xl
-                                               transform hover:-translate-y-0.5 flex items-center justify-center">
+                                        class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 rounded-xl font-bold text-lg hover:from-orange-600 hover:to-orange-700 transition-all">
                                     Continuer
-                                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                                    </svg>
                                 </button>
                             </div>
-                        </div>
-
-                        <!-- Badge réassurance -->
-                        <div class="mt-4 flex items-center justify-center text-sm text-gray-500">
-                            <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                            </svg>
-                            Annulation gratuite jusqu'à 48h avant
                         </div>
                     </div>
                 </div>
@@ -331,14 +280,12 @@
 </div>
 
 <script>
-// Capacités des chambres
 const capaciteChambres = {
     @foreach($typeChambres as $type)
         {{ $type->numtype }}: {{ $type->capacitemax ?? 2 }},
     @endforeach
 };
 
-// Noms des chambres
 const nomsChambres = {
     @foreach($typeChambres as $type)
         {{ $type->numtype }}: "{{ $type->nomtype }}",
@@ -351,87 +298,114 @@ document.addEventListener('DOMContentLoaded', function() {
     const nbAdultes = document.getElementById('nbAdultes');
     const nbEnfants = document.getElementById('nbEnfants');
     const nbChambresInput = document.getElementById('nbChambres');
-    const radios = document.querySelectorAll('input[name="numtype"]');
     
+    // GESTION AFFICHAGE PROMO (Avec gestion de la couleur verte)
+    function afficherPromo(numtype, data) {
+        const badge = document.getElementById('badge-promo-' + numtype);
+        const prixBarre = document.getElementById('prix-barre-' + numtype);
+        const prixContainer = document.getElementById('container-prix-' + numtype);
+        const prixActuel = document.getElementById('prix-' + numtype);
+
+        // Si Promo
+        if (data.hasPromo && parseFloat(data.prixStandard) > parseFloat(data.prixParNuit)) {
+            if(badge) {
+                badge.classList.remove('hidden');
+                // Force le vert
+                badge.className = "bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full mb-1";
+            }
+            
+            if(prixBarre) {
+                prixBarre.textContent = parseFloat(data.prixStandard).toFixed(0) + ' €';
+                prixBarre.classList.remove('hidden');
+            }
+            
+            if(prixContainer) {
+                prixContainer.classList.remove('text-orange-500', 'text-[#113559]');
+                prixContainer.classList.add('text-green-600'); // PRIX EN VERT
+            }
+            
+            if(prixActuel) prixActuel.textContent = parseFloat(data.prixParNuit).toFixed(0);
+        } else {
+            // Pas de Promo
+            if(badge) badge.classList.add('hidden');
+            if(prixBarre) prixBarre.classList.add('hidden');
+            
+            if(prixContainer) {
+                prixContainer.classList.remove('text-green-600', 'text-red-600');
+                prixContainer.classList.add('text-orange-500'); // Retour à l'orange
+            }
+            
+            if(prixActuel && data.prixParNuit) {
+                prixActuel.textContent = parseFloat(data.prixParNuit).toFixed(0);
+            }
+        }
+    }
+
     function changeValue(id, delta) {
         const input = document.getElementById(id);
-        const min = parseInt(input.min) || 0;
-        const max = parseInt(input.max) || 99;
         let newVal = parseInt(input.value) + delta;
-        if (newVal >= min && newVal <= max) {
+        if (newVal >= input.min && newVal <= input.max) {
             input.value = newVal;
             updateRecap();
-            updatePrix();
+            // Quand on change le nb de personnes, on met à jour les prix
+            updateAllPrices(); 
         }
     }
     window.changeValue = changeValue;
     
-    // Sélection de chambre
     function selectChambre(card, numtype) {
-        // Retirer la sélection de toutes les cartes
         document.querySelectorAll('.chambre-card').forEach(c => {
             c.classList.remove('selected', 'border-orange-500', 'bg-orange-50', 'shadow-md');
             c.classList.add('border-gray-200');
         });
         
-        // Ajouter la sélection à la carte cliquée
         card.classList.add('selected', 'border-orange-500', 'bg-orange-50', 'shadow-md');
         card.classList.remove('border-gray-200');
-        
-        // Cocher le radio button
         document.getElementById('chambre-' + numtype).checked = true;
         
         updateRecap();
-        updatePrix();
+        // Mise à jour du récapitulatif de prix (droite) uniquement
+        updateSummaryPrice(); 
     }
     window.selectChambre = selectChambre;
     
-    // Calcul du nombre de chambres nécessaires
     function calculerNbChambres() {
         const selectedType = document.querySelector('input[name="numtype"]:checked');
         if (!selectedType) return 1;
-        
         const numtype = parseInt(selectedType.value);
         const capacite = capaciteChambres[numtype] || 2;
         const adultes = parseInt(nbAdultes.value) || 0;
         const enfants = parseInt(nbEnfants.value) || 0;
-        const totalPersonnes = adultes + enfants;
-        
-        return Math.ceil(totalPersonnes / capacite);
+        return Math.ceil((adultes + enfants) / capacite);
     }
     
-    // Validation dates
+    // ECOUTEURS D'EVENEMENTS : MISE A JOUR DE TOUS LES PRIX
     dateDebut.addEventListener('change', function() {
-        if (dateFin.value && new Date(dateFin.value) <= new Date(dateDebut.value)) {
-            dateFin.value = '';
-        }
+        if (dateFin.value && new Date(dateFin.value) <= new Date(dateDebut.value)) dateFin.value = '';
         dateFin.min = dateDebut.value;
         updateRecap();
-        updatePrix();
+        updateAllPrices(); // <--- ICI : Met à jour TOUTES les cartes
     });
     
     dateFin.addEventListener('change', function() {
         if (dateDebut.value && new Date(dateFin.value) <= new Date(dateDebut.value)) {
-            alert('La date de départ doit être après la date d\'arrivée');
+            alert('Date de départ invalide');
             dateFin.value = '';
             return;
         }
         updateRecap();
-        updatePrix();
+        updateAllPrices(); // <--- ICI : Met à jour TOUTES les cartes
     });
     
-    nbAdultes.addEventListener('change', function() { updateRecap(); updatePrix(); });
-    nbEnfants.addEventListener('change', function() { updateRecap(); updatePrix(); });
-    radios.forEach(radio => radio.addEventListener('change', function() { updateRecap(); updatePrix(); }));
-    
+    nbAdultes.addEventListener('change', function() { updateRecap(); updateAllPrices(); });
+    nbEnfants.addEventListener('change', function() { updateRecap(); updateAllPrices(); });
+
     function updateRecap() {
-        // Voyageurs
         const adultes = parseInt(nbAdultes.value) || 0;
         const enfants = parseInt(nbEnfants.value) || 0;
         document.getElementById('recap-adultes').textContent = adultes;
         document.getElementById('recap-enfants').textContent = enfants;
         
-        // Dates et nuits
         if (dateDebut.value && dateFin.value) {
             const d1 = new Date(dateDebut.value);
             const d2 = new Date(dateFin.value);
@@ -439,114 +413,22 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const options = { day: 'numeric', month: 'short' };
             const dateStr = d1.toLocaleDateString('fr-FR', options) + ' - ' + d2.toLocaleDateString('fr-FR', options);
-            document.getElementById('recap-dates').innerHTML = `
-                <svg class="w-5 h-5 mr-3 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                <span class="font-medium text-gray-800">${dateStr}</span>
-            `;
+            document.getElementById('recap-dates').innerHTML = `<span class="font-medium text-gray-800">${dateStr}</span>`;
             document.getElementById('recap-nuits').textContent = nuits + ' nuit' + (nuits > 1 ? 's' : '');
         }
         
-        // Chambre sélectionnée et nombre de chambres
         const selectedRadio = document.querySelector('input[name="numtype"]:checked');
         if (selectedRadio) {
             const numtype = parseInt(selectedRadio.value);
-            const nomChambre = nomsChambres[numtype] || '--';
-            const nbChambres = calculerNbChambres();
-            
-            document.getElementById('recap-chambre').textContent = nomChambre;
-            nbChambresInput.value = nbChambres;
-            
-            const recapNbChambres = document.getElementById('recap-nb-chambres');
-            if (nbChambres > 1) {
-                recapNbChambres.textContent = `× ${nbChambres} chambres nécessaires`;
-                recapNbChambres.classList.remove('hidden');
-            } else {
-                recapNbChambres.classList.add('hidden');
-            }
+            document.getElementById('recap-chambre').textContent = nomsChambres[numtype] || '--';
+            nbChambresInput.value = calculerNbChambres();
         }
     }
     
-    function updatePrix() {
-        const selectedType = document.querySelector('input[name="numtype"]:checked');
-        const prixPlaceholder = document.getElementById('prix-placeholder');
-        const prixDetail = document.getElementById('prix-detail');
-        
-        if (!selectedType || !dateDebut.value || !dateFin.value) {
-            // Afficher le placeholder si pas de dates
-            prixPlaceholder.classList.remove('hidden');
-            prixDetail.classList.add('hidden');
-            return;
-        }
-        
-        const adultes = parseInt(nbAdultes.value) || 0;
-        const enfants = parseInt(nbEnfants.value) || 0;
-        const totalPersonnes = adultes + enfants;
-        const nbChambres = calculerNbChambres();
-        
-        const d1 = new Date(dateDebut.value);
-        const d2 = new Date(dateFin.value);
-        const nuits = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
-        
-        if (nuits <= 0) return;
-        
-        fetch('/api/prix', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                numtype: selectedType.value,
-                dateDebut: dateDebut.value,
-                dateFin: dateFin.value,
-                nbAdultes: adultes,
-                nbEnfants: enfants
-            })
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.prixParNuit) {
-                const prixNuitUnitaire = parseFloat(data.prixParNuit);
-                const prixNuitTotal = prixNuitUnitaire * nbChambres;
-                const prixChambreTotal = prixNuitTotal * nuits;
-                
-                // Prix HT
-                const prixTotalHT = prixChambreTotal;
-                
-                // Calcul TVA (20%)
-                const tva = prixTotalHT * 0.2;
-                
-                // Prix TTC
-                const prixTotalTTC = prixTotalHT + tva;
-                const prixParPersonne = totalPersonnes > 0 ? Math.round(prixTotalTTC / totalPersonnes) : 0;
-                
-                // Afficher le détail des prix
-                prixPlaceholder.classList.add('hidden');
-                prixDetail.classList.remove('hidden');
-                
-                // Mettre à jour le prix sur la carte de la chambre
-                document.getElementById('prix-' + selectedType.value).textContent = prixNuitUnitaire.toFixed(0);
-                
-                // Mettre à jour le récapitulatif avec décomposition HT/TVA/TTC
-                document.getElementById('recap-total-ht').textContent = prixTotalHT.toFixed(2) + ' €';
-                document.getElementById('recap-tva').textContent = tva.toFixed(2) + ' €';
-                document.getElementById('recap-total').textContent = prixTotalTTC.toFixed(2) + ' €';
-                document.getElementById('recap-prix-personne').textContent = prixParPersonne + ' €';
-            }
-        })
-        .catch(err => {
-            console.error('Erreur prix:', err);
-        });
-    }
-    
-    // Init
-    updateRecap();
-    updatePrix();
-    
-    // Charger les prix de toutes les chambres au démarrage
-    function chargerTousLesPrix() {
+    // NOUVELLE FONCTION : Met à jour toutes les cartes (badges, prix barrés...)
+    function updateAllPrices() {
+        if (!dateDebut.value || !dateFin.value) return;
+
         const chambres = document.querySelectorAll('.chambre-card');
         chambres.forEach(card => {
             const numtype = card.dataset.numtype;
@@ -556,18 +438,88 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
-                body: JSON.stringify({ numtype: numtype })
+                body: JSON.stringify({
+                    numresort: {{ $resort->numresort }},
+                    numtype: numtype,
+                    dateDebut: dateDebut.value,
+                    dateFin: dateFin.value
+                })
             })
             .then(r => r.json())
             .then(data => {
-                if (data.prixParNuit) {
-                    document.getElementById('prix-' + numtype).textContent = parseFloat(data.prixParNuit).toFixed(0);
-                }
+                afficherPromo(numtype, data);
             })
-            .catch(err => console.error('Erreur chargement prix:', err));
+            .catch(err => console.error('Erreur updateAllPrices:', err));
+        });
+
+        // Met aussi à jour le résumé à droite
+        updateSummaryPrice();
+    }
+
+    // Calcul du prix total pour le résumé à droite
+    function updateSummaryPrice() {
+        const selectedType = document.querySelector('input[name="numtype"]:checked');
+        const prixPlaceholder = document.getElementById('prix-placeholder');
+        const prixDetail = document.getElementById('prix-detail');
+        
+        if (!selectedType || !dateDebut.value || !dateFin.value) {
+            prixPlaceholder.classList.remove('hidden');
+            prixDetail.classList.add('hidden');
+            return;
+        }
+        
+        const d1 = new Date(dateDebut.value);
+        const d2 = new Date(dateFin.value);
+        const nuits = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
+        if (nuits <= 0) return;
+
+        const nbChambres = calculerNbChambres();
+
+        fetch('/api/prix', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                numresort: {{ $resort->numresort }},
+                numtype: selectedType.value,
+                dateDebut: dateDebut.value,
+                dateFin: dateFin.value
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.prixParNuit) {
+                const prixNuitUnitaire = parseFloat(data.prixParNuit);
+                const prixTotal = prixNuitUnitaire * nbChambres * nuits;
+                const tva = prixTotal * 0.2;
+                const ht = prixTotal - tva;
+
+                prixPlaceholder.classList.add('hidden');
+                prixDetail.classList.remove('hidden');
+                
+                document.getElementById('recap-total-ht').textContent = ht.toFixed(2) + ' €';
+                document.getElementById('recap-tva').textContent = tva.toFixed(2) + ' €';
+                
+                const totalEl = document.getElementById('recap-total');
+                totalEl.textContent = prixTotal.toFixed(2) + ' €';
+                
+                // Mettre le total en vert si promo active sur la chambre sélectionnée
+                if (data.hasPromo) {
+                    totalEl.classList.remove('text-orange-500');
+                    totalEl.classList.add('text-green-600');
+                } else {
+                    totalEl.classList.remove('text-green-600');
+                    totalEl.classList.add('text-orange-500');
+                }
+            }
         });
     }
-    chargerTousLesPrix();
+    
+    // Initialisation
+    updateRecap();
+    updateAllPrices(); // Charge les prix au démarrage
 });
 </script>
 @endsection

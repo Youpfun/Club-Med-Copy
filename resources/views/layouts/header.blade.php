@@ -7,6 +7,11 @@
     <nav class="hidden md:flex items-center gap-x-6 px-4">
         <a href="{{ url('/resorts') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">Nos Resorts</a>
         <a href="{{ url('/clients') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">Clients (Admin)</a>
+        @auth
+            @if(Auth::user()->role === 'Directeur du Service Marketing')
+                <a href="{{ route('marketing.dashboard') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">Espace Marketing (Responsable Marketing)</a>
+            @endif
+        @endauth
     </nav>
 
     <div class="flex gap-x-4 items-center">

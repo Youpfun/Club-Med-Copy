@@ -16,8 +16,10 @@ class Tarifer extends Model
 
     protected $fillable = [
         'numtype',
+        'numresort',
         'numperiode',
         'prix',
+        'prix_promo',
     ];
 
     public function typeChambre()
@@ -28,5 +30,10 @@ class Tarifer extends Model
     public function periode()
     {
         return $this->belongsTo(Periode::class, 'numperiode', 'numperiode');
+    }
+
+    public function resort()
+    {
+        return $this->belongsTo(Resort::class, 'numresort', 'numresort');
     }
 }
