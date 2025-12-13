@@ -27,7 +27,6 @@ Route::get('/resort/{id}/types-activites', [ActiviteController::class, 'indexTyp
 Route::get('/resort/{id}/type/{typeId}/activites', [ActiviteController::class, 'indexActivitesParType'])->name('resort.activites.detail');
 Route::get('/resort/{id}/activites', [ActiviteController::class, 'index'])->name('resort.activites');
 
-// Signalement d'avis (accessible à tous les visiteurs)
 Route::post('/avis/{numavis}/signaler', [AvisController::class, 'report'])->name('avis.report');
 
 Route::get('/typeclubs', [TypeclubController::class, 'index']);
@@ -62,21 +61,17 @@ Route::middleware([
         return redirect('/');
     })->name('logout');
 
-    // Panier
     Route::get('/panier', [PanierController::class, 'index'])->name('cart.index');
     Route::get('/panier/{numreservation}', [PanierController::class, 'show'])->name('panier.show');
     Route::delete('/panier/remove/{numreservation}', [PanierController::class, 'remove'])->name('panier.remove');
 
-    // Réservations
     Route::get('/mes-reservations', [ReservationController::class, 'index'])->name('reservations.index');
     Route::get('/reservation/{numreservation}/details', [ReservationController::class, 'show'])->name('reservation.show');
-    // Étapes de réservation
     Route::get('/reservation/{numresort}/step1', [ReservationController::class, 'step1'])->name('reservation.step1');
     Route::get('/reservation/{numresort}/step2', [ReservationController::class, 'step2'])->name('reservation.step2');
     Route::get('/reservation/{numresort}/step3', [ReservationController::class, 'step3'])->name('reservation.step3');
     Route::post('/reservation/{numresort}/addToCart', [ReservationController::class, 'addToCart'])->name('reservation.addToCart');
     
-    // Routes for adding/modifying activities and participants (placeholder redirects)
     Route::get('/reservation/{id}/activities', function ($id) {
         return redirect("/reservation/{$id}/step3");
     })->name('reservation.activities');
@@ -84,15 +79,12 @@ Route::middleware([
         return redirect("/reservation/{$id}/step2");
     })->name('reservation.participants');
 
-    // Avis
     Route::get('/reservation/{id}/avis', [AvisController::class, 'create'])->name('reservation.review');
     Route::post('/avis', [AvisController::class, 'store'])->name('avis.store');
 
-    // Confirmation de séjour (Service Vente)
     Route::get('/stay-confirmation/{numreservation}', [StayConfirmationController::class, 'showConfirmationForm'])->name('stay-confirmation.form');
     Route::post('/stay-confirmation/{numreservation}', [StayConfirmationController::class, 'sendConfirmation'])->name('stay-confirmation.send');
 
-    // Tableau de bord Service Vente
     Route::prefix('vente')->middleware('vente')->group(function () {
         Route::get('/dashboard', [VenteController::class, 'dashboard'])->name('vente.dashboard');
         Route::get('/pending-partners', [VenteController::class, 'pendingPartnerValidation'])->name('vente.pending-partners');

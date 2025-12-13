@@ -35,7 +35,6 @@ class ReservationController extends Controller
             ->orderBy('reservation.datedebut', 'desc')
             ->get();
 
-        // Récupérer les réservations en attente (panier)
         $panierResorts = DB::table('reservation')
             ->join('resort', 'reservation.numresort', '=', 'resort.numresort') 
             ->join('pays', 'resort.codepays', '=', 'pays.codepays')
@@ -116,7 +115,6 @@ class ReservationController extends Controller
         $typeChambre = Typechambre::find($numtype);
         $transport = $numtransport ? Transport::find($numtransport) : null;
 
-        // Récupérer les activités à la carte du resort
         try {
             $activites = DB::table('activite')
                 ->join('activitealacarte', 'activite.numactivite', '=', 'activitealacarte.numactivite')
@@ -133,7 +131,6 @@ class ReservationController extends Controller
         $nbNuits = Carbon::parse($dateDebut)->diffInDays(Carbon::parse($dateFin));
         $nbPersonnes = $nbAdultes + $nbEnfants;
         
-        // Calculer le nombre de chambres nécessaires
         $capaciteMax = $typeChambre->capacitemax ?? 2;
         $nbChambres = ceil($nbPersonnes / $capaciteMax);
         
@@ -168,7 +165,6 @@ class ReservationController extends Controller
         $nbNuits = Carbon::parse($dateDebut)->diffInDays(Carbon::parse($dateFin));
         $nbPersonnes = $nbAdultes + $nbEnfants;
 
-        // Calculer le nombre de chambres nécessaires
         $typeChambre = Typechambre::find($numtype);
         $capaciteMax = $typeChambre->capacitemax ?? 2;
         $nbChambres = ceil($nbPersonnes / $capaciteMax);
@@ -209,7 +205,6 @@ class ReservationController extends Controller
             'numtype' => $numtype,
         ]);
 
-        // Stocker les activités dans la BDD
         foreach ($activites as $numactivite) {
             $activite = DB::table('activitealacarte')->where('numactivite', $numactivite)->first();
             if ($activite) {
@@ -223,7 +218,6 @@ class ReservationController extends Controller
             }
         }
 
-        // Stocker les détails des voyageurs en session (car colonnes absentes de la BDD)
         $reservationDetails = session('reservation_details', []);
         $reservationDetails[$numreservation] = [
             'nbAdultes' => $nbAdultes,
@@ -244,7 +238,6 @@ class ReservationController extends Controller
             return response()->json(['error' => 'Paramètres manquants'], 400);
         }
 
-        // Si pas de dates, retourner juste le prix par nuit (prix par défaut)
         if (!$dateDebut || !$dateFin) {
             $prixParNuit = $this->getPrixChambre($numtype, now()->format('Y-m-d'));
             return response()->json([
@@ -295,15 +288,14 @@ class ReservationController extends Controller
         $reservation = \App\Models\Reservation::with([
             'resort.pays', 
             'transport', 
-            'activites.activite', // Pour les activités payantes
-            'participants',       // AJOUTÉ : Pour la liste des gens
-            'paiements'           // AJOUTÉ : Pour l'historique financier (modèle Paiement)
+            'activites.activite',
+            'participants',
+            'paiements'
         ])
         ->where('user_id', $userId)
         ->where('numreservation', $numreservation)
         ->firstOrFail();
 
-        // Récupération manuelle du type de chambre via la table de liaison 'choisir'
         $typeChambre = DB::table('choisir')
             ->join('typechambre', 'choisir.numtype', '=', 'typechambre.numtype')
             ->where('choisir.numreservation', $numreservation)
