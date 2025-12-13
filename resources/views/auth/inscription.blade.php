@@ -28,6 +28,10 @@
     <form action="{{ route('inscription.store') }}" method="POST">
         @csrf
 
+        <div class="mb-4 text-right">
+            <p class="text-xs text-gray-500 italic">Les champs marqués d'un astérisque (*) sont obligatoires.</p>
+        </div>
+
         <div class="mb-6 flex gap-4">
             <label class="flex items-center cursor-pointer border px-4 py-3 rounded w-1/2 hover:bg-gray-50 {{ old('genre') == 'M' ? 'border-clubmed ring-1 ring-clubmed' : 'border-gray-300' }}">
                 <input type="radio" name="genre" value="M" class="mr-2" {{ old('genre') == 'M' ? 'checked' : '' }}>
@@ -97,11 +101,12 @@
             <div class="grid grid-cols-2 gap-6">
                 <div>
                     <label class="block text-xs font-bold mb-1">Mot de passe*</label>
-                    <input type="password" name="password" class="w-full border p-2 rounded text-sm" placeholder="••••••••" required>
+                    <input type="password" name="password" minlength="8" class="w-full border p-2 rounded text-sm" placeholder="••••••••" required>
+                    <p class="text-[10px] text-gray-500 mt-1">8 caractères minimum requis.</p>
                 </div>
                 <div>
                     <label class="block text-xs font-bold mb-1">Confirmer mot de passe*</label>
-                    <input type="password" name="password_confirmation" class="w-full border p-2 rounded text-sm" placeholder="••••••••" required>
+                    <input type="password" name="password_confirmation" minlength="8" class="w-full border p-2 rounded text-sm" placeholder="••••••••" required>
                 </div>
             </div>
         </div>
