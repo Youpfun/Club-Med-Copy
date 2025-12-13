@@ -287,4 +287,29 @@ class ReservationController extends Controller
 
         return $tarif ? $tarif->prix : 100;
     }
+
+    public function show($numreservation)
+    {
+        $userId = Auth::id();
+
+        $reservation = \App\Models\Reservation::with([
+            'resort.pays', 
+            'transport', 
+            'activites.activite', // Pour les activités payantes
+            'participants',       // AJOUTÉ : Pour la liste des gens
+            'paiements'           // AJOUTÉ : Pour l'historique financier (modèle Paiement)
+        ])
+        ->where('user_id', $userId)
+        ->where('numreservation', $numreservation)
+        ->firstOrFail();
+
+        // Récupération manuelle du type de chambre via la table de liaison 'choisir'
+        $typeChambre = DB::table('choisir')
+            ->join('typechambre', 'choisir.numtype', '=', 'typechambre.numtype')
+            ->where('choisir.numreservation', $numreservation)
+            ->select('typechambre.*')
+            ->first();
+
+        return view('reservation.show', compact('reservation', 'typeChambre'));
+    }
 }

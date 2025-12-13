@@ -56,6 +56,16 @@ class Reservation extends Model
         return $this->hasMany(ReservationActivite::class, 'numreservation', 'numreservation');
     }
 
+    public function participants()
+    {
+        return $this->hasMany(Participant::class, 'numreservation', 'numreservation');
+    }
+
+    public function paiements()
+    {
+        return $this->hasMany(Paiement::class, 'numreservation', 'numreservation');
+    }
+
     public function partenaires()
     {
         return $this->hasManyThrough(

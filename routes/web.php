@@ -69,7 +69,7 @@ Route::middleware([
 
     // Réservations
     Route::get('/mes-reservations', [ReservationController::class, 'index'])->name('reservations.index');
-    
+    Route::get('/reservation/{numreservation}/details', [ReservationController::class, 'show'])->name('reservation.show');
     // Étapes de réservation
     Route::get('/reservation/{numresort}/step1', [ReservationController::class, 'step1'])->name('reservation.step1');
     Route::get('/reservation/{numresort}/step2', [ReservationController::class, 'step2'])->name('reservation.step2');

@@ -155,12 +155,13 @@
                                 </div>
 
                                 <div class="mt-auto pt-6 border-t border-gray-100 flex flex-wrap gap-4">
+                                    <a href="{{ route('reservation.show', $res->numreservation) }}" class="flex-1 text-center px-6 py-3 bg-white border-2 border-[#113559] text-[#113559] hover:bg-gray-50 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                        Voir le détail
+                                    </a>
                                     <a href="{{ route('reservation.activities', ['id' => $res->numreservation]) }}" class="flex-1 text-center px-6 py-3 bg-[#113559] hover:bg-[#0e2a47] text-white rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-md">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                                         Ajouter des activités
-                                    </a>
-                                    <a href="{{ route('reservation.participants', ['id' => $res->numreservation]) }}" class="flex-1 text-center px-6 py-3 bg-white border-2 border-gray-200 hover:border-[#113559] text-[#113559] rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
-                                        Modifier participants
                                     </a>
                                 </div>
                             </div>
@@ -205,7 +206,17 @@
                             <p class="text-green-700 font-medium mb-2">Séjour en cours jusqu'au {{ \Carbon\Carbon::parse($res->datefin)->format('d/m') }}</p>
                             <p class="text-sm text-gray-600">Envie d'un soin au spa ou d'une excursion ? Réservez maintenant.</p>
                         </div>
-                        <div class="md:w-1/4 w-full">
+                        <div class="md:w-1/4 w-full flex flex-col gap-3">
+                            {{-- Bouton pour voir le détail --}}
+                            <a href="{{ route('reservation.show', $res->numreservation) }}" class="w-full block text-center px-6 py-4 bg-white border-2 border-[#113559] text-[#113559] hover:bg-gray-50 rounded-xl font-bold text-sm transition-colors shadow-sm flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                Voir le détail
+                            </a>
+
+                            {{-- Bouton activités --}}
                             <a href="{{ route('reservation.activities', ['id' => $res->numreservation]) }}" class="w-full block text-center px-6 py-4 bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] rounded-xl font-bold text-sm transition-colors shadow-sm">
                                 Activités à la carte
                             </a>
@@ -252,10 +263,16 @@
                                 {{ \Carbon\Carbon::parse($res->datedebut)->format('M Y') }} • {{ $res->nbpersonnes }} pers.
                             </p>
                             
-                            <a href="{{ route('reservation.review', ['id' => $res->numreservation]) }}" class="text-sm font-bold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
-                                Laisser un avis
-                            </a>
+                            <div class="flex flex-col gap-2">
+                                <a href="{{ route('reservation.show', $res->numreservation) }}" class="text-sm font-bold text-[#113559] hover:text-blue-800 hover:underline flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                    Revoir les détails
+                                </a>
+                                <a href="{{ route('reservation.review', ['id' => $res->numreservation]) }}" class="text-sm font-bold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
+                                    Laisser un avis
+                                </a>
+                            </div>
                         </div>
                     </div>
                 @endforeach
