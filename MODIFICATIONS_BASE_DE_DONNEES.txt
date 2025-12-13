@@ -286,20 +286,6 @@ Ajout dans $fillable:
 • 'resort_validation_token_used_at'
 
 
-================================================================================
-CONFIGURATION EMAIL
-================================================================================
-
-Fichier .env:
--------------
-MAIL_MAILER=smtp
-MAIL_HOST=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USERNAME=clubmedsae@gmail.com
-MAIL_PASSWORD=foqitpunksyhuubp
-MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS="clubmedsae@gmail.com"
-
 
 ================================================================================
 FIN DU DOCUMENT
