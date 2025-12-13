@@ -19,6 +19,8 @@
     @include('layouts.header')
 
     <main id="main" role="main" tabindex="-1">
+        
+        {{-- SECTION HERO --}}
         <section class="relative isolate px-4 py-12 lg:px-8 xl:px-16">
             <div class="mx-auto max-w-7xl">
                 <h1 class="font-serif text-4xl lg:text-5xl font-bold mb-4 text-[#113559]">Nos Resorts</h1>
@@ -26,66 +28,102 @@
             </div>
         </section>
 
+        {{-- SECTION FILTRES --}}
         <section class="px-4 lg:px-8 xl:px-16 mb-12">
             <div class="mx-auto max-w-7xl">
                 <form action="{{ url('/resorts') }}" method="GET" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+                    
+                    {{-- GRILLE DES FILTRES (Adaptée pour 5 éléments) --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-5">
+                        
+                        {{-- 1. COLLECTION --}}
                         <div class="relative">
-                            <label for="typeclub" class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Type de club</label>
-                            <select name="typeclub" id="typeclub" class="w-full h-12 px-4 py-2 border border-gray-300 rounded-full text-sm font-semibold text-gray-900 focus:outline-none focus:border-[#113559] focus:ring-1 focus:ring-[#113559] transition-colors cursor-pointer bg-white">
-                                <option value="">Tous les types</option>
-                                @foreach($typeclubs ?? [] as $id => $nom)
-                                    <option value="{{ $id }}" {{ request('typeclub') == $id ? 'selected' : '' }}>{{ $nom }}</option>
+                            <label for="regroupement" class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Collection</label>
+                            <select name="regroupement" id="regroupement" class="w-full h-12 px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-900 focus:outline-none focus:border-[#113559] cursor-pointer bg-white">
+                                <option value="">Toutes collections</option>
+                                @foreach($regroupementsList ?? [] as $id => $nom)
+                                    <option value="{{ $id }}" {{ request('regroupement') == $id ? 'selected' : '' }}>{{ $nom }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        
+
+                        {{-- 2. DESTINATION (Localisation) --}}
                         <div class="relative">
-                            <label for="localisation" class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Localisation</label>
-                            <select name="localisation" id="localisation" class="w-full h-12 px-4 py-2 border border-gray-300 rounded-full text-sm font-semibold text-gray-900 focus:outline-none focus:border-[#113559] focus:ring-1 focus:ring-[#113559] transition-colors cursor-pointer bg-white">
-                                <option value="">Toutes les localisations</option>
+                            <label for="localisation" class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Destination</label>
+                            <select name="localisation" id="localisation" class="w-full h-12 px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-900 focus:outline-none focus:border-[#113559] cursor-pointer bg-white">
+                                <option value="">Toutes destinations</option>
                                 @foreach($localisations ?? [] as $id => $nom)
                                     <option value="{{ $id }}" {{ request('localisation') == $id ? 'selected' : '' }}>{{ $nom }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        
+
+                        {{-- 3. PAYS (Nouveau filtre) --}}
                         <div class="relative">
                             <label for="pays" class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Pays</label>
-                            <select name="pays" id="pays" class="w-full h-12 px-4 py-2 border border-gray-300 rounded-full text-sm font-semibold text-gray-900 focus:outline-none focus:border-[#113559] focus:ring-1 focus:ring-[#113559] transition-colors cursor-pointer bg-white">
+                            <select name="pays" id="pays" class="w-full h-12 px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-900 focus:outline-none focus:border-[#113559] cursor-pointer bg-white">
                                 <option value="">Tous les pays</option>
                                 @foreach($paysList ?? [] as $code => $nom)
                                     <option value="{{ $code }}" {{ request('pays') == $code ? 'selected' : '' }}>{{ $nom }}</option>
                                 @endforeach
                             </select>
                         </div>
+
+                        {{-- 4. ACTIVITÉ --}}
+                        <div class="relative">
+                            <label for="activite" class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Activité</label>
+                            <select name="activite" id="activite" class="w-full h-12 px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-900 focus:outline-none focus:border-[#113559] cursor-pointer bg-white">
+                                <option value="">Toutes activités</option>
+                                @foreach($activitesList ?? [] as $id => $nom)
+                                    <option value="{{ $id }}" {{ request('activite') == $id ? 'selected' : '' }}>{{ $nom }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- 5. TYPE DE SÉJOUR --}}
+                        <div class="relative">
+                            <label for="typeclub" class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Type de séjour</label>
+                            <select name="typeclub" id="typeclub" class="w-full h-12 px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-900 focus:outline-none focus:border-[#113559] cursor-pointer bg-white">
+                                <option value="">Tous les types</option>
+                                @foreach($typeclubs ?? [] as $id => $nom)
+                                    <option value="{{ $id }}" {{ request('typeclub') == $id ? 'selected' : '' }}>{{ $nom }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                     
-                    <div class="flex gap-3 pt-2 border-t border-gray-100 mt-4">
-                        <button type="submit" class="px-8 py-3 bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] rounded-full font-bold text-sm transition-colors shadow-md">
-                            Rechercher
-                        </button>
-                        @if(request('typeclub') || request('localisation') || request('pays'))
-                            <a href="{{ url('/resorts') }}" class="px-8 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full font-bold text-sm transition-colors">
-                                Réinitialiser
-                            </a>
-                        @endif
+                    {{-- SECTION TRI ET BOUTONS --}}
+                    <div class="flex flex-col md:flex-row justify-between items-center pt-4 border-t border-gray-100 mt-4 gap-4">
+                        <div class="flex items-center gap-3 w-full md:w-auto">
+                            <label for="tri" class="text-sm font-bold text-gray-600 whitespace-nowrap">Trier par :</label>
+                            <select name="tri" id="tri" class="h-10 pl-3 pr-8 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#113559] cursor-pointer bg-gray-50">
+                                <option value="nom" {{ request('tri') == 'nom' ? 'selected' : '' }}>Nom (A-Z)</option>
+                                <option value="prix_asc" {{ request('tri') == 'prix_asc' ? 'selected' : '' }}>Prix croissant</option>
+                                <option value="prix_desc" {{ request('tri') == 'prix_desc' ? 'selected' : '' }}>Prix décroissant</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-3 w-full md:w-auto justify-end">
+                            @if(request()->anyFilled(['typeclub', 'localisation', 'pays', 'activite', 'regroupement', 'tri']))
+                                <a href="{{ url('/resorts') }}" class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full font-bold text-sm transition-colors">Réinitialiser</a>
+                            @endif
+                            <button type="submit" class="px-8 py-3 bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] rounded-full font-bold text-sm transition-colors shadow-md">Rechercher</button>
+                        </div>
                     </div>
                 </form>
             </div>
         </section>
 
-        @if(request('typeclub') || request('localisation') || request('pays'))
+        @if(request()->anyFilled(['typeclub', 'localisation', 'pays', 'activite', 'regroupement']))
             <section class="px-4 lg:px-8 xl:px-16 mb-6">
                 <div class="mx-auto max-w-7xl">
                     <p class="text-sm text-gray-600 bg-blue-50 inline-block px-4 py-2 rounded-full">
-                        {{-- Attention: avec paginate, count($resorts) donne le nombre sur la page, $resorts->total() donne le total --}}
-                        <span class="font-bold text-[#113559]">{{ $resorts->total() }}</span> resort(s) trouvé(s) correspondant à votre recherche.
+                        <span class="font-bold text-[#113559]">{{ $resorts->total() }}</span> resort(s) trouvé(s).
                     </p>
                 </div>
             </section>
         @endif
 
+        {{-- LISTE DES RESORTS --}}
         <section class="px-4 lg:px-8 xl:px-16 mb-20">
             <div class="mx-auto max-w-7xl">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
@@ -100,17 +138,14 @@
 
                             <div class="relative h-64 w-full overflow-hidden bg-gray-200">
                                 @if(file_exists($fullPath))
-                                    <img src="{{ asset($imagePath) }}" 
-                                         alt="{{ $resort->nomresort }}" 
-                                         class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105">
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
+                                    <img src="{{ asset($imagePath) }}" alt="{{ $resort->nomresort }}" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
                                 @else
                                     <div class="h-full w-full bg-gradient-to-br from-slate-100 to-slate-200 flex flex-col items-center justify-center text-slate-400 p-4">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
                                         <span class="text-xs text-center font-medium">Image indisponible</span>
-                                        <span class="text-[10px] text-slate-300 mt-1">{{ $imageName }}</span>
                                     </div>
                                 @endif
 
@@ -124,32 +159,49 @@
                             </div>
 
                             <div class="relative p-6 flex flex-col flex-grow">
-                                <a href="/ficheresort/{{ $resort->numresort }}" class="flex flex-col mb-2">
-                                    <h3 class="font-serif text-2xl font-bold text-[#113559] mb-1 group-hover:text-blue-600 transition-colors">
-                                        {{ $resort->nomresort }}
-                                    </h3>
-                                    
-                                    <div class="flex items-center justify-between mb-4">
-                                        <div class="flex items-center gap-1">
-                                            <span class="font-bold text-xl text-[#113559]">{{ $resort->nbtridents }} 🔱</span>
-                                        </div>
+                                <a href="/ficheresort/{{ $resort->numresort }}" class="block mb-4">
+                                    {{-- TITRE À GAUCHE - TRIDENTS À DROITE --}}
+                                    <div class="flex justify-between items-start gap-2">
+                                        <h3 class="font-serif text-2xl font-bold text-[#113559] group-hover:text-blue-600 transition-colors leading-tight">
+                                            {{ $resort->nomresort }}
+                                        </h3>
+                                        <span class="font-bold text-xl text-[#113559] whitespace-nowrap shrink-0">
+                                            {{ $resort->nbtridents }} 🔱
+                                        </span>
                                     </div>
                                 </a>
                                 
-                                <div class="grid grid-cols-2 gap-4 text-sm mb-6 border-y border-gray-100 py-4">
-                                    <div class="flex flex-col">
-                                        <span class="text-gray-400 text-xs uppercase font-semibold">Avis Clients</span>
-                                        <div class="flex items-center gap-1 mt-1">
-                                            <span class="font-bold text-gray-900 text-lg">{{ $resort->moyenneavis }}</span>
-                                            <span class="text-yellow-400 text-lg">★</span>
-                                            <span class="text-gray-400 text-xs">/ 5</span>
+                                {{-- GRILLE 3 COLONNES AVEC PRIX DYNAMIQUE --}}
+                                <div class="grid grid-cols-3 divide-x divide-gray-100 border-y border-gray-100 py-4 mb-6">
+                                    {{-- 1. AVIS --}}
+                                    <div class="flex flex-col items-center justify-center px-1">
+                                        <span class="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">Avis</span>
+                                        <div class="flex items-center gap-1">
+                                            <span class="font-bold text-[#113559] text-lg leading-none">{{ $resort->moyenneavis ?? '-' }}</span>
+                                            <span class="text-yellow-400 text-sm">★</span>
                                         </div>
                                     </div>
-                                    <div class="flex flex-col border-l border-gray-100 pl-4">
-                                        <span class="text-gray-400 text-xs uppercase font-semibold">Chambres</span>
-                                        <div class="flex items-center gap-1 mt-1">
-                                            <span class="font-bold text-gray-900 text-lg">{{ $resort->nbchambrestotal }}</span>
-                                            <span class="text-xs text-gray-500">disp.</span>
+                                    
+                                    {{-- 2. CHAMBRES --}}
+                                    <div class="flex flex-col items-center justify-center px-1">
+                                        <span class="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">Chambres</span>
+                                        <div class="flex items-center">
+                                            <span class="font-bold text-[#113559] text-lg leading-none">{{ $resort->nbchambrestotal }}</span>
+                                        </div>
+                                    </div>
+
+                                    {{-- 3. PRIX DYNAMIQUE --}}
+                                    <div class="flex flex-col items-center justify-center px-1">
+                                        <span class="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">Prix</span>
+                                        <div class="flex flex-col items-center">
+                                            @if(isset($resort->min_price) && $resort->min_price > 0)
+                                                <span class="font-bold text-[#113559] text-lg leading-none">
+                                                    {{ number_format($resort->min_price, 0, ',', ' ') }} €
+                                                </span>
+                                                <span class="text-[10px] text-gray-500 font-medium">/ par nuit</span>
+                                            @else
+                                                <span class="font-bold text-[#113559] text-sm leading-none">Sur devis</span>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -170,7 +222,6 @@
                     @endforeach
                 </div>
 
-                {{-- Pagination --}}
                 @if(method_exists($resorts, 'links'))
                     <div class="mt-10 flex justify-center">
                         {{ $resorts->links() }}
