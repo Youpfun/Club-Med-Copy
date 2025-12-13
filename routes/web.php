@@ -42,6 +42,11 @@ Route::get('verify/otp', [TwoFactorController::class, 'index'])->name('2fa.verif
 Route::post('verify/otp', [TwoFactorController::class, 'store'])->name('2fa.store');
 Route::post('verify/resend', [TwoFactorController::class, 'resend'])->name('2fa.resend');
 
+Route::middleware(['auth', 'marketing'])->prefix('marketing')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\MarketingController::class, 'index'])->name('marketing.dashboard');
+    Route::post('/update-price', [App\Http\Controllers\MarketingController::class, 'updatePrice'])->name('marketing.update_price');
+});
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
@@ -54,6 +59,8 @@ Route::middleware([
 
     Route::put('/user/update-custom', [UserController::class, 'updateCustom'])->name('user.update.custom');
 
+    Route::post('/api/prix', [ResortController::class, 'getPrix'])->name('api.prix');
+    
     Route::post('/logout', function () {
         Auth::guard('web')->logout();
         request()->session()->invalidate();
