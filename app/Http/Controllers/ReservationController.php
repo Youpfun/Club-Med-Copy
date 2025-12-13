@@ -5,11 +5,17 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Models\Resort;
 use App\Models\Typechambre;
 use App\Models\Transport;
 use App\Models\Activite;
+use App\Models\Partenaire;
+use App\Mail\PartnerValidationMail;
+use App\Mail\ResortValidationMail;
+use App\Mail\PartnerConfirmationMail;
 
 class ReservationController extends Controller
 {
@@ -207,15 +213,47 @@ class ReservationController extends Controller
 
         foreach ($activites as $numactivite) {
             $activite = DB::table('activitealacarte')->where('numactivite', $numactivite)->first();
+            $partenaireRecord = DB::table('fourni')->where('numactivite', $numactivite)->first();
+            $numpartenaire = $partenaireRecord ? $partenaireRecord->numpartenaire : null;
+
             if ($activite) {
                 DB::table('reservation_activite')->insert([
                     'numreservation' => $numreservation,
                     'numactivite' => $numactivite,
                     'prix_unitaire' => $activite->prixmin,
                     'quantite' => $nbPersonnes,
+                    'numpartenaire' => $numpartenaire,
+                    'partenaire_validation_status' => 'pending',
                     'created_at' => now(),
                 ]);
             }
+        }
+
+        // Envoyer un email de validation au resort au lieu des partenaires
+        $reservationLoaded = \App\Models\Reservation::with(['resort', 'user', 'activites.activite', 'chambres.typechambre'])->find($numreservation);
+        
+        // Générer un token unique pour le resort
+        $resortToken = (string) Str::uuid();
+        $expiresAt = now()->addDays(3);
+
+        // Mettre à jour la réservation avec le token resort
+        DB::table('reservation')
+            ->where('numreservation', $numreservation)
+            ->update([
+                'resort_validation_token' => $resortToken,
+                'resort_validation_token_expires_at' => $expiresAt,
+                'resort_validation_status' => 'pending',
+            ]);
+
+        // Envoyer l'email au resort
+        $resort = $reservationLoaded->resort;
+        $resortEmail = $resort->emailresort ?? config('mail.from.address'); // Email du resort ou email par défaut
+        $resortLink = url('/resort/validate/' . $resortToken);
+
+        try {
+            Mail::to($resortEmail)->send(new ResortValidationMail($reservationLoaded, $resort, $resortLink));
+        } catch (\Exception $e) {
+            \Log::error('Envoi email resort échec: ' . $e->getMessage());
         }
 
         $reservationDetails = session('reservation_details', []);

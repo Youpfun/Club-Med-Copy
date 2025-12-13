@@ -1,0 +1,306 @@
+================================================================================
+    MODIFICATIONS DE LA BASE DE DONNÉES - CLUB MÉDITERRANÉE
+    Date: 13 Décembre 2025
+================================================================================
+
+================================================================================
+1. TABLE: reservation_activite (Validation des partenaires)
+================================================================================
+
+COLONNES AJOUTÉES:
+------------------
+• numpartenaire (bigint NOT NULL)
+  - Clé étrangère vers la table 'partenaire'
+  - Permet d'identifier quel partenaire fournit l'activité
+
+• partenaire_validation_status (varchar DEFAULT 'pending')
+  - Valeurs possibles: 'pending', 'accepted', 'refused'
+  - Statut de validation du partenaire pour cette activité
+
+• partenaire_validated_at (timestamp NULL)
+  - Date et heure de validation par le partenaire
+
+• validation_token (varchar NULL)
+  - Token UUID unique pour la validation par email
+  - Permet au partenaire de valider via un lien sécurisé
+
+• validation_token_expires_at (timestamp NULL)
+  - Date d'expiration du token (3 jours après génération)
+
+• validation_token_used_at (timestamp NULL)
+  - Date d'utilisation du token (évite la double validation)
+
+MIGRATIONS ASSOCIÉES:
+---------------------
+- 2025_12_12_000002_add_numpartenaire_to_reservation_activite_table.php
+- 2025_12_13_000000_add_partenaire_validation_to_reservation_activite.php
+- 2025_12_13_210000_add_numpartenaire_back_to_reservation_activite.php
+
+
+================================================================================
+2. TABLE: reservation (Validation des resorts)
+================================================================================
+
+COLONNES AJOUTÉES:
+------------------
+• resort_validation_status (varchar DEFAULT 'pending')
+  - Valeurs possibles: 'pending', 'accepted', 'refused'
+  - Statut de validation du resort pour la réservation
+
+• resort_validated_at (timestamp NULL)
+  - Date et heure de validation par le resort
+
+• resort_validation_token (varchar NULL UNIQUE)
+  - Token UUID unique pour validation par email
+  - Contrainte UNIQUE pour éviter les doublons
+
+• resort_validation_token_expires_at (timestamp NULL)
+  - Date d'expiration du token (3 jours)
+
+• resort_validation_token_used_at (timestamp NULL)
+  - Date d'utilisation du token
+
+INDEX AJOUTÉS:
+--------------
+• Index sur 'numresort' - Optimise les recherches par resort
+• Index sur 'statut' - Optimise les filtres par statut
+• Index sur 'datedebut' - Optimise les recherches par date de début
+• Index sur 'datefin' - Optimise les recherches par date de fin
+
+MIGRATIONS ASSOCIÉES:
+---------------------
+- 2025_12_13_211422_add_resort_validation_to_reservation_table.php
+- 2025_12_13_185657_add_indexes_to_reservation_table.php
+
+
+================================================================================
+3. NOUVELLE TABLE: reservation_confirmations
+================================================================================
+
+STRUCTURE:
+----------
+• id (bigserial PRIMARY KEY) - Identifiant auto-incrémenté
+• numreservation (bigint NOT NULL) - Référence à la réservation confirmée
+• user_id (bigint NOT NULL) - ID du membre du service vente qui confirme
+• notify_resort (boolean DEFAULT true) - Indique si le resort a été notifié
+• notify_partenaires (boolean DEFAULT true) - Indique si les partenaires ont été notifiés
+• confirmation_message (text NULL) - Message personnalisé optionnel
+• confirmed_at (timestamp NOT NULL) - Date et heure de confirmation
+• created_at (timestamp)
+• updated_at (timestamp)
+
+OBJECTIF:
+---------
+Historique complet des confirmations de réservations par le service vente
+
+MIGRATION ASSOCIÉE:
+-------------------
+- 2025_12_12_000001_create_reservation_confirmations_table.php
+
+
+================================================================================
+4. NOUVELLE TABLE: reservation_rejections
+================================================================================
+
+STRUCTURE:
+----------
+• id (bigserial PRIMARY KEY) - Identifiant auto-incrémenté
+• numreservation (bigint NOT NULL) - Référence à la réservation rejetée
+• user_id (bigint NOT NULL) - ID du membre du service vente qui rejette
+• rejection_reason (text NOT NULL) - Raison obligatoire du rejet
+• rejected_at (timestamp NOT NULL) - Date et heure du rejet
+• created_at (timestamp)
+• updated_at (timestamp)
+
+OBJECTIF:
+---------
+Historique et justification des rejets de réservations
+
+MIGRATION ASSOCIÉE:
+-------------------
+- 2025_12_12_000003_create_reservation_rejections_table.php
+
+
+================================================================================
+WORKFLOW DES DONNÉES
+================================================================================
+
+ANCIEN SYSTÈME:
+--------------
+Client → Réservation créée → Confirmation immédiate par service vente
+
+NOUVEAU SYSTÈME (Workflow complet):
+-----------------------------------
+ÉTAPE 1: Création de la réservation
+  ↓ Client crée une réservation
+  ↓ reservation.resort_validation_status = 'pending'
+  ↓ resort_validation_token généré (UUID)
+  ↓ Email envoyé au resort avec lien de validation
+
+ÉTAPE 2: Validation du resort
+  ↓ Resort clique sur le lien dans l'email
+  ↓ Resort accepte ou refuse la réservation
+  ↓ SI ACCEPTÉ:
+      - reservation.resort_validation_status = 'accepted'
+      - reservation.resort_validated_at = timestamp actuel
+      - Emails automatiquement envoyés aux partenaires
+  ↓ SI REFUSÉ:
+      - reservation.resort_validation_status = 'refused'
+      - Processus arrêté
+
+ÉTAPE 3: Validation des partenaires (si resort accepté)
+  ↓ Partenaires reçoivent emails avec tokens uniques
+  ↓ reservation_activite.partenaire_validation_status = 'pending'
+  ↓ Chaque partenaire valide ses activités
+  ↓ reservation_activite.partenaire_validation_status = 'accepted' ou 'refused'
+  ↓ reservation_activite.partenaire_validated_at = timestamp
+
+ÉTAPE 4: Confirmation finale par service vente
+  ↓ Service vente vérifie:
+      - resort_validation_status = 'accepted'
+      - Tous les partenaire_validation_status = 'accepted'
+  ↓ SI TOUT OK:
+      - reservation.statut = 'confirmee'
+      - Enregistrement créé dans reservation_confirmations
+      - Emails de confirmation envoyés au client, resort, partenaires
+
+
+================================================================================
+SÉCURITÉ ET VALIDATION
+================================================================================
+
+TOKENS DE VALIDATION:
+---------------------
+• Format: UUID (ex: "a1c793fe-ca96-4286-afd8-584153d5a2a8")
+• Durée de vie: 3 jours
+• Usage unique: validation_token_used_at empêche la réutilisation
+• Liens publics mais sécurisés (pas d'authentification requise)
+
+CONTRAINTES:
+------------
+• Les partenaires ne peuvent valider que si le resort a d'abord accepté
+• Le service vente ne peut confirmer que si resort + partenaires ont accepté
+• Un token expiré ou déjà utilisé ne peut plus être utilisé
+
+STATUTS POSSIBLES:
+------------------
+• 'pending' - En attente de validation (défaut)
+• 'accepted' - Validé et accepté
+• 'refused' - Refusé
+
+
+================================================================================
+DONNÉES EXISTANTES
+================================================================================
+
+IMPACT SUR LES DONNÉES:
+-----------------------
+• Toutes les réservations existantes conservées
+• Nouvelles colonnes avec valeurs par défaut:
+  - resort_validation_status = 'pending'
+  - partenaire_validation_status = 'pending'
+  - Tous les timestamps = NULL
+
+COMPATIBILITÉ:
+--------------
+• Les anciennes réservations (avant modification) peuvent être:
+  - Marquées manuellement comme validées pour test
+  - Laissées en 'pending' sans impact sur le fonctionnement
+
+
+================================================================================
+FICHIERS DE CODE CRÉÉS/MODIFIÉS
+================================================================================
+
+NOUVEAUX CONTRÔLEURS:
+--------------------
+• app/Http/Controllers/ResortValidationController.php
+  - Gère la validation par le resort (affichage et soumission)
+
+• app/Http/Controllers/PartnerValidationController.php
+  - Gère la validation par les partenaires
+
+CONTRÔLEURS MODIFIÉS:
+---------------------
+• app/Http/Controllers/ReservationController.php
+  - Envoi email au resort au lieu des partenaires lors de la création
+  
+• app/Http/Controllers/StayConfirmationController.php
+  - Vérification des statuts resort + partenaires avant confirmation
+  
+• app/Http/Controllers/VenteController.php
+  - Affichage des statuts de validation dans le dashboard
+
+NOUVEAUX EMAILS:
+----------------
+• app/Mail/ResortValidationMail.php - Email de demande de validation au resort
+• app/Mail/ResortConfirmationMail.php - Email de confirmation finale au resort
+• app/Mail/PartnerValidationMail.php - Email de demande de validation aux partenaires
+• app/Mail/PartnerConfirmationMail.php - Email de confirmation finale aux partenaires
+
+NOUVELLES VUES:
+---------------
+• resources/views/resort/validation.blade.php - Page de validation resort
+• resources/views/resort/validation-result.blade.php - Résultat validation resort
+• resources/views/resort/validation-error.blade.php - Erreur validation resort
+• resources/views/partner/validation.blade.php - Page de validation partenaire
+• resources/views/emails/resort_validation.blade.php - Template email resort
+• resources/views/emails/resort_confirmation.blade.php - Template confirmation resort
+• resources/views/emails/partner_validation.blade.php - Template email partenaire
+• resources/views/emails/partner_confirmation.blade.php - Template confirmation partenaire
+
+VUES MODIFIÉES:
+---------------
+• resources/views/stay-confirmation/form.blade.php
+  - Affichage des statuts resort et partenaires
+  - Blocage du bouton de confirmation si validations manquantes
+
+• resources/views/vente/dashboard.blade.php
+  - Affichage des statuts de validation pour chaque réservation
+
+
+================================================================================
+ROUTES AJOUTÉES
+================================================================================
+
+ROUTES PUBLIQUES (sécurisées par token):
+----------------------------------------
+GET  /resort/validate/{token}    - Affichage du formulaire de validation resort
+POST /resort/validate/{token}    - Soumission de la validation resort
+
+GET  /partner/validate/{token}   - Affichage du formulaire de validation partenaire  
+POST /partner/validate/{token}   - Soumission de la validation partenaire
+
+
+================================================================================
+MODÈLE LARAVEL MODIFIÉ
+================================================================================
+
+app/Models/Reservation.php:
+---------------------------
+Ajout dans $fillable:
+• 'resort_validation_status'
+• 'resort_validated_at'
+• 'resort_validation_token'
+• 'resort_validation_token_expires_at'
+• 'resort_validation_token_used_at'
+
+
+================================================================================
+CONFIGURATION EMAIL
+================================================================================
+
+Fichier .env:
+-------------
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=clubmedsae@gmail.com
+MAIL_PASSWORD=foqitpunksyhuubp
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS="clubmedsae@gmail.com"
+
+
+================================================================================
+FIN DU DOCUMENT
+================================================================================

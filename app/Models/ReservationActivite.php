@@ -13,6 +13,12 @@ class ReservationActivite extends Model
         'numactivite',
         'prix_unitaire',
         'quantite',
+        'numpartenaire',
+        'partenaire_validation_status',
+        'partenaire_validated_at',
+        'validation_token',
+        'validation_token_expires_at',
+        'validation_token_used_at',
     ];
 
     public $timestamps = false;
@@ -20,6 +26,9 @@ class ReservationActivite extends Model
     protected $casts = [
         'prix_unitaire' => 'decimal:2',
         'quantite' => 'integer',
+        'partenaire_validated_at' => 'datetime',
+        'validation_token_expires_at' => 'datetime',
+        'validation_token_used_at' => 'datetime',
     ];
 
     public function reservation()

@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use App\Models\Reservation;
 use App\Models\ReservationRejection;
+use App\Mail\PartnerConfirmationMail;
 
 class VenteController extends Controller
 {
@@ -16,10 +18,26 @@ class VenteController extends Controller
             abort(403, 'Accès réservé au service vente');
         }
 
-        $reservationsPendingConfirmation = Reservation::with(['resort', 'user', 'activites'])
+        $reservationsPendingConfirmation = Reservation::with(['resort', 'user', 'activites.activite'])
             ->whereIn('statut', ['en_attente', 'payee'])
             ->orderBy('datedebut', 'asc')
             ->paginate(15);
+
+        // Enrichir chaque réservation avec les statuts partenaires
+        foreach ($reservationsPendingConfirmation as $reservation) {
+            $partenairesStatus = DB::table('reservation_activite')
+                ->join('partenaire', 'reservation_activite.numpartenaire', '=', 'partenaire.numpartenaire')
+                ->where('reservation_activite.numreservation', $reservation->numreservation)
+                ->whereNotNull('reservation_activite.numpartenaire')
+                ->select(
+                    'partenaire.nompartenaire',
+                    'reservation_activite.partenaire_validation_status',
+                    'reservation_activite.partenaire_validated_at'
+                )
+                ->get();
+            
+            $reservation->partenaires_status = $partenairesStatus;
+        }
 
         $confirmedIds = DB::table('reservation_confirmations')
             ->orderBy('confirmed_at', 'desc')
@@ -52,21 +70,6 @@ class VenteController extends Controller
             'confirmedReservations',
             'stats'
         ));
-    }
-
-    public function pendingPartnerValidation()
-    {
-        if (!Auth::user() || (strpos(strtolower(Auth::user()->role ?? ''), 'vente') === false)) {
-            abort(403, 'Accès réservé au service vente');
-        }
-
-        $reservations = Reservation::with(['resort', 'user', 'activites', 'activites.activite'])
-            ->where('statut', '!=', 'confirmee')
-            ->whereHas('activites')
-            ->orderBy('datedebut', 'asc')
-            ->paginate(15);
-
-        return view('vente.pending-partners', compact('reservations'));
     }
 
     public function showRejectForm($numreservation)
@@ -128,5 +131,44 @@ class VenteController extends Controller
             DB::rollBack();
             return back()->with('error', 'Erreur lors du rejet de la réservation: ' . $e->getMessage());
         }
+    }
+
+    public function confirmReservation($numreservation)
+    {
+        if (!Auth::user() || (strpos(strtolower(Auth::user()->role ?? ''), 'vente') === false)) {
+            abort(403, 'Accès réservé au service vente');
+        }
+
+        $reservation = Reservation::with(['resort', 'user', 'activites'])->findOrFail($numreservation);
+
+        // Vérifier que toutes les activités partenaires sont acceptées
+        $pending = DB::table('reservation_activite')
+            ->where('numreservation', $numreservation)
+            ->where('partenaire_validation_status', 'pending')
+            ->count();
+
+        if ($pending > 0) {
+            return back()->with('error', 'Tous les partenaires n\'ont pas encore répondu.');
+        }
+
+        $reservation->update(['statut' => 'confirmee']);
+
+        $partenaires = DB::table('reservation_activite')
+            ->join('partenaire', 'reservation_activite.numpartenaire', '=', 'partenaire.numpartenaire')
+            ->where('reservation_activite.numreservation', $numreservation)
+            ->whereNotNull('reservation_activite.numpartenaire')
+            ->distinct()
+            ->select('partenaire.*')
+            ->get();
+
+        foreach ($partenaires as $partenaire) {
+            try {
+                Mail::to($partenaire->emailpartenaire)->send(new PartnerConfirmationMail($reservation, $partenaire));
+            } catch (\Exception $e) {
+                \Log::error('Envoi email confirmation partenaire échec: ' . $e->getMessage());
+            }
+        }
+
+        return back()->with('success', 'Réservation confirmée et partenaires notifiés.');
     }
 }

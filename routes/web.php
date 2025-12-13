@@ -16,6 +16,8 @@ use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\AvisController;
 use App\Http\Controllers\StayConfirmationController;
 use App\Http\Controllers\VenteController;
+use App\Http\Controllers\PartnerValidationController;
+use App\Http\Controllers\ResortValidationController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -87,9 +89,17 @@ Route::middleware([
 
     Route::prefix('vente')->middleware('vente')->group(function () {
         Route::get('/dashboard', [VenteController::class, 'dashboard'])->name('vente.dashboard');
-        Route::get('/pending-partners', [VenteController::class, 'pendingPartnerValidation'])->name('vente.pending-partners');
         Route::get('/reject-reservation/{numreservation}', [VenteController::class, 'showRejectForm'])->name('vente.reject-form');
         Route::post('/reject-reservation/{numreservation}', [VenteController::class, 'rejectReservation'])->name('vente.reject');
+        Route::post('/confirm-reservation/{numreservation}', [VenteController::class, 'confirmReservation'])->name('vente.confirm');
     });
 
 });
+
+// Routes partenaires (pas d'auth obligatoire, sécurisées par token)
+Route::get('/partner/validate/{token}', [PartnerValidationController::class, 'show']);
+Route::post('/partner/validate/{token}', [PartnerValidationController::class, 'respond']);
+
+// Routes resort (pas d'auth obligatoire, sécurisées par token)
+Route::get('/resort/validate/{token}', [ResortValidationController::class, 'show']);
+Route::post('/resort/validate/{token}', [ResortValidationController::class, 'respond']);

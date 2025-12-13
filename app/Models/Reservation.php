@@ -24,6 +24,11 @@ class Reservation extends Model
         'prixtotal',
         'datedebut',
         'datefin',
+        'resort_validation_status',
+        'resort_validated_at',
+        'resort_validation_token',
+        'resort_validation_token_expires_at',
+        'resort_validation_token_used_at',
     ];
 
     protected $casts = [

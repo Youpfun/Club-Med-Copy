@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Mail;
 use App\Models\Reservation;
 use App\Models\Partenaire;
 use App\Mail\StayConfirmationMail;
+use App\Mail\PartnerConfirmationMail;
+use App\Mail\ResortConfirmationMail;
 
 class StayConfirmationController extends Controller
 {
@@ -36,9 +38,41 @@ class StayConfirmationController extends Controller
 
         $partenaires = $partenaires->unique('numpartenaire');
 
+        // Récupérer les statuts de validation des partenaires
+        $partenairesStatus = DB::table('reservation_activite')
+            ->join('partenaire', 'reservation_activite.numpartenaire', '=', 'partenaire.numpartenaire')
+            ->where('reservation_activite.numreservation', $numreservation)
+            ->whereNotNull('reservation_activite.numpartenaire')
+            ->select(
+                'partenaire.numpartenaire',
+                'partenaire.nompartenaire',
+                'reservation_activite.partenaire_validation_status',
+                'reservation_activite.partenaire_validated_at'
+            )
+            ->get();
+
+        // Vérifier si tous les partenaires ont accepté
+        $allPartnersAccepted = $partenairesStatus->isNotEmpty() && 
+                               $partenairesStatus->every(function($p) {
+                                   return $p->partenaire_validation_status === 'accepted';
+                               });
+        
+        $hasRefusedPartners = $partenairesStatus->contains(function($p) {
+            return $p->partenaire_validation_status === 'refused';
+        });
+
+        // Vérifier le statut de validation du resort
+        $resortValidated = $reservation->resort_validation_status === 'accepted';
+        $resortRefused = $reservation->resort_validation_status === 'refused';
+
         return view('stay-confirmation.form', [
             'reservation' => $reservation,
             'partenaires' => $partenaires,
+            'partenairesStatus' => $partenairesStatus,
+            'allPartnersAccepted' => $allPartnersAccepted,
+            'hasRefusedPartners' => $hasRefusedPartners,
+            'resortValidated' => $resortValidated,
+            'resortRefused' => $resortRefused,
         ]);
     }
 
@@ -46,6 +80,40 @@ class StayConfirmationController extends Controller
     {
         if (!$this->isVenteMember()) {
             abort(403, 'Seul le service vente peut confirmer les séjours');
+        }
+
+        $reservation = Reservation::findOrFail($numreservation);
+
+        // Vérifier que le resort a validé
+        if ($reservation->resort_validation_status !== 'accepted') {
+            if ($reservation->resort_validation_status === 'refused') {
+                return back()->with('error', 'Impossible de confirmer : le resort a refusé cette réservation.');
+            }
+            return back()->with('error', 'Impossible de confirmer : le resort n\'a pas encore validé cette réservation.');
+        }
+
+        // Vérifier que tous les partenaires ont validé
+        $partenairesStatus = DB::table('reservation_activite')
+            ->where('numreservation', $numreservation)
+            ->whereNotNull('numpartenaire')
+            ->get();
+
+        if ($partenairesStatus->isNotEmpty()) {
+            $hasRefused = $partenairesStatus->contains(function($p) {
+                return $p->partenaire_validation_status === 'refused';
+            });
+
+            $hasPending = $partenairesStatus->contains(function($p) {
+                return $p->partenaire_validation_status === 'pending';
+            });
+
+            if ($hasRefused) {
+                return back()->with('error', 'Impossible de confirmer : un ou plusieurs partenaires ont refusé les dates.');
+            }
+
+            if ($hasPending) {
+                return back()->with('error', 'Impossible de confirmer : tous les partenaires n\'ont pas encore validé les dates.');
+            }
         }
 
         $request->validate([
@@ -71,26 +139,30 @@ class StayConfirmationController extends Controller
                 $resortEmail = $this->getResortEmail($reservation->resort->numresort);
                 if ($resortEmail) {
                     Mail::to($resortEmail)
-                        ->send(new StayConfirmationMail($reservation, 'resort'));
+                        ->send(new ResortConfirmationMail($reservation));
                 }
             }
 
             if ($notifyPartenaires) {
-                $partenairesEmails = DB::table('fourni')
-                    ->join('partenaire', 'fourni.numpartenaire', '=', 'partenaire.numpartenaire')
-                    ->join('activitealacarte', 'fourni.numactivite', '=', 'activitealacarte.numactivite')
-                    ->join('reservation_activite', function($join) use ($numreservation) {
-                        $join->on('reservation_activite.numactivite', '=', 'activitealacarte.numactivite')
-                            ->where('reservation_activite.numreservation', $numreservation);
-                    })
-                    ->distinct('partenaire.numpartenaire')
+                $partenairesEmails = DB::table('reservation_activite')
+                    ->join('partenaire', 'reservation_activite.numpartenaire', '=', 'partenaire.numpartenaire')
+                    ->where('reservation_activite.numreservation', $numreservation)
+                    ->whereNotNull('reservation_activite.numpartenaire')
+                    ->distinct()
                     ->select('partenaire.numpartenaire', 'partenaire.nompartenaire', 'partenaire.emailpartenaire')
                     ->get();
 
-                foreach ($partenairesEmails as $partenaire) {
-                    if ($partenaire->emailpartenaire) {
-                        Mail::to($partenaire->emailpartenaire)
-                            ->send(new StayConfirmationMail($reservation, 'partenaire'));
+                foreach ($partenairesEmails as $partenaireData) {
+                    if ($partenaireData->emailpartenaire) {
+                        // Créer un objet partenaire pour le mail
+                        $partenaire = (object)[
+                            'numpartenaire' => $partenaireData->numpartenaire,
+                            'nompartenaire' => $partenaireData->nompartenaire,
+                            'emailpartenaire' => $partenaireData->emailpartenaire,
+                        ];
+                        
+                        Mail::to($partenaireData->emailpartenaire)
+                            ->send(new PartnerConfirmationMail($reservation, $partenaire));
                     }
                 }
             }
@@ -110,7 +182,7 @@ class StayConfirmationController extends Controller
                 'updated_at' => now(),
             ]);
 
-            return redirect('/mes-reservations')
+            return redirect()->route('vente.dashboard')
                 ->with('success', 'Séjour confirmé et emails envoyés avec succès!');
         } catch (\Exception $e) {
             return back()->with('error', 'Erreur lors de l\'envoi des emails: ' . $e->getMessage());

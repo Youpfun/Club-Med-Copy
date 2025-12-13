@@ -9,6 +9,19 @@
             <p class="text-gray-600">Gérez les confirmations de séjours et les validations des partenaires</p>
         </div>
 
+        {{-- Messages de session --}}
+        @if(session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+                <strong>✓ Succès!</strong> {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+                <strong>✗ Erreur!</strong> {{ session('error') }}
+            </div>
+        @endif
+
         {{-- Statistiques --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             <div class="bg-white rounded-lg shadow p-6">
@@ -103,6 +116,23 @@
                                         ">
                                             {{ ucfirst($reservation->statut) }}
                                         </span>
+                                        
+                                        @if($reservation->partenaires_status && $reservation->partenaires_status->count() > 0)
+                                            <div class="mt-2 space-y-1">
+                                                @foreach($reservation->partenaires_status as $ps)
+                                                    <div class="text-xs">
+                                                        <span class="font-semibold">{{ $ps->nompartenaire }}:</span>
+                                                        @if($ps->partenaire_validation_status === 'accepted')
+                                                            <span class="text-green-600">✓ Validé</span>
+                                                        @elseif($ps->partenaire_validation_status === 'refused')
+                                                            <span class="text-red-600">✗ Refusé</span>
+                                                        @else
+                                                            <span class="text-orange-600">⏳ En attente</span>
+                                                        @endif
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 text-sm">
                                         <a href="{{ route('stay-confirmation.form', $reservation->numreservation) }}" 
