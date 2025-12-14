@@ -14,25 +14,28 @@ class PanierController extends Controller
     {
         $userId = Auth::id();
         
+        // Récupérer les réservations uniques
         $reservations = DB::table('reservation')
             ->join('resort', 'reservation.numresort', '=', 'resort.numresort')
             ->leftJoin('pays', 'resort.codepays', '=', 'pays.codepays')
-            ->join('choisir', 'reservation.numreservation', '=', 'choisir.numreservation')
-            ->join('typechambre', 'choisir.numtype', '=', 'typechambre.numtype')
-            ->leftJoin('transport', 'reservation.numtransport', '=', 'transport.numtransport')
             ->where('reservation.user_id', $userId)
             ->where('reservation.statut', 'en_attente')
             ->select(
                 'reservation.*',
                 'resort.nomresort',
                 'resort.numresort',
-                'pays.nompays',
-                'typechambre.nomtype',
-                'typechambre.numtype',
-                'transport.nomtransport',
-                'transport.prixtransport'
+                'pays.nompays'
             )
             ->get();
+
+        // Pour chaque réservation, récupérer ses chambres
+        foreach ($reservations as $reservation) {
+            $reservation->chambres = DB::table('choisir')
+                ->join('typechambre', 'choisir.numtype', '=', 'typechambre.numtype')
+                ->where('choisir.numreservation', $reservation->numreservation)
+                ->select('typechambre.nomtype', 'choisir.quantite')
+                ->get();
+        }
 
         return view('panier', compact('reservations'));
     }
@@ -44,23 +47,13 @@ class PanierController extends Controller
         $reservation = DB::table('reservation')
             ->join('resort', 'reservation.numresort', '=', 'resort.numresort')
             ->leftJoin('pays', 'resort.codepays', '=', 'pays.codepays')
-            ->join('choisir', 'reservation.numreservation', '=', 'choisir.numreservation')
-            ->join('typechambre', 'choisir.numtype', '=', 'typechambre.numtype')
-            ->leftJoin('transport', 'reservation.numtransport', '=', 'transport.numtransport')
             ->where('reservation.numreservation', $numreservation)
             ->where('reservation.user_id', $userId)
             ->select(
                 'reservation.*',
                 'resort.nomresort',
                 'resort.numresort',
-                'pays.nompays',
-                'typechambre.nomtype',
-                'typechambre.numtype',
-                'typechambre.surface',
-                'typechambre.capacitemax',
-                'transport.nomtransport',
-                'transport.prixtransport',
-                'transport.numtransport as transport_id'
+                'pays.nompays'
             )
             ->first();
 
@@ -69,63 +62,83 @@ class PanierController extends Controller
         }
 
         $resort = Resort::with('photos')->find($reservation->numresort);
-        $typeChambre = DB::table('typechambre')->where('numtype', $reservation->numtype)->first();
-        $transport = $reservation->transport_id ? DB::table('transport')->where('numtransport', $reservation->transport_id)->first() : null;
+        
+        // Récupérer les chambres avec quantités
+        $chambres = DB::table('choisir')
+            ->join('typechambre', 'choisir.numtype', '=', 'typechambre.numtype')
+            ->where('choisir.numreservation', $numreservation)
+            ->select('typechambre.*', 'choisir.quantite')
+            ->get();
 
         // Calculs
         $nbNuits = Carbon::parse($reservation->datedebut)->diffInDays(Carbon::parse($reservation->datefin));
         
-        // Récupérer les détails des voyageurs depuis la session
-        $reservationDetails = session('reservation_details', []);
-        $details = $reservationDetails[$reservation->numreservation] ?? null;
-        
-        if ($details) {
-            $nbAdultes = $details['nbAdultes'];
-            $nbEnfants = $details['nbEnfants'];
-        } else {
-            // Fallback si pas de données en session
-            $nbAdultes = $reservation->nbpersonnes;
-            $nbEnfants = 0;
-        }
-        $nbPersonnes = $nbAdultes + $nbEnfants;
-        
-        // Récupérer les activités depuis la BDD
-        $activitesReservation = DB::table('reservation_activite')
-            ->where('numreservation', $reservation->numreservation)
+        // Récupérer les participants avec leurs transports
+        $participants = DB::table('participant')
+            ->leftJoin('transport', 'participant.numtransport', '=', 'transport.numtransport')
+            ->where('participant.numreservation', $numreservation)
+            ->select(
+                'participant.*',
+                'transport.nomtransport',
+                'transport.prixtransport'
+            )
             ->get();
         
-        $activites = [];
-        $prixActivites = 0;
+        // Compter adultes et enfants
+        $nbAdultes = $participants->filter(function($p) {
+            return str_contains($p->nomparticipant, 'Adulte');
+        })->count();
         
-        if ($activitesReservation->count() > 0) {
-            // Récupérer les détails des activités
-            $activitesIds = $activitesReservation->pluck('numactivite')->toArray();
-            
-            $activites = DB::table('activite')
-                ->join('activitealacarte', 'activite.numactivite', '=', 'activitealacarte.numactivite')
-                ->whereIn('activite.numactivite', $activitesIds)
-                ->select('activite.numactivite', 'activite.nomactivite', 'activitealacarte.prixmin')
-                ->get();
-            
-            // Calculer le prix total des activités
-            foreach ($activitesReservation as $actRes) {
-                $prixActivites += $actRes->prix_unitaire * $actRes->quantite;
-            }
+        $nbEnfants = $participants->filter(function($p) {
+            return str_contains($p->nomparticipant, 'Enfant');
+        })->count();
+        
+        $nbPersonnes = $nbAdultes + $nbEnfants;
+        
+        // Récupérer les activités avec les participants qui les ont choisies
+        $activitesData = DB::table('participant_activite')
+            ->join('activite', 'participant_activite.numactivite', '=', 'activite.numactivite')
+            ->join('activitealacarte', 'activite.numactivite', '=', 'activitealacarte.numactivite')
+            ->join('participant', 'participant_activite.numparticipant', '=', 'participant.numparticipant')
+            ->where('participant.numreservation', $numreservation)
+            ->select(
+                'activite.numactivite',
+                'activite.nomactivite',
+                'activite.descriptionactivite',
+                'activitealacarte.prixmin',
+                'participant.nomparticipant',
+                'participant.numparticipant'
+            )
+            ->get();
+        
+        // Regrouper les activités avec leurs participants
+        $activites = $activitesData->groupBy('numactivite')->map(function($group) {
+            $first = $group->first();
+            return [
+                'numactivite' => $first->numactivite,
+                'nomactivite' => $first->nomactivite,
+                'descriptionactivite' => $first->descriptionactivite,
+                'prixmin' => $first->prixmin,
+                'participants' => $group->pluck('nomparticipant')->toArray(),
+                'nbParticipants' => $group->count(),
+            ];
+        })->values();
+        
+        // Calculer les prix
+        $prixChambre = 0;
+        foreach ($chambres as $chambre) {
+            $prixParNuit = $this->getPrixChambre($chambre->numtype, $reservation->datedebut);
+            $prixChambre += $prixParNuit * $nbNuits * $chambre->quantite;
         }
         
-        // Prix chambre - calculer le nombre de chambres nécessaires pour l'affichage
-        $capaciteMax = $typeChambre->capacitemax ?? 2;
-        $nbChambres = ceil($nbPersonnes / $capaciteMax);
-        $prixParNuit = $this->getPrixChambre($reservation->numtype, $reservation->datedebut);
-        $prixChambre = $prixParNuit * $nbNuits * $nbChambres;
+        $prixTransportTotal = $participants->sum('prixtransport');
         
-        // Prix transport
-        $prixTransportParPersonne = $transport ? floatval($transport->prixtransport) : 0;
-        $prixTransportAdultes = $prixTransportParPersonne * $nbAdultes;
-        $prixTransportEnfants = $prixTransportParPersonne * $nbEnfants;
-        $prixTransportTotal = $prixTransportAdultes + $prixTransportEnfants;
+        $prixActivites = 0;
+        foreach ($activites as $activite) {
+            $prixActivites += $activite['prixmin'] * $activite['nbParticipants'];
+        }
         
-        // Utiliser le prix total enregistré dans la BDD (fixé au moment de la réservation)
+        // Utiliser le prix total enregistré dans la BDD
         $total = floatval($reservation->prixtotal);
         
         // Décomposer le total pour affichage (avec TVA 20%)
@@ -135,18 +148,13 @@ class PanierController extends Controller
         return view('panier.detail', [
             'reservation' => $reservation,
             'resort' => $resort,
-            'typeChambre' => $typeChambre,
-            'transport' => $transport,
+            'chambres' => $chambres,
+            'participants' => $participants,
             'nbNuits' => $nbNuits,
             'nbAdultes' => $nbAdultes,
             'nbEnfants' => $nbEnfants,
             'nbPersonnes' => $nbPersonnes,
-            'nbChambres' => $nbChambres,
-            'prixParNuit' => $prixParNuit,
             'prixChambre' => $prixChambre,
-            'prixTransportParPersonne' => $prixTransportParPersonne,
-            'prixTransportAdultes' => $prixTransportAdultes,
-            'prixTransportEnfants' => $prixTransportEnfants,
             'prixTransportTotal' => $prixTransportTotal,
             'activites' => $activites,
             'prixActivites' => $prixActivites,
@@ -191,8 +199,28 @@ class PanierController extends Controller
             ->first();
 
         if ($reservation) {
+            // Récupérer les IDs des participants de cette réservation
+            $participantIds = DB::table('participant')
+                ->where('numreservation', $numreservation)
+                ->pluck('numparticipant');
+            
+            // Supprimer les liens participant_activite
+            if ($participantIds->isNotEmpty()) {
+                DB::table('participant_activite')
+                    ->whereIn('numparticipant', $participantIds)
+                    ->delete();
+            }
+            
+            // Supprimer les participants
+            DB::table('participant')->where('numreservation', $numreservation)->delete();
+            
+            // Supprimer les activités de la réservation
             DB::table('reservation_activite')->where('numreservation', $numreservation)->delete();
+            
+            // Supprimer les chambres
             DB::table('choisir')->where('numreservation', $numreservation)->delete();
+            
+            // Supprimer la réservation
             DB::table('reservation')->where('numreservation', $numreservation)->delete();
             
             // Nettoyer aussi la session

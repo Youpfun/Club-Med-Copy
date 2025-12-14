@@ -21,6 +21,7 @@ class Participant extends Model
         'prenomparticipant',
         'genreparticipant',
         'datenaissanceparticipant',
+        'numtransport',
     ];
 
     protected $casts = [
@@ -30,5 +31,10 @@ class Participant extends Model
     public function reservation()
     {
         return $this->belongsTo(Reservation::class, 'numreservation', 'numreservation');
+    }
+
+    public function transport()
+    {
+        return $this->belongsTo(Transport::class, 'numtransport', 'numtransport');
     }
 }
