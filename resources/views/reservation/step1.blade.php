@@ -50,7 +50,7 @@
     </div>
 
     <div class="container mx-auto px-4 py-8">
-        <form id="step1Form" action="{{ route('reservation.step2', $resort->numresort) }}" method="GET">
+        <form id="step1Form" action="{{ route('reservation.step2', $resort->numresort) }}" method="GET" onsubmit="return validateForm()">
             <div class="flex flex-col lg:flex-row gap-8">
                 
                 <div class="flex-1 space-y-6">
@@ -70,6 +70,7 @@
                                 <input type="date" name="dateDebut" id="dateDebut" required 
                                        class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-orange-500 focus:ring-0 transition-colors" 
                                        min="{{ date('Y-m-d') }}"
+                                       max="{{ date('Y-m-d', strtotime('+3 years')) }}"
                                        value="{{ request('dateDebut') }}">
                             </div>
                             <div>
@@ -77,6 +78,7 @@
                                 <input type="date" name="dateFin" id="dateFin" required 
                                        class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-orange-500 focus:ring-0 transition-colors" 
                                        min="{{ date('Y-m-d') }}"
+                                       max="{{ date('Y-m-d', strtotime('+3 years')) }}"
                                        value="{{ request('dateFin') }}">
                             </div>
                         </div>
@@ -154,14 +156,10 @@
                         </h2>
                         <div class="space-y-4" id="chambres-container">
                             @foreach($typeChambres as $index => $type)
-                                @php
-                                    $isSelected = request('numtype') ? (request('numtype') == $type->numtype) : ($index === 0);
-                                @endphp
-                                <div class="chambre-card cursor-pointer rounded-xl border-2 border-gray-200 transition-all duration-200 hover:border-gray-300 hover:shadow-sm {{ $isSelected ? 'selected border-orange-500 bg-orange-50 shadow-md' : '' }}"
-                                     data-numtype="{{ $type->numtype }}" onclick="selectChambre(this, {{ $type->numtype }})">
+                                <div class="chambre-card rounded-xl border-2 border-gray-200 transition-all duration-200 hover:border-gray-300 hover:shadow-sm"
+                                     data-numtype="{{ $type->numtype }}">
                                     
-                                    <input type="radio" name="numtype" value="{{ $type->numtype }}" 
-                                           id="chambre-{{ $type->numtype }}" class="hidden" required {{ $isSelected ? 'checked' : '' }}>
+                                    <input type="hidden" name="chambres[{{ $type->numtype }}]" value="0" id="chambre-qty-{{ $type->numtype }}" class="chambre-quantity">
                                     
                                     <div class="p-5">
                                         <div class="flex items-start justify-between">
@@ -195,7 +193,29 @@
                                                 </div>
                                                 <div class="text-sm text-gray-500">€ / nuit</div>
                                             </div>
+                                        </div>
+                                        
+                                        <!-- Sélecteur de quantité -->
+                                        <div class="mt-4 pt-4 border-t border-gray-200">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-sm font-medium text-gray-700">Nombre de chambres :</span>
+                                                <div class="flex items-center space-x-3">
+                                                    <button type="button" onclick="changeChambresQty({{ $type->numtype }}, -1)" 
+                                                            class="w-9 h-9 rounded-full bg-white border-2 border-gray-300 text-gray-600 hover:border-orange-500 hover:text-orange-500 transition-colors flex items-center justify-center">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                                        </svg>
+                                                    </button>
+                                                    <span class="w-12 text-center text-xl font-bold text-gray-800" id="display-qty-{{ $type->numtype }}">0</span>
+                                                    <button type="button" onclick="changeChambresQty({{ $type->numtype }}, 1)" 
+                                                            class="w-9 h-9 rounded-full bg-white border-2 border-gray-300 text-gray-600 hover:border-orange-500 hover:text-orange-500 transition-colors flex items-center justify-center">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                                        </svg>
+                                                    </button>
+                                                </div>
                                             </div>
+                                        </div>
                                     </div>
                                 </div>
                             @endforeach
@@ -353,30 +373,38 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     window.changeValue = changeValue;
     
-    function selectChambre(card, numtype) {
-        document.querySelectorAll('.chambre-card').forEach(c => {
-            c.classList.remove('selected', 'border-orange-500', 'bg-orange-50', 'shadow-md');
-            c.classList.add('border-gray-200');
-        });
+    function changeChambresQty(numtype, delta) {
+        const input = document.getElementById('chambre-qty-' + numtype);
+        const display = document.getElementById('display-qty-' + numtype);
+        const card = document.querySelector('.chambre-card[data-numtype="' + numtype + '"]');
         
-        card.classList.add('selected', 'border-orange-500', 'bg-orange-50', 'shadow-md');
-        card.classList.remove('border-gray-200');
-        document.getElementById('chambre-' + numtype).checked = true;
+        let newVal = parseInt(input.value) + delta;
+        if (newVal < 0) newVal = 0;
+        if (newVal > 10) newVal = 10; // Limite max de 10 chambres par type
+        
+        input.value = newVal;
+        display.textContent = newVal;
+        
+        // Styling de la carte selon la quantité
+        if (newVal > 0) {
+            card.classList.add('border-orange-500', 'bg-orange-50', 'shadow-md');
+            card.classList.remove('border-gray-200');
+        } else {
+            card.classList.remove('border-orange-500', 'bg-orange-50', 'shadow-md');
+            card.classList.add('border-gray-200');
+        }
         
         updateRecap();
-        // Mise à jour du récapitulatif de prix (droite) uniquement
         updateSummaryPrice(); 
     }
-    window.selectChambre = selectChambre;
+    window.changeChambresQty = changeChambresQty;
     
     function calculerNbChambres() {
-        const selectedType = document.querySelector('input[name="numtype"]:checked');
-        if (!selectedType) return 1;
-        const numtype = parseInt(selectedType.value);
-        const capacite = capaciteChambres[numtype] || 2;
-        const adultes = parseInt(nbAdultes.value) || 0;
-        const enfants = parseInt(nbEnfants.value) || 0;
-        return Math.ceil((adultes + enfants) / capacite);
+        let total = 0;
+        document.querySelectorAll('.chambre-quantity').forEach(input => {
+            total += parseInt(input.value) || 0;
+        });
+        return total;
     }
     
     // ECOUTEURS D'EVENEMENTS : MISE A JOUR DE TOUS LES PRIX
@@ -417,12 +445,22 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('recap-nuits').textContent = nuits + ' nuit' + (nuits > 1 ? 's' : '');
         }
         
-        const selectedRadio = document.querySelector('input[name="numtype"]:checked');
-        if (selectedRadio) {
-            const numtype = parseInt(selectedRadio.value);
-            document.getElementById('recap-chambre').textContent = nomsChambres[numtype] || '--';
-            nbChambresInput.value = calculerNbChambres();
-        }
+        // Afficher les chambres sélectionnées
+        let chambresTexte = [];
+        document.querySelectorAll('.chambre-quantity').forEach(input => {
+            const qty = parseInt(input.value) || 0;
+            if (qty > 0) {
+                const numtype = input.name.match(/\[(\d+)\]/)[1];
+                const nom = nomsChambres[numtype];
+                chambresTexte.push(`${qty}x ${nom}`);
+            }
+        });
+        
+        document.getElementById('recap-chambre').innerHTML = chambresTexte.length > 0 
+            ? chambresTexte.join('<br>') 
+            : '--';
+        
+        nbChambresInput.value = calculerNbChambres();
     }
     
     // NOUVELLE FONCTION : Met à jour toutes les cartes (badges, prix barrés...)
@@ -458,11 +496,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Calcul du prix total pour le résumé à droite
     function updateSummaryPrice() {
-        const selectedType = document.querySelector('input[name="numtype"]:checked');
         const prixPlaceholder = document.getElementById('prix-placeholder');
         const prixDetail = document.getElementById('prix-detail');
         
-        if (!selectedType || !dateDebut.value || !dateFin.value) {
+        if (!dateDebut.value || !dateFin.value) {
             prixPlaceholder.classList.remove('hidden');
             prixDetail.classList.add('hidden');
             return;
@@ -473,47 +510,73 @@ document.addEventListener('DOMContentLoaded', function() {
         const nuits = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
         if (nuits <= 0) return;
 
-        const nbChambres = calculerNbChambres();
-
-        fetch('/api/prix', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                numresort: {{ $resort->numresort }},
-                numtype: selectedType.value,
-                dateDebut: dateDebut.value,
-                dateFin: dateFin.value
-            })
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.prixParNuit) {
-                const prixNuitUnitaire = parseFloat(data.prixParNuit);
-                const prixTotal = prixNuitUnitaire * nbChambres * nuits;
-                const tva = prixTotal * 0.2;
-                const ht = prixTotal - tva;
-
-                prixPlaceholder.classList.add('hidden');
-                prixDetail.classList.remove('hidden');
-                
-                document.getElementById('recap-total-ht').textContent = ht.toFixed(2) + ' €';
-                document.getElementById('recap-tva').textContent = tva.toFixed(2) + ' €';
-                
-                const totalEl = document.getElementById('recap-total');
-                totalEl.textContent = prixTotal.toFixed(2) + ' €';
-                
-                // Mettre le total en vert si promo active sur la chambre sélectionnée
-                if (data.hasPromo) {
-                    totalEl.classList.remove('text-orange-500');
-                    totalEl.classList.add('text-green-600');
-                } else {
-                    totalEl.classList.remove('text-green-600');
-                    totalEl.classList.add('text-orange-500');
-                }
+        // Récupérer toutes les chambres avec quantité > 0
+        const chambresSelectionnees = [];
+        document.querySelectorAll('.chambre-quantity').forEach(input => {
+            const qty = parseInt(input.value) || 0;
+            if (qty > 0) {
+                const numtype = input.name.match(/\[(\d+)\]/)[1];
+                chambresSelectionnees.push({ numtype: numtype, qty: qty });
             }
+        });
+
+        if (chambresSelectionnees.length === 0) {
+            prixPlaceholder.classList.remove('hidden');
+            prixDetail.classList.add('hidden');
+            return;
+        }
+
+        // Calculer le prix total pour toutes les chambres
+        let prixTotalChambres = 0;
+        let hasPromo = false;
+        let compteur = chambresSelectionnees.length;
+
+        chambresSelectionnees.forEach(chambre => {
+            fetch('/api/prix', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    numresort: {{ $resort->numresort }},
+                    numtype: chambre.numtype,
+                    dateDebut: dateDebut.value,
+                    dateFin: dateFin.value
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.prixParNuit) {
+                    const prixNuitUnitaire = parseFloat(data.prixParNuit);
+                    prixTotalChambres += prixNuitUnitaire * chambre.qty * nuits;
+                    if (data.hasPromo) hasPromo = true;
+                }
+
+                compteur--;
+                if (compteur === 0) {
+                    // Toutes les requêtes sont terminées, afficher le total
+                    const tva = prixTotalChambres * 0.2;
+                    const ht = prixTotalChambres - tva;
+
+                    prixPlaceholder.classList.add('hidden');
+                    prixDetail.classList.remove('hidden');
+                    
+                    document.getElementById('recap-total-ht').textContent = ht.toFixed(2) + ' €';
+                    document.getElementById('recap-tva').textContent = tva.toFixed(2) + ' €';
+                    
+                    const totalEl = document.getElementById('recap-total');
+                    totalEl.textContent = prixTotalChambres.toFixed(2) + ' €';
+                    
+                    if (hasPromo) {
+                        totalEl.classList.remove('text-orange-500');
+                        totalEl.classList.add('text-green-600');
+                    } else {
+                        totalEl.classList.remove('text-green-600');
+                        totalEl.classList.add('text-orange-500');
+                    }
+                }
+            });
         });
     }
     
@@ -521,5 +584,14 @@ document.addEventListener('DOMContentLoaded', function() {
     updateRecap();
     updateAllPrices(); // Charge les prix au démarrage
 });
+
+function validateForm() {
+    const nbChambresTotal = calculerNbChambres();
+    if (nbChambresTotal === 0) {
+        alert('Veuillez sélectionner au moins une chambre avant de continuer.');
+        return false;
+    }
+    return true;
+}
 </script>
 @endsection

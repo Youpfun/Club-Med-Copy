@@ -52,6 +52,9 @@ Route::post('verify/resend', [TwoFactorController::class, 'resend'])->name('2fa.
 Route::middleware(['auth', 'marketing'])->prefix('marketing')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\MarketingController::class, 'index'])->name('marketing.dashboard');
     Route::post('/update-price', [App\Http\Controllers\MarketingController::class, 'updatePrice'])->name('marketing.update_price');
+    Route::post('/periodes', [App\Http\Controllers\MarketingController::class, 'storePeriode'])->name('marketing.store_periode');
+    Route::post('/bulk-promo', [App\Http\Controllers\MarketingController::class, 'applyBulkPromo'])->name('marketing.bulk_promo');
+    Route::post('/reset-promos', [App\Http\Controllers\MarketingController::class, 'resetPromos'])->name('marketing.reset_promos');
 });
 
 Route::middleware([
@@ -85,6 +88,14 @@ Route::middleware([
     Route::get('/reservation/{numresort}/step2', [ReservationController::class, 'step2'])->name('reservation.step2');
     Route::get('/reservation/{numresort}/step3', [ReservationController::class, 'step3'])->name('reservation.step3');
     Route::post('/reservation/{numresort}/addToCart', [ReservationController::class, 'addToCart'])->name('reservation.addToCart');
+    
+    // Routes d'édition de réservation
+    Route::get('/reservation/{numreservation}/edit/step1', [ReservationController::class, 'editStep1'])->name('reservation.edit.step1');
+    Route::post('/reservation/{numreservation}/update/step1', [ReservationController::class, 'updateStep1'])->name('reservation.update.step1');
+    Route::get('/reservation/{numreservation}/edit/step2', [ReservationController::class, 'editStep2'])->name('reservation.edit.step2');
+    Route::post('/reservation/{numreservation}/update/step2', [ReservationController::class, 'updateStep2'])->name('reservation.update.step2');
+    Route::get('/reservation/{numreservation}/edit/step3', [ReservationController::class, 'editStep3'])->name('reservation.edit.step3');
+    Route::post('/reservation/{numreservation}/update/step3', [ReservationController::class, 'updateStep3'])->name('reservation.update.step3');
     
     Route::get('/reservation/{id}/activities', function ($id) {
         return redirect("/reservation/{$id}/step3");

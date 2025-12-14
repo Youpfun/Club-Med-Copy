@@ -31,7 +31,16 @@
             
             <!-- Détails séjour -->
             <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">Détails du séjour</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Détails du séjour</h3>
+                    <a href="{{ route('reservation.edit.step1', $reservation->numreservation) }}" 
+                       class="text-blue-600 hover:text-blue-800 text-sm font-semibold flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Modifier
+                    </a>
+                </div>
                 <div class="grid grid-cols-2 gap-4 text-sm">
                     <div>
                         <p class="text-gray-500">Dates</p>
@@ -45,159 +54,196 @@
                             <p class="font-medium">{{ $nbEnfants }} enfant(s)</p>
                         @endif
                     </div>
-                    <div>
-                        <p class="text-gray-500">Hébergement</p>
-                        <p class="font-medium">{{ $typeChambre->nomtype ?? 'N/A' }}</p>
-                        @if($typeChambre && $typeChambre->surface)
-                            <p class="text-gray-500">{{ $typeChambre->surface }} m²</p>
-                        @endif
-                    </div>
-                    <div>
-                        <p class="text-gray-500">Transport</p>
-                        <p class="font-medium">{{ $transport->nomtransport ?? 'Sans transport' }}</p>
+                </div>
+            </div>
+            
+            <!-- Chambres sélectionnées -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                        </svg>
+                        Hébergement
+                    </h3>
+                    <a href="{{ route('reservation.edit.step1', $reservation->numreservation) }}" 
+                       class="text-blue-600 hover:text-blue-800 text-sm font-semibold flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Modifier
+                    </a>
+                </div>
+                <div class="space-y-3">
+                    @foreach($chambres as $chambre)
+                        <div class="border-2 border-gray-200 rounded-lg p-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-semibold text-gray-800">{{ $chambre->nomtype }}</p>
+                                    <p class="text-sm text-gray-500">{{ $chambre->surface }} m² • Max {{ $chambre->capacitemax }} pers.</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-lg font-bold text-blue-600">× {{ $chambre->quantite }}</p>
+                                    <p class="text-xs text-gray-500">chambre(s)</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            
+            <!-- Transport par participant -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                        Transport des participants
+                    </h3>
+                    <a href="{{ route('reservation.edit.step2', $reservation->numreservation) }}" 
+                       class="text-blue-600 hover:text-blue-800 text-sm font-semibold flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Modifier
+                    </a>
+                </div>
+                <div class="space-y-2">
+                    @foreach($participants as $participant)
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                            <div class="flex items-center">
+                                @if(str_contains($participant->nomparticipant, 'Adulte'))
+                                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                @else
+                                    <svg class="w-5 h-5 mr-2 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                @endif
+                                <span class="font-medium text-gray-700">{{ $participant->nomparticipant }}</span>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-semibold text-gray-800">{{ $participant->nomtransport ?? 'Sans transport' }}</p>
+                                @if($participant->prixtransport)
+                                    <p class="text-xs text-gray-500">{{ number_format($participant->prixtransport, 0, ',', ' ') }} €</p>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                    <div class="flex justify-between pt-3 border-t-2 border-gray-300 font-semibold">
+                        <span>Total transport</span>
+                        <span class="text-lg">{{ number_format($prixTransportTotal, 0, ',', ' ') }} €</span>
                     </div>
                 </div>
             </div>
             
-            <!-- Décomposition détaillée des prix -->
+            <!-- Activités par participant -->
+            @if(!empty($activites) && count($activites) > 0)
             <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold mb-4 border-b pb-2">Décomposition détaillée des prix</h3>
-                
-                <!-- Section Hébergement -->
-                <div class="mb-6">
-                    <h4 class="font-medium text-blue-800 mb-3 flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                        </svg>
-                        Hébergement - {{ $typeChambre->nomtype ?? 'Chambre' }}
-                    </h4>
-                    <div class="bg-gray-50 rounded p-4 space-y-2 text-sm">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Prix par nuit et par chambre</span>
-                            <span>{{ number_format($prixParNuit, 2, ',', ' ') }} €</span>
-                        </div>
-                        <div class="flex justify-between text-gray-600">
-                            <span>Nombre de chambres ({{ $nbPersonnes }} pers. ÷ {{ $typeChambre->capacitemax ?? 2 }})</span>
-                            <span>× {{ $nbChambres }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Nombre de nuits</span>
-                            <span>× {{ $nbNuits }}</span>
-                        </div>
-                        <div class="flex justify-between font-medium border-t pt-2">
-                            <span>Sous-total hébergement ({{ $nbChambres }} chambre(s) × {{ $nbNuits }} nuit(s))</span>
-                            <span>{{ number_format($prixChambre, 2, ',', ' ') }} €</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Section Transport -->
-                @if($transport)
-                <div class="mb-6">
-                    <h4 class="font-medium text-blue-800 mb-3 flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                        </svg>
-                        Transport - {{ $transport->nomtransport }}
-                    </h4>
-                    <div class="bg-gray-50 rounded p-4 space-y-2 text-sm">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Prix par personne</span>
-                            <span>{{ number_format($prixTransportParPersonne, 2, ',', ' ') }} €</span>
-                        </div>
-                        <div class="flex justify-between text-gray-600">
-                            <span>Adultes ({{ $nbAdultes }} × {{ number_format($prixTransportParPersonne, 2, ',', ' ') }} €)</span>
-                            <span>{{ number_format($prixTransportAdultes, 2, ',', ' ') }} €</span>
-                        </div>
-                        @if($nbEnfants > 0)
-                        <div class="flex justify-between text-gray-600">
-                            <span>Enfants ({{ $nbEnfants }} × {{ number_format($prixTransportParPersonne, 2, ',', ' ') }} €)</span>
-                            <span>{{ number_format($prixTransportEnfants, 2, ',', ' ') }} €</span>
-                        </div>
-                        @endif
-                        <div class="flex justify-between font-medium border-t pt-2">
-                            <span>Sous-total transport</span>
-                            <span>{{ number_format($prixTransportTotal, 2, ',', ' ') }} €</span>
-                        </div>
-                    </div>
-                </div>
-                @endif
-                
-                <!-- Activités optionnelles -->
-                @if(!empty($activites) && count($activites) > 0)
-                <div class="border-2 border-purple-200 bg-purple-50 rounded-lg p-4 mt-4">
-                    <h4 class="font-medium text-purple-800 mb-3 flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        Activités optionnelles
-                    </h4>
-                    <div class="space-y-2 text-sm">
-                        @foreach($activites as $activite)
-                        <div class="flex justify-between text-gray-700">
-                            <span>{{ $activite->nomactivite }} ({{ $nbPersonnes }} pers.)</span>
-                            <span>{{ number_format($activite->prixmin * $nbPersonnes, 2, ',', ' ') }} €</span>
+                        Activités sélectionnées
+                    </h3>
+                    <a href="{{ route('reservation.edit.step3', $reservation->numreservation) }}" 
+                       class="text-blue-600 hover:text-blue-800 text-sm font-semibold flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Modifier
+                    </a>
+                </div>
+                <div class="space-y-4">
+                    @foreach($activites as $activite)
+                        <div class="border-2 border-purple-200 bg-purple-50 rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex-1">
+                                    <p class="font-semibold text-purple-900">{{ $activite['nomactivite'] }}</p>
+                                    <p class="text-xs text-purple-700 italic">{{ $activite['descriptionactivite'] }}</p>
+                                </div>
+                                <div class="text-right ml-4">
+                                    <p class="text-sm font-bold text-purple-800">{{ number_format($activite['prixmin'], 0, ',', ' ') }} €<span class="text-xs">/pers</span></p>
+                                </div>
+                            </div>
+                            <div class="mt-3 pt-3 border-t border-purple-300">
+                                <p class="text-xs font-semibold text-purple-800 mb-2">Participants :</p>
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach($activite['participants'] as $participantNom)
+                                        <span class="inline-flex items-center px-2 py-1 bg-white border border-purple-300 rounded-full text-xs font-medium text-purple-700">
+                                            @if(str_contains($participantNom, 'Adulte'))
+                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                                </svg>
+                                            @else
+                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                            @endif
+                                            {{ $participantNom }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                                <div class="mt-3 flex justify-between text-sm font-semibold text-purple-900">
+                                    <span>Sous-total ({{ $activite['nbParticipants'] }} participant(s))</span>
+                                    <span>{{ number_format($activite['prixmin'] * $activite['nbParticipants'], 0, ',', ' ') }} €</span>
+                                </div>
+                            </div>
                         </div>
-                        @endforeach
-                        <div class="flex justify-between font-medium border-t pt-2 border-purple-200">
-                            <span>Sous-total activités</span>
-                            <span>{{ number_format($prixActivites, 2, ',', ' ') }} €</span>
-                        </div>
+                    @endforeach
+                    <div class="flex justify-between pt-3 border-t-2 border-purple-300 font-semibold text-purple-900">
+                        <span>Total activités</span>
+                        <span class="text-lg">{{ number_format($prixActivites, 0, ',', ' ') }} €</span>
                     </div>
                 </div>
-                @endif
+            </div>
+            @endif
+            
+            <!-- Décomposition détaillée des prix -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-4 border-b pb-2">Récapitulatif des prix</h3>
                 
-                <!-- Récapitulatif Final -->
-                <div class="border-t-2 border-gray-200 pt-4 mt-4">
-                    <h4 class="font-medium text-gray-800 mb-3">Récapitulatif</h4>
-                    <div class="space-y-2 text-sm">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Hébergement</span>
-                            <span>{{ number_format($prixChambre, 2, ',', ' ') }} €</span>
-                        </div>
-                        @if($transport)
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Transport</span>
-                            <span>{{ number_format($prixTransportTotal, 2, ',', ' ') }} €</span>
-                        </div>
-                        @endif
-                        @if(!empty($activites) && count($activites) > 0)
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Activités</span>
-                            <span>{{ number_format($prixActivites, 2, ',', ' ') }} €</span>
-                        </div>
-                        @endif
-                        <div class="flex justify-between border-t pt-2">
-                            <span class="text-gray-600">Sous-total HT</span>
-                            <span>{{ number_format($sousTotal, 2, ',', ' ') }} €</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">TVA (20%)</span>
-                            <span>{{ number_format($tva, 2, ',', ' ') }} €</span>
-                        </div>
-                        <div class="flex justify-between font-bold text-lg border-t-2 pt-3 mt-2">
-                            <span>Total TTC</span>
-                            <span class="text-blue-600">{{ number_format($total, 2, ',', ' ') }} €</span>
-                        </div>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Hébergement ({{ $nbNuits }} nuits)</span>
+                        <span class="font-medium">{{ number_format($prixChambre, 2, ',', ' ') }} €</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Transport ({{ $nbAdultes + $nbEnfants }} pers.)</span>
+                        <span class="font-medium">{{ number_format($prixTransportTotal, 2, ',', ' ') }} €</span>
+                    </div>
+                    @if(!empty($activites) && count($activites) > 0)
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Activités ({{ count($activites) }} activité(s))</span>
+                        <span class="font-medium">{{ number_format($prixActivites, 2, ',', ' ') }} €</span>
+                    </div>
+                    @endif
+                    <div class="flex justify-between border-t pt-3">
+                        <span class="text-gray-600">Sous-total HT</span>
+                        <span>{{ number_format($sousTotal, 2, ',', ' ') }} €</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">TVA (20%)</span>
+                        <span>{{ number_format($tva, 2, ',', ' ') }} €</span>
+                    </div>
+                    <div class="flex justify-between font-bold text-lg border-t-2 pt-3 mt-2">
+                        <span>Total TTC</span>
+                        <span class="text-blue-600">{{ number_format($total, 2, ',', ' ') }} €</span>
                     </div>
                 </div>
                 
                 <!-- Prix par personne -->
                 <div class="mt-6 bg-blue-50 rounded-lg p-4">
-                    <h4 class="font-medium text-blue-800 mb-3">Prix par voyageur</h4>
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div class="bg-white rounded p-3">
-                            <p class="text-gray-500">Par adulte</p>
-                            <p class="text-xl font-bold text-blue-600">{{ number_format($total / $nbPersonnes, 2, ',', ' ') }} €</p>
-                        </div>
-                        @if($nbEnfants > 0)
-                        <div class="bg-white rounded p-3">
-                            <p class="text-gray-500">Par enfant</p>
-                            <p class="text-xl font-bold text-blue-600">{{ number_format($total / $nbPersonnes, 2, ',', ' ') }} €</p>
-                        </div>
-                        @endif
-                    </div>
+                    <p class="text-sm text-gray-600 mb-2">Prix par voyageur</p>
+                    @if(($nbAdultes + $nbEnfants) > 0)
+                        <p class="text-2xl font-bold text-blue-600">{{ number_format($total / ($nbAdultes + $nbEnfants), 2, ',', ' ') }} €</p>
+                    @else
+                        <p class="text-2xl font-bold text-blue-600">{{ number_format($total / max(1, $reservation->nbpersonnes), 2, ',', ' ') }} €</p>
+                    @endif
                 </div>
             </div>
         </div>
@@ -231,12 +277,10 @@
                         <span>Hébergement</span>
                         <span>{{ number_format($prixChambre, 2, ',', ' ') }} €</span>
                     </div>
-                    @if($transport)
                     <div class="flex justify-between">
                         <span>Transport</span>
                         <span>{{ number_format($prixTransportTotal, 2, ',', ' ') }} €</span>
                     </div>
-                    @endif
                     @if(!empty($activites) && count($activites) > 0)
                     <div class="flex justify-between text-purple-700">
                         <span>Activités ({{ count($activites) }})</span>

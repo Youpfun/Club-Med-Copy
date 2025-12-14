@@ -65,8 +65,14 @@
             @csrf
             <input type="hidden" name="dateDebut" value="{{ $dateDebut }}">
             <input type="hidden" name="dateFin" value="{{ $dateFin }}">
-            <input type="hidden" name="numtype" value="{{ $numtype }}">
-            <input type="hidden" name="numtransport" value="{{ $numtransport }}">
+            @foreach($chambres as $numtype => $qty)
+                @if($qty > 0)
+                    <input type="hidden" name="chambres[{{ $numtype }}]" value="{{ $qty }}">
+                @endif
+            @endforeach
+            @foreach($transportsParticipants as $key => $numtransport)
+                <input type="hidden" name="transports[{{ $key }}]" value="{{ $numtransport }}">
+            @endforeach
             <input type="hidden" name="nbAdultes" value="{{ $nbAdultes }}">
             <input type="hidden" name="nbEnfants" value="{{ $nbEnfants }}">
 
@@ -84,42 +90,72 @@
                                 </svg>
                                 Activités optionnelles
                             </h2>
-                            <p class="text-white/80 text-sm mt-1">Personnalisez votre séjour avec nos activités à la carte</p>
+                            <p class="text-white/80 text-sm mt-1">Sélectionnez les participants pour chaque activité</p>
                         </div>
                         
                         <div class="p-6">
                             @if($activites->count() > 0)
-                                <div class="space-y-4">
+                                <div class="space-y-6">
                                     @foreach($activites as $activite)
-                                        <div class="activity-card border-2 border-gray-200 rounded-xl p-5 cursor-pointer transition-all hover:border-orange-300 hover:shadow-md"
-                                             onclick="toggleActivity(this, {{ $activite->numactivite }}, {{ $activite->prixmin }})">
-                                            <div class="flex items-center justify-between">
-                                                <div class="flex items-center space-x-5">
-                                                    <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center">
+                                        <div class="border-2 border-gray-200 rounded-xl p-5">
+                                            <div class="flex items-start justify-between mb-4">
+                                                <div class="flex items-start space-x-4">
+                                                    <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
                                                         <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                                         </svg>
                                                     </div>
-                                                    <div class="ml-2">
+                                                    <div>
                                                         <h3 class="font-bold text-lg text-gray-800">{{ $activite->nomactivite }}</h3>
-                                                        <p class="text-gray-500 text-sm">Pour {{ $nbAdultes + $nbEnfants }} personne(s)</p>
-                                                    </div>
-                                                </div>
-                                                <div class="flex items-center space-x-6">
-                                                    <div class="text-right">
-                                                        <div class="text-2xl font-bold text-orange-600">{{ number_format($activite->prixmin, 0, ',', ' ') }} €</div>
-                                                        <div class="text-sm text-gray-500">par personne</div>
-                                                    </div>
-                                                    <div class="w-6 h-6 border-2 border-gray-300 rounded-md flex items-center justify-center activity-checkbox-visual ml-2">
-                                                        <svg class="w-4 h-4 text-white hidden" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                                        </svg>
+                                                        <p class="text-gray-500 text-sm mt-1">{{ $activite->descriptionactivite }}</p>
+                                                        <div class="mt-2">
+                                                            <span class="text-2xl font-bold text-orange-600">{{ number_format($activite->prixmin, 0, ',', ' ') }} €</span>
+                                                            <span class="text-sm text-gray-500"> / personne</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <input type="checkbox" name="activites[]" value="{{ $activite->numactivite }}" 
-                                                   data-prix="{{ $activite->prixmin }}" class="activity-checkbox hidden">
+                                            
+                                            <!-- Sélection des participants -->
+                                            <div class="border-t border-gray-200 pt-4 mt-4">
+                                                <p class="text-sm font-medium text-gray-700 mb-3">Qui participe à cette activité ?</p>
+                                                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                                    @for($i = 1; $i <= $nbAdultes; $i++)
+                                                        <label class="flex items-center space-x-2 cursor-pointer group">
+                                                            <input type="checkbox" 
+                                                                   name="activites[{{ $activite->numactivite }}][]" 
+                                                                   value="adulte_{{ $i }}" 
+                                                                   class="w-5 h-5 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+                                                                   data-prix="{{ $activite->prixmin }}"
+                                                                   data-activite="{{ $activite->numactivite }}">
+                                                            <span class="text-sm text-gray-700 group-hover:text-orange-600">
+                                                                <svg class="w-4 h-4 inline mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                                                </svg>
+                                                                Adulte {{ $i }}
+                                                            </span>
+                                                        </label>
+                                                    @endfor
+                                                    
+                                                    @for($i = 1; $i <= $nbEnfants; $i++)
+                                                        <label class="flex items-center space-x-2 cursor-pointer group">
+                                                            <input type="checkbox" 
+                                                                   name="activites[{{ $activite->numactivite }}][]" 
+                                                                   value="enfant_{{ $i }}" 
+                                                                   class="w-5 h-5 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+                                                                   data-prix="{{ $activite->prixmin }}"
+                                                                   data-activite="{{ $activite->numactivite }}">
+                                                            <span class="text-sm text-gray-700 group-hover:text-orange-600">
+                                                                <svg class="w-4 h-4 inline mr-1 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                                </svg>
+                                                                Enfant {{ $i }}
+                                                            </span>
+                                                        </label>
+                                                    @endfor
+                                                </div>
+                                            </div>
                                         </div>
                                     @endforeach
                                 </div>
@@ -206,7 +242,14 @@
                                 </div>
                                 <div class="ml-2">
                                     <p class="text-sm text-gray-500 mb-1">Hébergement</p>
-                                    <p class="font-semibold text-gray-800">{{ $typeChambre->nomtype ?? 'Non sélectionné' }}</p>
+                                    @foreach($chambres as $numtype => $qty)
+                                        @if($qty > 0)
+                                            @php
+                                                $typeChambre = \App\Models\Typechambre::find($numtype);
+                                            @endphp
+                                            <p class="font-semibold text-gray-800">{{ $qty }}x {{ $typeChambre->nomtype ?? 'Chambre' }}</p>
+                                        @endif
+                                    @endforeach
                                 </div>
                             </div>
 
@@ -219,7 +262,7 @@
                                 </div>
                                 <div class="ml-2">
                                     <p class="text-sm text-gray-500 mb-1">Transport</p>
-                                    <p class="font-semibold text-gray-800">{{ $transport->nomtransport ?? 'Sans transport' }}</p>
+                                    <p class="font-semibold text-gray-800">{{ $nbAdultes + $nbEnfants }} voyageur(s)</p>
                                 </div>
                             </div>
 
@@ -235,7 +278,7 @@
                                     <span class="font-medium text-gray-800">{{ number_format($prixChambre, 0, ',', ' ') }} €</span>
                                 </div>
                                 
-                                @if($transport)
+                                @if($prixTransport > 0)
                                 <div class="flex justify-between items-center text-sm">
                                     <span class="text-gray-600">Transport ({{ $nbAdultes + $nbEnfants }} pers.)</span>
                                     <span class="font-medium text-gray-800">{{ number_format($prixTransport, 0, ',', ' ') }} €</span>
@@ -276,13 +319,16 @@
 
                         <!-- Boutons -->
                         <div class="p-6 bg-gray-50 border-t space-y-3">
-                            <button type="submit" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-green-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center">
+                            <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-green-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center">
                                 <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                                 </svg>
-                                Ajouter au panier
+                                <span id="submitBtnText">Ajouter au panier</span>
+                                <svg id="submitBtnSpinner" class="hidden w-6 h-6 ml-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                                </svg>
                             </button>
-                            <a href="{{ route('reservation.step2', ['numresort' => $resort->numresort, 'dateDebut' => $dateDebut, 'dateFin' => $dateFin, 'numtype' => $numtype, 'numtransport' => $numtransport, 'nbAdultes' => $nbAdultes, 'nbEnfants' => $nbEnfants]) }}" 
+                            <a href="{{ route('reservation.step2', $resort->numresort) }}" 
                                class="block w-full text-center border-2 border-gray-300 text-gray-600 py-3 px-6 rounded-xl font-semibold hover:bg-gray-100 transition-all">
                                 ← Retour
                             </a>
@@ -297,40 +343,18 @@
 <script>
     const prixChambre = {{ $prixChambre }};
     const prixTransport = {{ $prixTransport }};
-    const nbPersonnes = {{ $nbAdultes + $nbEnfants }};
+    const nbAdultes = {{ $nbAdultes }};
+    const nbEnfants = {{ $nbEnfants }};
+    const nbPersonnes = nbAdultes + nbEnfants;
     let totalActivites = 0;
 
-    function toggleActivity(card, numActivite, prix) {
-        const checkbox = card.querySelector('.activity-checkbox');
-        const checkboxVisual = card.querySelector('.activity-checkbox-visual');
-        const svg = checkboxVisual.querySelector('svg');
-        
-        checkbox.checked = !checkbox.checked;
-        
-        if (checkbox.checked) {
-            card.classList.remove('border-gray-200');
-            card.classList.add('border-orange-500', 'bg-orange-50');
-            checkboxVisual.classList.remove('border-gray-300');
-            checkboxVisual.classList.add('border-orange-500', 'bg-orange-500');
-            svg.classList.remove('hidden');
-        } else {
-            card.classList.remove('border-orange-500', 'bg-orange-50');
-            card.classList.add('border-gray-200');
-            checkboxVisual.classList.remove('border-orange-500', 'bg-orange-500');
-            checkboxVisual.classList.add('border-gray-300');
-            svg.classList.add('hidden');
-        }
-        
-        updatePrix();
-    }
-
     function updatePrix() {
-        const checkboxes = document.querySelectorAll('.activity-checkbox');
+        const checkboxes = document.querySelectorAll('input[type="checkbox"][data-prix]');
         totalActivites = 0;
         
         checkboxes.forEach(cb => {
             if (cb.checked) {
-                totalActivites += parseFloat(cb.dataset.prix) * nbPersonnes;
+                totalActivites += parseFloat(cb.dataset.prix);
             }
         });
         
@@ -345,5 +369,32 @@
         document.getElementById('prixTotal').textContent = new Intl.NumberFormat('fr-FR').format(total) + ' €';
         document.getElementById('prixParPersonne').textContent = new Intl.NumberFormat('fr-FR').format(Math.round(parPersonne)) + ' €';
     }
+    
+    // Ajouter des écouteurs sur toutes les checkboxes
+    document.addEventListener('DOMContentLoaded', function() {
+        const allCheckboxes = document.querySelectorAll('input[type="checkbox"][data-prix]');
+        allCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updatePrix);
+        });
+        
+        updatePrix(); // Calcul initial
+        
+        // Empêcher la double soumission
+        const form = document.getElementById('step3Form');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitBtnText = document.getElementById('submitBtnText');
+        const submitBtnSpinner = document.getElementById('submitBtnSpinner');
+        
+        form.addEventListener('submit', function(e) {
+            if (submitBtn.disabled) {
+                e.preventDefault();
+                return false;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtnText.textContent = 'Ajout en cours...';
+            submitBtnSpinner.classList.remove('hidden');
+        });
+    });
 </script>
 @endsection
