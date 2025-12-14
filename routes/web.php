@@ -47,6 +47,9 @@ Route::post('verify/resend', [TwoFactorController::class, 'resend'])->name('2fa.
 Route::middleware(['auth', 'marketing'])->prefix('marketing')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\MarketingController::class, 'index'])->name('marketing.dashboard');
     Route::post('/update-price', [App\Http\Controllers\MarketingController::class, 'updatePrice'])->name('marketing.update_price');
+    Route::post('/periodes', [App\Http\Controllers\MarketingController::class, 'storePeriode'])->name('marketing.store_periode');
+    Route::post('/bulk-promo', [App\Http\Controllers\MarketingController::class, 'applyBulkPromo'])->name('marketing.bulk_promo');
+    Route::post('/reset-promos', [App\Http\Controllers\MarketingController::class, 'resetPromos'])->name('marketing.reset_promos');
 });
 
 Route::middleware([
