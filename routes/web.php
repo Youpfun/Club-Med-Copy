@@ -18,6 +18,11 @@ use App\Http\Controllers\StayConfirmationController;
 use App\Http\Controllers\VenteController;
 use App\Http\Controllers\PartnerValidationController;
 use App\Http\Controllers\ResortValidationController;
+use App\Http\Controllers\StripeController;
+use App\Http\Controllers\StripeWebhookController;
+
+// Stripe Webhook (doit être AVANT les middlewares auth)
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('stripe.webhook');
 
 Route::get('/', function () {
     return view('welcome');
@@ -93,6 +98,12 @@ Route::middleware([
 
     Route::get('/stay-confirmation/{numreservation}', [StayConfirmationController::class, 'showConfirmationForm'])->name('stay-confirmation.form');
     Route::post('/stay-confirmation/{numreservation}', [StayConfirmationController::class, 'sendConfirmation'])->name('stay-confirmation.send');
+
+    // Routes Stripe / Paiement
+    Route::get('/reservation/{numreservation}/payment', [StripeController::class, 'showPaymentPage'])->name('payment.page');
+    Route::post('/reservation/{numreservation}/checkout', [StripeController::class, 'checkout'])->name('payment.checkout');
+    Route::get('/reservation/{numreservation}/payment-success', [StripeController::class, 'success'])->name('payment.success');
+    Route::get('/reservation/{numreservation}/payment-cancel', [StripeController::class, 'cancel'])->name('payment.cancel');
 
     Route::prefix('vente')->middleware('vente')->group(function () {
         Route::get('/dashboard', [VenteController::class, 'dashboard'])->name('vente.dashboard');

@@ -212,9 +212,19 @@
                     <p class="text-sm text-gray-400">({{ $nbAdultes }} adulte(s){{ $nbEnfants > 0 ? ', ' . $nbEnfants . ' enfant(s)' : '' }})</p>
                 </div>
                 
-                <div class="mb-4 p-3 bg-yellow-100 rounded text-center">
-                    <span class="text-yellow-700 font-medium">En attente de paiement</span>
-                </div>
+                @if($reservation->statut === 'Validée')
+                    <div class="mb-4 p-3 bg-green-100 rounded text-center">
+                        <span class="text-green-700 font-medium">✓ Réservation validée</span>
+                    </div>
+                @elseif($reservation->statut === 'En attente')
+                    <div class="mb-4 p-3 bg-yellow-100 rounded text-center">
+                        <span class="text-yellow-700 font-medium">En attente de paiement</span>
+                    </div>
+                @else
+                    <div class="mb-4 p-3 bg-gray-100 rounded text-center">
+                        <span class="text-gray-700 font-medium">{{ $reservation->statut }}</span>
+                    </div>
+                @endif
 
                 <div class="text-sm text-gray-600 mb-4 space-y-1">
                     <div class="flex justify-between">
@@ -239,18 +249,28 @@
                     </div>
                 </div>
                 
-                <button class="w-full bg-green-600 text-white py-3 rounded hover:bg-green-700 font-semibold mb-3">
-                    Payer maintenant
-                </button>
-                
-                <form action="{{ route('panier.remove', $reservation->numreservation) }}" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="w-full border border-red-600 text-red-600 py-2 rounded hover:bg-red-50"
-                            onclick="return confirm('Supprimer cette réservation ?')">
-                        Supprimer
-                    </button>
-                </form>
+                @if($reservation->statut === 'Validée' || $reservation->statut === 'Terminée')
+                    <a href="{{ route('reservations.index') }}" class="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-semibold mb-3 block text-center">
+                        Voir mes réservations
+                    </a>
+                @elseif($reservation->statut === 'En attente')
+                    <a href="{{ route('payment.page', $reservation->numreservation) }}" class="w-full bg-green-600 text-white py-3 rounded hover:bg-green-700 font-semibold mb-3 block text-center">
+                        Payer maintenant
+                    </a>
+                @else
+                    <a href="{{ route('reservations.index') }}" class="w-full bg-gray-600 text-white py-3 rounded hover:bg-gray-700 font-semibold mb-3 block text-center">
+                        Voir mes réservations
+                    </a>
+                    
+                    <form action="{{ route('panier.remove', $reservation->numreservation) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="w-full border border-red-600 text-red-600 py-2 rounded hover:bg-red-50"
+                                onclick="return confirm('Supprimer cette réservation ?')">
+                            Supprimer
+                        </button>
+                    </form>
+                @endif
             </div>
         </div>
     </div>

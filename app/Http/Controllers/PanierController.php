@@ -14,6 +14,13 @@ class PanierController extends Controller
     {
         $userId = Auth::id();
         
+        // Récupérer les IDs des réservations déjà payées (Confirmée ou Terminée)
+        $paidReservationIds = DB::table('reservation')
+            ->where('user_id', $userId)
+            ->whereIn('statut', ['Confirmée', 'Terminée'])
+            ->pluck('numreservation')
+            ->toArray();
+        
         $reservations = DB::table('reservation')
             ->join('resort', 'reservation.numresort', '=', 'resort.numresort')
             ->leftJoin('pays', 'resort.codepays', '=', 'pays.codepays')
@@ -21,7 +28,8 @@ class PanierController extends Controller
             ->join('typechambre', 'choisir.numtype', '=', 'typechambre.numtype')
             ->leftJoin('transport', 'reservation.numtransport', '=', 'transport.numtransport')
             ->where('reservation.user_id', $userId)
-            ->where('reservation.statut', 'en_attente')
+            ->where('reservation.statut', 'En attente')
+            ->whereNotIn('reservation.numreservation', $paidReservationIds) // Exclure les IDs déjà payés
             ->select(
                 'reservation.*',
                 'resort.nomresort',

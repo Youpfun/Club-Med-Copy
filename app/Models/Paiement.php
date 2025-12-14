@@ -11,18 +11,21 @@ class Paiement extends Model
 
     protected $table = 'paiement';
 
-    protected $primaryKey = 'numeropaiement';
-
-    public $timestamps = false;
+    protected $primaryKey = 'numpaiement';
 
     protected $fillable = [
         'numreservation',
+        'montant',
+        'statut',
+        'stripe_session_id',
+        'stripe_payment_intent',
         'datepaiement',
         'montantpaiement',
     ];
 
     protected $casts = [
         'datepaiement' => 'date',
+        'montant' => 'decimal:2',
         'montantpaiement' => 'decimal:2',
     ];
 

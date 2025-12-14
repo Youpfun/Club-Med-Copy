@@ -115,10 +115,25 @@
                             <p class="text-xs text-right text-gray-400 mt-1">TVA incluse</p>
                         </div>
 
-                        <button class="w-full bg-green-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-green-700 transition-all shadow-md flex justify-center items-center">
-                            Procéder au paiement
-                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                        </button>
+                        @if($reservations->count() === 1)
+                            {{-- Une seule réservation : aller directement au paiement --}}
+                            <a href="{{ route('payment.page', $reservations->first()->numreservation) }}" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-green-700 transition-all shadow-md flex justify-center items-center">
+                                Procéder au paiement
+                                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                            </a>
+                        @else
+                            {{-- Plusieurs réservations : payer une par une --}}
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-600 text-center mb-3">Vous devez payer chaque séjour individuellement</p>
+                                @foreach($reservations as $reservation)
+                                    <a href="{{ route('payment.page', $reservation->numreservation) }}" 
+                                       class="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-semibold text-sm hover:bg-green-700 transition-all flex justify-between items-center">
+                                        <span>{{ $reservation->nomresort }}</span>
+                                        <span>{{ number_format($reservation->prixtotal, 2, ',', ' ') }} €</span>
+                                    </a>
+                                @endforeach
+                            </div>
+                        @endif
 
                         <div class="mt-4 text-center">
                             <p class="text-xs text-gray-400 flex items-center justify-center">

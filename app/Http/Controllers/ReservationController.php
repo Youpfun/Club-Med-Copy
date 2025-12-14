@@ -24,13 +24,14 @@ class ReservationController extends Controller
         $userId = Auth::id();
         $today = Carbon::today();
 
+        // UNIQUEMENT les réservations validées ou terminées (payées)
         $reservations = DB::table('reservation')
             ->join('resort', 'reservation.numresort', '=', 'resort.numresort') 
             ->join('pays', 'resort.codepays', '=', 'pays.codepays')
             ->join('choisir', 'reservation.numreservation', '=', 'choisir.numreservation')
             ->join('typechambre', 'choisir.numtype', '=', 'typechambre.numtype')
             ->where('reservation.user_id', $userId)
-            ->whereIn('reservation.statut', ['En attente', 'Confirmée', 'Terminée'])
+            ->whereIn('reservation.statut', ['Validée', 'Terminée'])
             ->select(
                 'reservation.*', 
                 'resort.nomresort', 
@@ -38,16 +39,18 @@ class ReservationController extends Controller
                 'pays.nompays',
                 'typechambre.nomtype as type_chambre'
             )
+            ->distinct()
             ->orderBy('reservation.datedebut', 'desc')
             ->get();
 
+        // UNIQUEMENT les réservations en attente (panier)
         $panierResorts = DB::table('reservation')
             ->join('resort', 'reservation.numresort', '=', 'resort.numresort') 
             ->join('pays', 'resort.codepays', '=', 'pays.codepays')
             ->join('choisir', 'reservation.numreservation', '=', 'choisir.numreservation')
             ->join('typechambre', 'choisir.numtype', '=', 'typechambre.numtype')
             ->where('reservation.user_id', $userId)
-            ->where('reservation.statut', 'en_attente')
+            ->where('reservation.statut', 'En attente')
             ->select(
                 'reservation.*', 
                 'resort.nomresort', 
@@ -55,6 +58,7 @@ class ReservationController extends Controller
                 'pays.nompays',
                 'typechambre.nomtype as type_chambre'
             )
+            ->distinct()
             ->orderBy('reservation.datedebut', 'asc')
             ->get();
 
@@ -199,7 +203,7 @@ class ReservationController extends Controller
             'numjour' => 1,
             'pla_numjour' => 1,
             'numtransport' => $numtransport,
-            'statut' => 'en_attente',
+            'statut' => 'En attente',
             'nbpersonnes' => $nbPersonnes,
             'prixtotal' => $prixTotal,
             'datedebut' => $dateDebut,

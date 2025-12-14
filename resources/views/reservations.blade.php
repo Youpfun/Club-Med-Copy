@@ -136,7 +136,7 @@
                                             Départ dans {{ \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($res->datedebut)) }} jours
                                         </div>
                                     </div>
-                                    <span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-gray-100 text-gray-600">Confirmé</span>
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-green-100 text-green-700">Validée</span>
                                 </div>
 
                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm text-gray-600 mb-8">
