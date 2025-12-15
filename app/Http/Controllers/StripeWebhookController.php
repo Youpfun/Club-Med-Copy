@@ -97,11 +97,10 @@ class StripeWebhookController extends Controller
                 'updated_at' => now(),
             ]);
 
-            // Mettre à jour le statut de la réservation
+            // Mettre à jour le statut de la réservation sans condition sur l'ancien statut
             $updated = DB::table('reservation')
                 ->where('numreservation', $numreservation)
-                ->where('statut', 'En attente')
-                ->update(['statut' => 'Validée']);
+                ->update(['statut' => 'Confirmée']);
 
             Log::info('Webhook: Reservation updated', [
                 'numreservation' => $numreservation,

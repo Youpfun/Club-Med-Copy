@@ -258,7 +258,7 @@
                     <p class="text-sm text-gray-400">({{ $nbAdultes }} adulte(s){{ $nbEnfants > 0 ? ', ' . $nbEnfants . ' enfant(s)' : '' }})</p>
                 </div>
                 
-                @if($reservation->statut === 'Validée')
+                @if(in_array($reservation->statut, ['Validée','Confirmée','confirmee']))
                     <div class="mb-4 p-3 bg-green-100 rounded text-center">
                         <span class="text-green-700 font-medium">✓ Réservation validée</span>
                     </div>
@@ -293,7 +293,7 @@
                     </div>
                 </div>
                 
-                @if($reservation->statut === 'Validée' || $reservation->statut === 'Terminée')
+                @if(in_array($reservation->statut, ['Validée','Confirmée','confirmee','Terminée']))
                     <a href="{{ route('reservations.index') }}" class="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-semibold mb-3 block text-center">
                         Voir mes réservations
                     </a>

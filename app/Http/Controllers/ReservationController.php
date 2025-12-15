@@ -24,14 +24,14 @@ class ReservationController extends Controller
         $userId = Auth::id();
         $today = Carbon::today();
 
-        // UNIQUEMENT les réservations validées ou terminées (payées)
+        // UNIQUEMENT les réservations confirmées/validées ou terminées (payées)
         $reservations = DB::table('reservation')
             ->join('resort', 'reservation.numresort', '=', 'resort.numresort') 
             ->join('pays', 'resort.codepays', '=', 'pays.codepays')
             ->join('choisir', 'reservation.numreservation', '=', 'choisir.numreservation')
             ->join('typechambre', 'choisir.numtype', '=', 'typechambre.numtype')
             ->where('reservation.user_id', $userId)
-            ->whereIn('reservation.statut', ['Validée', 'Terminée'])
+            ->whereIn('reservation.statut', ['Confirmée', 'Validée', 'Terminée', 'confirmee'])
             ->select(
                 'reservation.*', 
                 'resort.nomresort', 
@@ -236,13 +236,8 @@ class ReservationController extends Controller
             'numresort' => $numresort,
             'numjour' => 1,
             'pla_numjour' => 1,
-<<<<<<< HEAD
             'numtransport' => $numtransport,
             'statut' => 'En attente',
-=======
-            'numtransport' => null, // Plus utilisé car géré par participant
-            'statut' => 'en_attente',
->>>>>>> 72585b78d1b486876d0592420f032c245d422a13
             'nbpersonnes' => $nbPersonnes,
             'prixtotal' => $prixTotal,
             'datedebut' => $dateDebut,

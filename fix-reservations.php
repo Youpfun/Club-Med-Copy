@@ -9,11 +9,11 @@ use Illuminate\Support\Facades\DB;
 
 echo "=== Correction des réservations ===\n\n";
 
-// Forcer la réservation #109 à Validée
+// Forcer la réservation #109 à Confirmée
 echo "Force mise à jour réservation #109...\n";
 DB::table('reservation')
     ->where('numreservation', 109)
-    ->update(['statut' => 'Validée']);
+    ->update(['statut' => 'Confirmée']);
 echo "✓ Réservation #109 mise à jour\n\n";
 
 // Trouver les réservations qui ont un paiement complété mais sont encore "En attente"
@@ -42,7 +42,13 @@ if ($reservationsToFix->count() > 0) {
                   ->where('statut', 'Complété');
         })
         ->where('statut', 'En attente')
-        ->update(['statut' => 'Validée']);
+        ->update(['statut' => 'Confirmée']);
+
+// Harmoniser les anciens statuts "Validée" en "Confirmée"
+$normalized = DB::table('reservation')
+    ->where('statut', 'Validée')
+    ->update(['statut' => 'Confirmée']);
+echo "\n✓ {$normalized} réservation(s) normalisée(s) (Validée -> Confirmée)\n";
     
     echo "\n✓ {$updated} réservation(s) corrigée(s)!\n";
 } else {

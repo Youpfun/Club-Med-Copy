@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Réconciliation automatique des paiements Stripe
+        $schedule->command('payments:reconcile --since=48')->hourly();
     }
 
     /**

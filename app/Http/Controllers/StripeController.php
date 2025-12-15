@@ -138,12 +138,11 @@ class StripeController extends Controller
                 ]);
             }
 
-            // Mettre à jour le statut de la réservation seulement si elle est en attente
+            // Mettre à jour le statut de la réservation (sans dépendre de l'ancien statut)
             $updated = DB::table('reservation')
                 ->where('numreservation', $numreservation)
-                ->where('statut', 'En attente')
                 ->update([
-                    'statut' => 'Validée'
+                    'statut' => 'Confirmée'
                 ]);
 
             // Log pour déboguer
@@ -155,9 +154,10 @@ class StripeController extends Controller
             ]);
 
             return redirect()->route('reservations.index')
-                ->with('success', 'Paiement effectué avec succès! Votre réservation #' . $numreservation . ' est maintenant validée.');
+                ->with('success', 'Paiement effectué avec succès! Votre réservation #' . $numreservation . ' est maintenant confirmée.');
         } catch (\Exception $e) {
-            return redirect()->route('panier.show', $numreservation)
+            // Rediriger vers Mes réservations pour rester cohérent avec le flux souhaité
+            return redirect()->route('reservations.index')
                 ->with('error', 'Erreur lors de la confirmation du paiement: ' . $e->getMessage());
         }
     }
