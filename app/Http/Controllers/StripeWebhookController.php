@@ -62,51 +62,55 @@ class StripeWebhookController extends Controller
     private function handleCheckoutSessionCompleted($session)
     {
         try {
-            $numreservation = $session->metadata->numreservation ?? null;
+            // Gérer 1 ou plusieurs réservations via metadata
+            $ids = [];
+            if (!empty($session->metadata->numreservation)) {
+                $ids = [$session->metadata->numreservation];
+            }
+            if (!empty($session->metadata->numreservations)) {
+                $multi = array_filter(array_map('trim', explode(',', $session->metadata->numreservations)));
+                $ids = array_merge($ids, $multi);
+            }
 
-            if (!$numreservation) {
+            if (empty($ids)) {
                 Log::error('No reservation ID in webhook session', ['session_id' => $session->id]);
                 return;
             }
 
-            // Vérifier si le paiement existe déjà
-            $existingPayment = DB::table('paiement')
-                ->where('stripe_session_id', $session->id)
-                ->first();
+            foreach (array_unique($ids) as $numreservation) {
+                $reservation = Reservation::find($numreservation);
+                if (!$reservation) {
+                    Log::error('Reservation not found in webhook', ['numreservation' => $numreservation]);
+                    continue;
+                }
 
-            if ($existingPayment) {
-                Log::info('Payment already recorded', ['numreservation' => $numreservation]);
-                return;
+                // Vérifier si le paiement existe déjà pour cette réservation
+                $existingPayment = DB::table('paiement')
+                    ->where('numreservation', $numreservation)
+                    ->where('stripe_session_id', $session->id)
+                    ->first();
+
+                if (!$existingPayment) {
+                    DB::table('paiement')->insert([
+                        'numreservation' => $numreservation,
+                        'montant' => $reservation->prixtotal,
+                        'statut' => 'Complété',
+                        'stripe_session_id' => $session->id,
+                        'stripe_payment_intent' => $session->payment_intent,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+
+                DB::table('reservation')
+                    ->where('numreservation', $numreservation)
+                    ->update(['statut' => 'Confirmée']);
+
+                Log::info('Webhook: Reservation updated', [
+                    'numreservation' => $numreservation,
+                    'statut' => DB::table('reservation')->where('numreservation', $numreservation)->value('statut')
+                ]);
             }
-
-            $reservation = Reservation::find($numreservation);
-
-            if (!$reservation) {
-                Log::error('Reservation not found in webhook', ['numreservation' => $numreservation]);
-                return;
-            }
-
-            // Créer l'enregistrement de paiement
-            DB::table('paiement')->insert([
-                'numreservation' => $numreservation,
-                'montant' => $reservation->prixtotal,
-                'statut' => 'Complété',
-                'stripe_session_id' => $session->id,
-                'stripe_payment_intent' => $session->payment_intent,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // Mettre à jour le statut de la réservation sans condition sur l'ancien statut
-            $updated = DB::table('reservation')
-                ->where('numreservation', $numreservation)
-                ->update(['statut' => 'Confirmée']);
-
-            Log::info('Webhook: Reservation updated', [
-                'numreservation' => $numreservation,
-                'updated' => $updated,
-                'statut' => DB::table('reservation')->where('numreservation', $numreservation)->value('statut')
-            ]);
 
         } catch (\Exception $e) {
             Log::error('Error handling checkout session', [

@@ -79,6 +79,11 @@ Route::middleware([
     })->name('logout');
 
     Route::get('/panier', [PanierController::class, 'index'])->name('cart.index');
+    // Paiement du panier (toutes les réservations en attente de l'utilisateur) - placer AVANT la route dynamique
+    Route::post('/panier/checkout', [StripeController::class, 'checkoutCart'])->name('payment.cart.checkout');
+    Route::get('/panier/payment-success', [StripeController::class, 'successCart'])->name('payment.cart.success');
+    Route::get('/panier/payment-cancel', [StripeController::class, 'cancelCart'])->name('payment.cart.cancel');
+    // Route dynamique en dernier pour éviter les collisions
     Route::get('/panier/{numreservation}', [PanierController::class, 'show'])->name('panier.show');
     Route::delete('/panier/remove/{numreservation}', [PanierController::class, 'remove'])->name('panier.remove');
 
@@ -115,6 +120,8 @@ Route::middleware([
     Route::post('/reservation/{numreservation}/checkout', [StripeController::class, 'checkout'])->name('payment.checkout');
     Route::get('/reservation/{numreservation}/payment-success', [StripeController::class, 'success'])->name('payment.success');
     Route::get('/reservation/{numreservation}/payment-cancel', [StripeController::class, 'cancel'])->name('payment.cancel');
+
+    
 
     Route::prefix('vente')->middleware('vente')->group(function () {
         Route::get('/dashboard', [VenteController::class, 'dashboard'])->name('vente.dashboard');

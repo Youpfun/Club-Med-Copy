@@ -14,10 +14,10 @@ class PanierController extends Controller
     {
         $userId = Auth::id();
         
-        // Récupérer les IDs des réservations déjà payées (Confirmée/Validée ou Terminée)
+        // Récupérer les IDs des réservations déjà payées (Confirmée ou Terminée)
         $paidReservationIds = DB::table('reservation')
             ->where('user_id', $userId)
-            ->whereIn('statut', ['Confirmée', 'Validée', 'Terminée', 'confirmee'])
+            ->whereIn('statut', ['Confirmée', 'Terminée'])
             ->pluck('numreservation')
             ->toArray();
         

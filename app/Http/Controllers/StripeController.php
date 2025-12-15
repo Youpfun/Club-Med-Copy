@@ -176,4 +176,127 @@ class StripeController extends Controller
         return redirect()->route('panier.show', $numreservation)
             ->with('warning', 'Paiement annulé. Votre réservation reste en attente.');
     }
+
+    /**
+     * Crée une session Stripe pour payer toutes les réservations en attente de l'utilisateur
+     */
+    public function checkoutCart(Request $request)
+    {
+        $userId = Auth::id();
+
+        $reservations = DB::table('reservation')
+            ->join('resort', 'reservation.numresort', '=', 'resort.numresort')
+            ->where('reservation.user_id', $userId)
+            ->where('reservation.statut', 'En attente')
+            ->select('reservation.*', 'resort.nomresort')
+            ->get();
+
+        if ($reservations->isEmpty()) {
+            return redirect()->route('cart.index')->with('error', 'Aucune réservation en attente à régler.');
+        }
+
+        \Stripe\Stripe::setApiKey(config('stripe.secret_key'));
+
+        try {
+            $lineItems = [];
+            $ids = [];
+
+            foreach ($reservations as $res) {
+                $lineItems[] = [
+                    'price_data' => [
+                        'currency' => 'eur',
+                        'product_data' => [
+                            'name' => 'Réservation ' . $res->nomresort,
+                            'description' => 'Réservation #' . $res->numreservation,
+                        ],
+                        'unit_amount' => (int) ($res->prixtotal * 100),
+                    ],
+                    'quantity' => 1,
+                ];
+                $ids[] = $res->numreservation;
+            }
+
+            $session = \Stripe\Checkout\Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => $lineItems,
+                'mode' => 'payment',
+                'success_url' => route('payment.cart.success') . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => route('payment.cart.cancel'),
+                'customer_email' => Auth::user()->email,
+                'metadata' => [
+                    'numreservations' => implode(',', $ids),
+                    'user_id' => $userId,
+                ],
+            ]);
+
+            return redirect()->away($session->url);
+        } catch (\Exception $e) {
+            return redirect()->route('cart.index')
+                ->with('error', 'Erreur lors de la création de la session de paiement: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Succès du paiement du panier
+     */
+    public function successCart(Request $request)
+    {
+        if (!$request->session_id) {
+            return redirect()->route('cart.index')->with('error', 'Paramètres de paiement invalides');
+        }
+
+        \Stripe\Stripe::setApiKey(config('stripe.secret_key'));
+        try {
+            $session = \Stripe\Checkout\Session::retrieve($request->session_id);
+            if ($session->payment_status !== 'paid') {
+                return redirect()->route('cart.index')->with('warning', 'Le paiement n\'a pas été complété.');
+            }
+
+            $ids = [];
+            if (!empty($session->metadata->numreservations)) {
+                $ids = array_filter(array_map('trim', explode(',', $session->metadata->numreservations)));
+            }
+
+            if (empty($ids)) {
+                return redirect()->route('reservations.index')->with('warning', 'Paiement traité, mais aucune réservation associée.');
+            }
+
+            foreach ($ids as $id) {
+                $reservation = Reservation::find($id);
+                if (!$reservation || $reservation->user_id !== Auth::id()) {
+                    continue;
+                }
+
+                $existingPayment = DB::table('paiement')
+                    ->where('numreservation', $id)
+                    ->where('stripe_session_id', $session->id)
+                    ->first();
+
+                if (!$existingPayment) {
+                    DB::table('paiement')->insert([
+                        'numreservation' => $id,
+                        'montant' => $reservation->prixtotal,
+                        'statut' => 'Complété',
+                        'stripe_session_id' => $session->id,
+                        'stripe_payment_intent' => $session->payment_intent,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+
+                DB::table('reservation')
+                    ->where('numreservation', $id)
+                    ->update(['statut' => 'Confirmée']);
+            }
+
+            return redirect()->route('reservations.index')->with('success', 'Paiement du panier effectué avec succès. Vos réservations sont confirmées.');
+        } catch (\Exception $e) {
+            return redirect()->route('cart.index')->with('error', 'Erreur lors de la confirmation du paiement: ' . $e->getMessage());
+        }
+    }
+
+    public function cancelCart()
+    {
+        return redirect()->route('cart.index')->with('warning', 'Paiement annulé. Vos réservations restent en attente.');
+    }
 }

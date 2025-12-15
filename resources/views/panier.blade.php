@@ -121,12 +121,20 @@
                                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                             </a>
                         @else
-                            {{-- Plusieurs réservations : payer une par une --}}
+                            {{-- Plusieurs réservations : payer tout en une fois ou une par une --}}
+                            <form action="{{ route('payment.cart.checkout') }}" method="POST" class="mb-4">
+                                @csrf
+                                <button type="submit" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-green-700 transition-all shadow-md flex justify-center items-center">
+                                    Payer toutes les réservations
+                                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                                </button>
+                            </form>
+
                             <div class="space-y-2">
-                                <p class="text-sm text-gray-600 text-center mb-3">Vous devez payer chaque séjour individuellement</p>
+                                <p class="text-sm text-gray-600 text-center mb-3">Ou régler un séjour spécifique</p>
                                 @foreach($reservations as $reservation)
                                     <a href="{{ route('payment.page', $reservation->numreservation) }}" 
-                                       class="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-semibold text-sm hover:bg-green-700 transition-all flex justify-between items-center">
+                                       class="w-full bg-white border border-gray-200 text-gray-700 py-3 px-4 rounded-lg font-semibold text-sm hover:border-blue-400 hover:text-blue-700 transition-all flex justify-between items-center">
                                         <span>{{ $reservation->nomresort }}</span>
                                         <span>{{ number_format($reservation->prixtotal, 2, ',', ' ') }} €</span>
                                     </a>
