@@ -39,8 +39,8 @@
                 </div>
             </div>
 
-            @if($panierResorts->isEmpty() && $aVenir->isEmpty())
-                {{-- CAS VIDE : Aucun projet --}}
+            @if($aVenir->isEmpty())
+                {{-- CAS VIDE : Aucun projet confirmé --}}
                 <div class="bg-white rounded-2xl p-12 text-center border border-dashed border-gray-300">
                     <div class="mb-4 text-gray-300">
                         <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
@@ -52,62 +52,7 @@
                 </div>
             @else
                 <div class="grid gap-8">
-                    
-                    {{-- 1A. LE PANIER (Non réservé) --}}
-                    @foreach($panierResorts as $resort)
-                        <div class="bg-white rounded-3xl shadow-md border-2 border-[#ffc000] overflow-hidden flex flex-col lg:flex-row group hover:shadow-xl transition-all duration-300 relative">
-                            {{-- Badge --}}
-                            <div class="absolute top-0 right-0 bg-[#ffc000] text-[#113559] text-xs font-bold px-4 py-1 rounded-bl-xl z-20">
-                                DANS VOTRE PANIER
-                            </div>
-
-                            {{-- Image --}}
-                            <div class="lg:w-1/3 h-64 lg:h-auto bg-gray-200 relative overflow-hidden">
-                                @php 
-                                    $imageName = strtolower(str_replace(' ', '', $resort->nomresort)) . '.webp';
-                                    $imagePath = 'img/ressort/' . $imageName;
-                                    $fullPath = public_path($imagePath);
-                                @endphp
-                                @if(file_exists($fullPath))
-                                    <img src="{{ asset($imagePath) }}" alt="{{ $resort->nomresort }}" class="w-full h-full object-cover grayscale opacity-90 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700">
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100">Image indisponible</div>
-                                @endif
-                                <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-[#113559] shadow-sm z-10">
-                                    {{ $resort->nompays }}
-                                </div>
-                            </div>
-                            
-                            {{-- Contenu --}}
-                            <div class="p-8 lg:w-2/3 flex flex-col justify-center">
-                                <div class="flex justify-between items-start mb-4">
-                                    <h3 class="text-2xl font-serif font-bold text-[#113559]">{{ $resort->nomresort }}</h3>
-                                </div>
-                                <p class="text-gray-500 mb-6">Ce séjour est en attente dans votre panier. Finalisez-le vite pour garantir les disponibilités.</p>
-
-                                <div class="flex flex-wrap gap-4 mt-auto">
-                                    {{-- Bouton Finaliser --}}
-                                    <a href="{{ route('cart.index') }}" class="flex-1 text-center px-6 py-3 bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] rounded-xl font-bold text-sm transition-colors shadow-md">
-                                        Finaliser la réservation
-                                    </a>
-                                    
-                                    {{-- Bouton Supprimer --}}
-                                    <form action="{{ route('panier.remove', $resort->numreservation) }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="px-6 py-3 bg-white border border-gray-200 hover:border-red-500 text-gray-500 hover:text-red-600 rounded-xl font-bold text-sm transition-all flex items-center gap-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                            Supprimer
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-
-                    {{-- 1B. RÉSERVATIONS CONFIRMÉES --}}
+                    {{-- RÉSERVATIONS CONFIRMÉES --}}
                     @foreach($aVenir as $res)
                         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col lg:flex-row group hover:shadow-lg transition-all duration-300">
                             {{-- Image --}}
