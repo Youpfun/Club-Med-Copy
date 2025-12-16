@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use App\Models\Reservation;
 use App\Models\Paiement;
 
@@ -81,6 +82,13 @@ class StripeController extends Controller
                     'numreservation' => $reservation->numreservation,
                     'user_id' => Auth::id(),
                 ],
+                // Propager aussi la metadata vers le PaymentIntent pour le handler payment_intent.succeeded
+                'payment_intent_data' => [
+                    'metadata' => [
+                        'numreservation' => $reservation->numreservation,
+                        'user_id' => Auth::id(),
+                    ],
+                ],
             ]);
 
             return redirect()->away($session->url);
@@ -120,22 +128,39 @@ class StripeController extends Controller
             }
 
             // Vérifier si le paiement existe déjà pour éviter les doublons
-            $existingPayment = DB::table('paiement')
-                ->where('numreservation', $numreservation)
-                ->where('stripe_session_id', $session->id)
-                ->first();
+            $existingPaymentQuery = DB::table('paiement')->where('numreservation', $numreservation);
+            if (Schema::hasColumn('paiement', 'stripe_session_id')) {
+                $existingPaymentQuery->where('stripe_session_id', $session->id);
+            }
+            $existingPayment = $existingPaymentQuery->first();
 
             if (!$existingPayment) {
-                // Créer un enregistrement de paiement
-                DB::table('paiement')->insert([
-                    'numreservation' => $numreservation,
-                    'montant' => $reservation->prixtotal,
-                    'statut' => 'Complété',
-                    'stripe_session_id' => $session->id,
-                    'stripe_payment_intent' => $session->payment_intent,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                // Créer un enregistrement de paiement compatible avec le schéma actuel
+                $data = [ 'numreservation' => $numreservation ];
+                if (Schema::hasColumn('paiement', 'montant')) {
+                    $data['montant'] = $reservation->prixtotal;
+                } elseif (Schema::hasColumn('paiement', 'montantpaiement')) {
+                    $data['montantpaiement'] = $reservation->prixtotal;
+                }
+                if (Schema::hasColumn('paiement', 'datepaiement')) {
+                    $data['datepaiement'] = now()->toDateString();
+                }
+                if (Schema::hasColumn('paiement', 'statut')) {
+                    $data['statut'] = 'Complété';
+                }
+                if (Schema::hasColumn('paiement', 'stripe_session_id')) {
+                    $data['stripe_session_id'] = $session->id;
+                }
+                if (Schema::hasColumn('paiement', 'stripe_payment_intent')) {
+                    $data['stripe_payment_intent'] = $session->payment_intent ?? null;
+                }
+                if (Schema::hasColumn('paiement', 'created_at')) {
+                    $data['created_at'] = now();
+                }
+                if (Schema::hasColumn('paiement', 'updated_at')) {
+                    $data['updated_at'] = now();
+                }
+                DB::table('paiement')->insert($data);
             }
 
             // Mettre à jour le statut de la réservation (sans dépendre de l'ancien statut)
@@ -227,6 +252,12 @@ class StripeController extends Controller
                     'numreservations' => implode(',', $ids),
                     'user_id' => $userId,
                 ],
+                'payment_intent_data' => [
+                    'metadata' => [
+                        'numreservations' => implode(',', $ids),
+                        'user_id' => $userId,
+                    ],
+                ],
             ]);
 
             return redirect()->away($session->url);
@@ -267,21 +298,39 @@ class StripeController extends Controller
                     continue;
                 }
 
-                $existingPayment = DB::table('paiement')
-                    ->where('numreservation', $id)
-                    ->where('stripe_session_id', $session->id)
-                    ->first();
+                $existingPaymentQuery = DB::table('paiement')
+                    ->where('numreservation', $id);
+                if (Schema::hasColumn('paiement', 'stripe_session_id')) {
+                    $existingPaymentQuery->where('stripe_session_id', $session->id);
+                }
+                $existingPayment = $existingPaymentQuery->first();
 
                 if (!$existingPayment) {
-                    DB::table('paiement')->insert([
-                        'numreservation' => $id,
-                        'montant' => $reservation->prixtotal,
-                        'statut' => 'Complété',
-                        'stripe_session_id' => $session->id,
-                        'stripe_payment_intent' => $session->payment_intent,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
+                    $data = [ 'numreservation' => $id ];
+                    if (Schema::hasColumn('paiement', 'montant')) {
+                        $data['montant'] = $reservation->prixtotal;
+                    } elseif (Schema::hasColumn('paiement', 'montantpaiement')) {
+                        $data['montantpaiement'] = $reservation->prixtotal;
+                    }
+                    if (Schema::hasColumn('paiement', 'datepaiement')) {
+                        $data['datepaiement'] = now()->toDateString();
+                    }
+                    if (Schema::hasColumn('paiement', 'statut')) {
+                        $data['statut'] = 'Complété';
+                    }
+                    if (Schema::hasColumn('paiement', 'stripe_session_id')) {
+                        $data['stripe_session_id'] = $session->id;
+                    }
+                    if (Schema::hasColumn('paiement', 'stripe_payment_intent')) {
+                        $data['stripe_payment_intent'] = $session->payment_intent ?? null;
+                    }
+                    if (Schema::hasColumn('paiement', 'created_at')) {
+                        $data['created_at'] = now();
+                    }
+                    if (Schema::hasColumn('paiement', 'updated_at')) {
+                        $data['updated_at'] = now();
+                    }
+                    DB::table('paiement')->insert($data);
                 }
 
                 DB::table('reservation')

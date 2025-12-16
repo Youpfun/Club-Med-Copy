@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use App\Models\Reservation;
 
 class StripeWebhookController extends Controller
@@ -39,7 +40,12 @@ class StripeWebhookController extends Controller
 
                 case 'payment_intent.succeeded':
                     $paymentIntent = $event->data->object;
-                    Log::info('Payment Intent succeeded', ['payment_intent' => $paymentIntent->id]);
+                    $this->handlePaymentIntentSucceeded($paymentIntent);
+                    break;
+
+                case 'payment_intent.payment_failed':
+                    $paymentIntent = $event->data->object;
+                    $this->handlePaymentIntentFailed($paymentIntent);
                     break;
 
                 default:
@@ -85,21 +91,46 @@ class StripeWebhookController extends Controller
                 }
 
                 // Vérifier si le paiement existe déjà pour cette réservation
-                $existingPayment = DB::table('paiement')
-                    ->where('numreservation', $numreservation)
-                    ->where('stripe_session_id', $session->id)
-                    ->first();
+                $paymentQuery = DB::table('paiement')->where('numreservation', $numreservation);
+                if (Schema::hasColumn('paiement', 'stripe_session_id')) {
+                    $paymentQuery->where('stripe_session_id', $session->id);
+                }
+                $existingPayment = $paymentQuery->first();
 
                 if (!$existingPayment) {
-                    DB::table('paiement')->insert([
+                    $data = [
                         'numreservation' => $numreservation,
-                        'montant' => $reservation->prixtotal,
-                        'statut' => 'Complété',
-                        'stripe_session_id' => $session->id,
-                        'stripe_payment_intent' => $session->payment_intent,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
+                    ];
+                    // Mapper le montant selon le schéma présent
+                    if (Schema::hasColumn('paiement', 'montant')) {
+                        $data['montant'] = $reservation->prixtotal;
+                    } elseif (Schema::hasColumn('paiement', 'montantpaiement')) {
+                        $data['montantpaiement'] = $reservation->prixtotal;
+                    }
+                    // Date de paiement si la colonne existe
+                    if (Schema::hasColumn('paiement', 'datepaiement')) {
+                        $data['datepaiement'] = now()->toDateString();
+                    }
+                    // Statut si la colonne existe
+                    if (Schema::hasColumn('paiement', 'statut')) {
+                        $data['statut'] = 'Complété';
+                    }
+                    // Colonnes Stripe si elles existent
+                    if (Schema::hasColumn('paiement', 'stripe_session_id')) {
+                        $data['stripe_session_id'] = $session->id;
+                    }
+                    if (Schema::hasColumn('paiement', 'stripe_payment_intent')) {
+                        $data['stripe_payment_intent'] = $session->payment_intent ?? null;
+                    }
+                    // Timestamps si présents
+                    if (Schema::hasColumn('paiement', 'created_at')) {
+                        $data['created_at'] = now();
+                    }
+                    if (Schema::hasColumn('paiement', 'updated_at')) {
+                        $data['updated_at'] = now();
+                    }
+
+                    DB::table('paiement')->insert($data);
                 }
 
                 DB::table('reservation')
@@ -116,6 +147,102 @@ class StripeWebhookController extends Controller
             Log::error('Error handling checkout session', [
                 'error' => $e->getMessage(),
                 'session_id' => $session->id ?? 'unknown'
+            ]);
+        }
+    }
+
+    /**
+     * Handle successful payment intent
+     */
+    private function handlePaymentIntentSucceeded($paymentIntent)
+    {
+        try {
+            Log::info('Payment Intent succeeded', [
+                'payment_intent_id' => $paymentIntent->id,
+                'amount' => $paymentIntent->amount / 100,
+                'currency' => $paymentIntent->currency
+            ]);
+
+            // Récupérer les réservations liées via le checkout session
+            if (!empty($paymentIntent->metadata->numreservation)) {
+                $numreservation = $paymentIntent->metadata->numreservation;
+                
+                $reservation = Reservation::find($numreservation);
+                if ($reservation && $reservation->statut !== 'Confirmée') {
+                    DB::table('reservation')
+                        ->where('numreservation', $numreservation)
+                        ->update(['statut' => 'Confirmée']);
+
+                    // Insérer un paiement minimal si aucune ligne n'existe et que le schéma ne gène pas
+                    $exists = DB::table('paiement')->where('numreservation', $numreservation)->exists();
+                    if (!$exists) {
+                        $data = [ 'numreservation' => $numreservation ];
+                        if (Schema::hasColumn('paiement', 'montant')) {
+                            $data['montant'] = $reservation->prixtotal;
+                        } elseif (Schema::hasColumn('paiement', 'montantpaiement')) {
+                            $data['montantpaiement'] = $reservation->prixtotal;
+                        }
+                        if (Schema::hasColumn('paiement', 'datepaiement')) {
+                            $data['datepaiement'] = now()->toDateString();
+                        }
+                        if (Schema::hasColumn('paiement', 'statut')) {
+                            $data['statut'] = 'Complété';
+                        }
+                        if (Schema::hasColumn('paiement', 'stripe_payment_intent')) {
+                            $data['stripe_payment_intent'] = $paymentIntent->id;
+                        }
+                        if (Schema::hasColumn('paiement', 'created_at')) {
+                            $data['created_at'] = now();
+                        }
+                        if (Schema::hasColumn('paiement', 'updated_at')) {
+                            $data['updated_at'] = now();
+                        }
+                        DB::table('paiement')->insert($data);
+                    }
+
+                    Log::info('Payment Intent: Reservation confirmed', [
+                        'numreservation' => $numreservation,
+                        'payment_intent_id' => $paymentIntent->id
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Error handling payment intent succeeded', [
+                'error' => $e->getMessage(),
+                'payment_intent_id' => $paymentIntent->id ?? 'unknown'
+            ]);
+        }
+    }
+
+    /**
+     * Handle failed payment intent
+     */
+    private function handlePaymentIntentFailed($paymentIntent)
+    {
+        try {
+            Log::warning('Payment Intent failed', [
+                'payment_intent_id' => $paymentIntent->id,
+                'amount' => $paymentIntent->amount / 100,
+                'currency' => $paymentIntent->currency,
+                'failure_message' => $paymentIntent->last_payment_error->message ?? 'Unknown error'
+            ]);
+
+            // Optionnel : marquer la réservation comme "Paiement échoué"
+            if (!empty($paymentIntent->metadata->numreservation)) {
+                $numreservation = $paymentIntent->metadata->numreservation;
+                
+                Log::info('Payment failed for reservation', [
+                    'numreservation' => $numreservation,
+                    'payment_intent_id' => $paymentIntent->id
+                ]);
+
+                // Vous pouvez ajouter une logique ici pour notifier l'utilisateur
+                // ou mettre à jour un champ spécifique dans la réservation
+            }
+        } catch (\Exception $e) {
+            Log::error('Error handling payment intent failed', [
+                'error' => $e->getMessage(),
+                'payment_intent_id' => $paymentIntent->id ?? 'unknown'
             ]);
         }
     }
