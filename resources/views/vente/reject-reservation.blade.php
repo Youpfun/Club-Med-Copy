@@ -61,10 +61,9 @@
                     <label for="reason" class="block text-sm font-semibold text-gray-900 mb-3">
                         Motif du Rejet <span class="text-red-600">*</span>
                     </label>
-                    <select name="reason" id="reason" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                        <option value="">-- Sélectionner un motif --</option>
+                    <select name="reason" id="reason" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <option value="client_refused" selected>Client a refusé la réservation</option>
                         <option value="new_resort_not_accepted">Client a refusé le nouveau resort proposé</option>
-                        <option value="client_refused">Client a refusé la réservation</option>
                         <option value="availability_issue">Problème de disponibilité</option>
                         <option value="other">Autre</option>
                     </select>
@@ -75,7 +74,7 @@
 
                 <div>
                     <label for="refund_amount" class="block text-sm font-semibold text-gray-900 mb-3">
-                        Montant du Remboursement (€) <span class="text-red-600">*</span>
+                        Montant du Remboursement (€)
                     </label>
                     <div class="relative">
                         <input 
@@ -85,7 +84,6 @@
                             step="0.01"
                             min="0"
                             value="{{ old('refund_amount', $reservation->prixtotal) }}"
-                            required 
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                             placeholder="0.00"
                         >

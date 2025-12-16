@@ -38,7 +38,6 @@ class StayConfirmationController extends Controller
 
         $partenaires = $partenaires->unique('numpartenaire');
 
-        // Récupérer les statuts de validation des partenaires
         $partenairesStatus = DB::table('reservation_activite')
             ->join('partenaire', 'reservation_activite.numpartenaire', '=', 'partenaire.numpartenaire')
             ->where('reservation_activite.numreservation', $numreservation)
@@ -51,7 +50,6 @@ class StayConfirmationController extends Controller
             )
             ->get();
 
-        // Vérifier si tous les partenaires ont accepté
         $allPartnersAccepted = $partenairesStatus->isNotEmpty() && 
                                $partenairesStatus->every(function($p) {
                                    return $p->partenaire_validation_status === 'accepted';
@@ -61,7 +59,6 @@ class StayConfirmationController extends Controller
             return $p->partenaire_validation_status === 'refused';
         });
 
-        // Vérifier le statut de validation du resort
         $resortValidated = $reservation->resort_validation_status === 'accepted';
         $resortRefused = $reservation->resort_validation_status === 'refused';
 
@@ -84,7 +81,6 @@ class StayConfirmationController extends Controller
 
         $reservation = Reservation::findOrFail($numreservation);
 
-        // Vérifier que le resort a validé
         if ($reservation->resort_validation_status !== 'accepted') {
             if ($reservation->resort_validation_status === 'refused') {
                 return back()->with('error', 'Impossible de confirmer : le resort a refusé cette réservation.');
@@ -92,7 +88,6 @@ class StayConfirmationController extends Controller
             return back()->with('error', 'Impossible de confirmer : le resort n\'a pas encore validé cette réservation.');
         }
 
-        // Vérifier que tous les partenaires ont validé
         $partenairesStatus = DB::table('reservation_activite')
             ->where('numreservation', $numreservation)
             ->whereNotNull('numpartenaire')
@@ -154,7 +149,6 @@ class StayConfirmationController extends Controller
 
                 foreach ($partenairesEmails as $partenaireData) {
                     if ($partenaireData->emailpartenaire) {
-                        // Créer un objet partenaire pour le mail
                         $partenaire = (object)[
                             'numpartenaire' => $partenaireData->numpartenaire,
                             'nompartenaire' => $partenaireData->nompartenaire,
