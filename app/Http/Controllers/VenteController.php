@@ -5,10 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use App\Models\Reservation;
 use App\Models\ReservationRejection;
-use App\Mail\PartnerConfirmationMail;
 
 class VenteController extends Controller
 {
@@ -23,7 +21,6 @@ class VenteController extends Controller
             ->orderBy('datedebut', 'asc')
             ->paginate(15);
 
-        // Enrichir chaque réservation avec les statuts partenaires
         foreach ($reservationsPendingConfirmation as $reservation) {
             $partenairesStatus = DB::table('reservation_activite')
                 ->join('partenaire', 'reservation_activite.numpartenaire', '=', 'partenaire.numpartenaire')
@@ -81,7 +78,7 @@ class VenteController extends Controller
         $reservation = Reservation::with(['resort', 'user'])->findOrFail($numreservation);
 
         if ($reservation->statut === 'rejetee') {
-            return redirect('/vente/dashboard')->with('error', 'Cette réservation a déjà été rejetée.');
+            return redirect()->route('vente.dashboard')->with('error', 'Cette réservation a déjà été rejetée.');
         }
 
         return view('vente.reject-reservation', compact('reservation'));
@@ -95,8 +92,6 @@ class VenteController extends Controller
 
         $request->validate([
             'reason' => 'required|string|in:client_refused,new_resort_not_accepted,availability_issue,other',
-            'notes' => 'nullable|string|max:1000',
-            'refund_amount' => 'required|numeric|min:0',
         ]);
 
         $reservation = Reservation::findOrFail($numreservation);
@@ -108,15 +103,10 @@ class VenteController extends Controller
         try {
             DB::beginTransaction();
 
-            $refundAmount = $request->input('refund_amount');
-
             ReservationRejection::create([
                 'numreservation' => $numreservation,
                 'user_id' => Auth::id(),
-                'reason' => $request->input('reason'),
-                'notes' => $request->input('notes'),
-                'refund_amount' => $refundAmount,
-                'refund_status' => 'pending',
+                'rejection_reason' => $request->input('reason'),
                 'rejected_at' => now(),
             ]);
 
@@ -126,18 +116,13 @@ class VenteController extends Controller
 
             DB::commit();
 
-            return redirect('/vente/dashboard')->with('success', "Réservation #{$numreservation} rejetée et remboursement de {$refundAmount}€ enregistré. Statut: en attente de traitement.");
+            return redirect()->route('vente.dashboard')->with('success', "Réservation #{$numreservation} rejetée avec succès.");
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Erreur lors du rejet de la réservation: ' . $e->getMessage());
         }
     }
 
-    public function confirmReservation($numreservation)
-    {
-        if (!Auth::user() || (strpos(strtolower(Auth::user()->role ?? ''), 'vente') === false)) {
-            abort(403, 'Accès réservé au service vente');
-        }
 
         $reservation = Reservation::with(['resort', 'user', 'activites'])->findOrFail($numreservation);
 

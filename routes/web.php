@@ -127,7 +127,11 @@ Route::middleware([
         Route::get('/dashboard', [VenteController::class, 'dashboard'])->name('vente.dashboard');
         Route::get('/reject-reservation/{numreservation}', [VenteController::class, 'showRejectForm'])->name('vente.reject-form');
         Route::post('/reject-reservation/{numreservation}', [VenteController::class, 'rejectReservation'])->name('vente.reject');
-        Route::post('/confirm-reservation/{numreservation}', [VenteController::class, 'confirmReservation'])->name('vente.confirm');
+        
+        Route::get('/test-reject/{numreservation}', function ($numreservation) {
+            $reservation = \App\Models\Reservation::findOrFail($numreservation);
+            return view('vente.reject-reservation-test', ['reservation' => $reservation]);
+        })->name('vente.reject-test');
     });
 
 });

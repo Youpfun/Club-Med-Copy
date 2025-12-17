@@ -7,9 +7,7 @@
         <div class="mb-12">
             <h1 class="text-4xl font-bold mb-2">Tableau de Bord Service Vente</h1>
             <p class="text-gray-600">Gérez les confirmations de séjours et les validations des partenaires</p>
-        </div>
-
-        {{-- Messages de session --}}
+               {{-- Messages de session --}}
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
                 <strong>✓ Succès!</strong> {{ session('success') }}
@@ -133,6 +131,8 @@
                                                 @endforeach
                                             </div>
                                         @endif
+                   {{ ucfirst($reservation->statut) }}
+                                        </span>
                                     </td>
                                     <td class="px-6 py-4 text-sm">
                                         <a href="{{ route('stay-confirmation.form', $reservation->numreservation) }}" 

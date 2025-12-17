@@ -9,7 +9,9 @@ return new class extends Migration
     public function up()
 {
     Schema::table('users', function (Blueprint $table) {
-        $table->string('two_factor_preference')->default('email');
+        if (!Schema::hasColumn('users', 'two_factor_preference')) {
+            $table->string('two_factor_preference')->default('email');
+        }
     });
 }
 

@@ -11,25 +11,25 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reservation_confirmations', function (Blueprint $table) {
-            $table->id();
-            $table->integer('numreservation')->unsigned();
-            $table->integer('user_id')->unsigned();
-            $table->boolean('notify_resort')->default(true);
-            $table->boolean('notify_partenaires')->default(true);
-            $table->text('confirmation_message')->nullable();
-            $table->timestamp('confirmed_at');
-            $table->timestamps();
+        if (!Schema::hasTable('reservation_confirmations')) {
+            Schema::create('reservation_confirmations', function (Blueprint $table) {
+                $table->id();
+                $table->integer('numreservation')->unsigned();
+                $table->integer('user_id')->unsigned();
+                $table->boolean('notify_resort')->default(true);
+                $table->boolean('notify_partenaires')->default(true);
+                $table->text('confirmation_message')->nullable();
+                $table->timestamp('confirmed_at');
+                $table->timestamps();
 
-            // Foreign keys
-            $table->foreign('numreservation')->references('numreservation')->on('reservation')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+                $table->foreign('numreservation')->references('numreservation')->on('reservation')->onDelete('cascade');
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
-            // Index
-            $table->index('numreservation');
-            $table->index('user_id');
-            $table->index('confirmed_at');
-        });
+                $table->index('numreservation');
+                $table->index('user_id');
+                $table->index('confirmed_at');
+            });
+        }
     }
 
     /**

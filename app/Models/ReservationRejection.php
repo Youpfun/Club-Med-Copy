@@ -13,10 +13,7 @@ class ReservationRejection extends Model
     protected $fillable = [
         'numreservation',
         'user_id',
-        'reason',
-        'notes',
-        'refund_amount',
-        'refund_status',
+        'rejection_reason',
         'rejected_at',
     ];
 
