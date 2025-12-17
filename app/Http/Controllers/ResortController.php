@@ -28,7 +28,6 @@ class ResortController extends Controller
         $query = Resort::query();
         $query->select('resort.*');
 
-        // On utilise 'prix' ici
         $priceSubquery = DB::table('tarifer')
             ->join('proposer', 'tarifer.numtype', '=', 'proposer.numtype')
             ->selectRaw('CAST(MIN(tarifer.prix) + (resort.numresort * 7) + (resort.nbtridents * 50) AS DECIMAL(10,0))')

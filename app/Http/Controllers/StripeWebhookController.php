@@ -10,9 +10,6 @@ use App\Models\Reservation;
 
 class StripeWebhookController extends Controller
 {
-    /**
-     * Handle Stripe webhooks
-     */
     public function handleWebhook(Request $request)
     {
         $payload = $request->getContent();
@@ -20,7 +17,6 @@ class StripeWebhookController extends Controller
         $webhookSecret = config('stripe.webhook_secret');
 
         try {
-            // Vérifier la signature du webhook si le secret est configuré
             if ($webhookSecret) {
                 $event = \Stripe\Webhook::constructEvent(
                     $payload,
@@ -31,7 +27,6 @@ class StripeWebhookController extends Controller
                 $event = json_decode($payload);
             }
 
-            // Traiter l'événement
             switch ($event->type) {
                 case 'checkout.session.completed':
                     $session = $event->data->object;
@@ -68,7 +63,6 @@ class StripeWebhookController extends Controller
     private function handleCheckoutSessionCompleted($session)
     {
         try {
-            // Gérer 1 ou plusieurs réservations via metadata
             $ids = [];
             if (!empty($session->metadata->numreservation)) {
                 $ids = [$session->metadata->numreservation];
@@ -90,7 +84,6 @@ class StripeWebhookController extends Controller
                     continue;
                 }
 
-                // Vérifier si le paiement existe déjà pour cette réservation
                 $paymentQuery = DB::table('paiement')->where('numreservation', $numreservation);
                 if (Schema::hasColumn('paiement', 'stripe_session_id')) {
                     $paymentQuery->where('stripe_session_id', $session->id);
@@ -163,7 +156,6 @@ class StripeWebhookController extends Controller
                 'currency' => $paymentIntent->currency
             ]);
 
-            // Récupérer les réservations liées via le checkout session
             if (!empty($paymentIntent->metadata->numreservation)) {
                 $numreservation = $paymentIntent->metadata->numreservation;
                 
@@ -173,7 +165,6 @@ class StripeWebhookController extends Controller
                         ->where('numreservation', $numreservation)
                         ->update(['statut' => 'Confirmée']);
 
-                    // Insérer un paiement minimal si aucune ligne n'existe et que le schéma ne gène pas
                     $exists = DB::table('paiement')->where('numreservation', $numreservation)->exists();
                     if (!$exists) {
                         $data = [ 'numreservation' => $numreservation ];

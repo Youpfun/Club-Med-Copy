@@ -72,23 +72,20 @@ class AvisController extends Controller
      */
     public function report(Request $request, $numavis)
     {
-        // Vérifier que l'avis existe
         $avis = Avis::find($numavis);
         if (!$avis) {
             return redirect()->back()
                 ->with('error', 'Avis introuvable.');
         }
 
-        // Validation des données
         $request->validate([
             'message' => 'required|string|max:1000',
         ]);
 
-        // Créer le signalement avec numresort, numavis et message
         Signalement::create([
-            'numresort' => $avis->numresort, // ID du resort depuis l'avis
-            'numavis' => $numavis, // ID de l'avis signalé
-            'user_id' => Auth::id(), // null si visiteur anonyme
+            'numresort' => $avis->numresort,
+            'numavis' => $numavis,
+            'user_id' => Auth::id(),
             'message' => $request->message,
             'datesignalement' => Carbon::now(),
             'traite' => false,

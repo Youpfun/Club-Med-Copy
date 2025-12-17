@@ -13,7 +13,6 @@ class ResortValidationController extends Controller
 {
     public function show($token)
     {
-        // Trouver la réservation avec ce token
         $reservation = Reservation::with(['resort', 'user', 'chambres.typechambre', 'activites.activite'])
             ->where('resort_validation_token', $token)
             ->first();
@@ -24,14 +23,12 @@ class ResortValidationController extends Controller
             ]);
         }
 
-        // Vérifier si le token a expiré
         if ($reservation->resort_validation_token_expires_at < now()) {
             return view('resort.validation-error', [
                 'message' => 'Ce lien de validation a expiré.'
             ]);
         }
 
-        // Vérifier si le token a déjà été utilisé
         if ($reservation->resort_validation_token_used_at) {
             return view('resort.validation-error', [
                 'message' => 'Ce lien a déjà été utilisé. Statut actuel : ' . $reservation->resort_validation_status
@@ -72,14 +69,12 @@ class ResortValidationController extends Controller
         $comment = $request->input('comment');
         $status = $action === 'accept' ? 'accepted' : 'refused';
 
-        // Mettre à jour la réservation
         $reservation->update([
             'resort_validation_status' => $status,
             'resort_validated_at' => now(),
             'resort_validation_token_used_at' => now(),
         ]);
 
-        // Si le resort accepte, envoyer les mails aux partenaires
         if ($status === 'accepted') {
             $this->sendPartnerValidationEmails($reservation);
         }
@@ -93,7 +88,6 @@ class ResortValidationController extends Controller
 
     private function sendPartnerValidationEmails($reservation)
     {
-        // Récupérer les partenaires uniques liés aux activités de cette réservation
         $partenairesData = DB::table('reservation_activite')
             ->join('partenaire', 'reservation_activite.numpartenaire', '=', 'partenaire.numpartenaire')
             ->where('reservation_activite.numreservation', $reservation->numreservation)
@@ -104,11 +98,9 @@ class ResortValidationController extends Controller
 
         foreach ($partenairesData as $partenaireData) {
             if ($partenaireData->emailpartenaire) {
-                // Générer un token unique pour ce partenaire
                 $token = Str::uuid()->toString();
                 $expiresAt = now()->addDays(3);
 
-                // Mettre à jour les activités de ce partenaire avec le token
                 DB::table('reservation_activite')
                     ->where('numreservation', $reservation->numreservation)
                     ->where('numpartenaire', $partenaireData->numpartenaire)
@@ -117,10 +109,8 @@ class ResortValidationController extends Controller
                         'validation_token_expires_at' => $expiresAt,
                     ]);
 
-                // Créer le lien de validation
                 $tokenLink = url('/partner/validate/' . $token);
 
-                // Envoyer l'email
                 Mail::to($partenaireData->emailpartenaire)
                     ->send(new PartnerValidationMail($reservation, $partenaireData, $tokenLink));
             }

@@ -125,7 +125,7 @@ class ReservationController extends Controller
         $nbAdultes = $request->query('nbAdultes', 1);
         $nbEnfants = $request->query('nbEnfants', 0);
         
-        // Récupérer les transports sélectionnés pour chaque participant
+        // Récupérer les transports sélectionnés
         $transportsParticipants = [];
         for ($i = 1; $i <= $nbAdultes; $i++) {
             $transportsParticipants['adulte_' . $i] = $request->query('transport_adulte_' . $i);
@@ -149,7 +149,6 @@ class ReservationController extends Controller
 
         $nbNuits = Carbon::parse($dateDebut)->diffInDays(Carbon::parse($dateFin));
         
-        // Calculer le prix total des chambres
         $prixChambre = 0;
         foreach ($chambres as $numtype => $qty) {
             if ($qty > 0) {
@@ -158,7 +157,6 @@ class ReservationController extends Controller
             }
         }
         
-        // Calculer le prix total du transport
         $prixTransport = 0;
         foreach ($transportsParticipants as $numtransport) {
             if ($numtransport) {
@@ -195,7 +193,6 @@ class ReservationController extends Controller
         $nbNuits = Carbon::parse($dateDebut)->diffInDays(Carbon::parse($dateFin));
         $nbPersonnes = $nbAdultes + $nbEnfants;
 
-        // Calculer le prix total des chambres
         $prixChambre = 0;
         foreach ($chambres as $numtype => $qty) {
             if ($qty > 0) {
@@ -204,7 +201,6 @@ class ReservationController extends Controller
             }
         }
 
-        // Calculer le prix total du transport
         $prixTransport = 0;
         foreach ($transports as $numtransport) {
             if ($numtransport) {
@@ -215,7 +211,6 @@ class ReservationController extends Controller
             }
         }
 
-        // Calculer le prix des activités (par participant sélectionné)
         $prixActivites = 0;
         foreach ($activites as $numactivite => $participants) {
             if (is_array($participants) && count($participants) > 0) {
@@ -230,7 +225,6 @@ class ReservationController extends Controller
         $tva = $sousTotal * 0.2;
         $prixTotal = $sousTotal + $tva;
 
-        // Créer la réservation
         $numreservation = DB::table('reservation')->insertGetId([
             'user_id' => Auth::id(),
             'numresort' => $numresort,
@@ -244,7 +238,6 @@ class ReservationController extends Controller
             'datefin' => $dateFin,
         ], 'numreservation');
 
-        // Créer les enregistrements dans choisir pour chaque type de chambre avec quantité
         foreach ($chambres as $numtype => $qty) {
             if ($qty > 0) {
                 DB::table('choisir')->insert([
@@ -255,10 +248,7 @@ class ReservationController extends Controller
             }
         }
 
-        // Créer les participants avec leur transport
         $participantsMap = [];
-        
-        // Créer les adultes
         for ($i = 1; $i <= $nbAdultes; $i++) {
             $key = 'adulte_' . $i;
             $numtransport = $transports[$key] ?? null;
@@ -274,8 +264,6 @@ class ReservationController extends Controller
             
             $participantsMap[$key] = $numparticipant;
         }
-        
-        // Créer les enfants
         for ($i = 1; $i <= $nbEnfants; $i++) {
             $key = 'enfant_' . $i;
             $numtransport = $transports[$key] ?? null;
@@ -292,14 +280,12 @@ class ReservationController extends Controller
             $participantsMap[$key] = $numparticipant;
         }
 
-        // Créer les liens participant_activite et reservation_activite
         foreach ($activites as $numactivite => $participants) {
             if (is_array($participants) && count($participants) > 0) {
                 $activite = DB::table('activitealacarte')->where('numactivite', $numactivite)->first();
                 $partenaireRecord = DB::table('fourni')->where('numactivite', $numactivite)->first();
 
                 if ($activite) {
-                    // Créer un enregistrement dans reservation_activite uniquement si un partenaire existe
                     if ($partenaireRecord && $partenaireRecord->numpartenaire) {
                         DB::table('reservation_activite')->insert([
                             'numreservation' => $numreservation,
@@ -312,7 +298,6 @@ class ReservationController extends Controller
                         ]);
                     }
 
-                    // Créer les liens participant_activite pour chaque participant
                     foreach ($participants as $participantKey) {
                         if (isset($participantsMap[$participantKey])) {
                             DB::table('participant_activite')->insert([
@@ -327,14 +312,11 @@ class ReservationController extends Controller
             }
         }
 
-        // Envoyer un email de validation au resort
         $reservationLoaded = \App\Models\Reservation::with(['resort', 'user', 'activites.activite', 'chambres.typechambre'])->find($numreservation);
         
-        // Générer un token unique pour le resort
         $resortToken = (string) Str::uuid();
         $expiresAt = now()->addDays(3);
 
-        // Mettre à jour la réservation avec le token resort
         DB::table('reservation')
             ->where('numreservation', $numreservation)
             ->update([
@@ -486,7 +468,6 @@ class ReservationController extends Controller
             return redirect()->route('cart.index')->with('error', 'Réservation non trouvée');
         }
 
-        // Mettre à jour les dates et nombre de personnes
         $dateDebut = $request->input('dateDebut');
         $dateFin = $request->input('dateFin');
         $nbAdultes = (int)$request->input('nbAdultes', 0);
@@ -501,7 +482,6 @@ class ReservationController extends Controller
                 'nbpersonnes' => $nbPersonnes,
             ]);
 
-        // Mettre à jour les chambres
         DB::table('choisir')->where('numreservation', $numreservation)->delete();
 
         foreach ($request->input('chambres', []) as $numtype => $quantite) {
@@ -594,14 +574,12 @@ class ReservationController extends Controller
             return redirect()->route('cart.index')->with('error', 'Réservation non trouvée');
         }
 
-        // Mettre à jour le transport pour chaque participant
         foreach ($request->input('transport', []) as $numparticipant => $numtransport) {
             DB::table('participant')
                 ->where('numparticipant', $numparticipant)
                 ->update(['numtransport' => $numtransport]);
         }
 
-        // Recalculer le prix
         $this->recalculerPrixReservation($numreservation);
 
         return redirect()->route('panier.show', $numreservation)

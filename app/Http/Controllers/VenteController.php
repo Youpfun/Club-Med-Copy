@@ -141,7 +141,6 @@ class VenteController extends Controller
 
         $reservation = Reservation::with(['resort', 'user', 'activites'])->findOrFail($numreservation);
 
-        // Vérifier que toutes les activités partenaires sont acceptées
         $pending = DB::table('reservation_activite')
             ->where('numreservation', $numreservation)
             ->where('partenaire_validation_status', 'pending')

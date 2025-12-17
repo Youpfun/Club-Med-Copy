@@ -14,7 +14,6 @@ class PanierController extends Controller
     {
         $userId = Auth::id();
         
-        // Récupérer les IDs des réservations déjà payées (Confirmée ou Terminée)
         $paidReservationIds = DB::table('reservation')
             ->where('user_id', $userId)
             ->whereIn('statut', ['Confirmée', 'Terminée'])
@@ -26,7 +25,7 @@ class PanierController extends Controller
             ->leftJoin('pays', 'resort.codepays', '=', 'pays.codepays')
             ->where('reservation.user_id', $userId)
             ->where('reservation.statut', 'En attente')
-            ->whereNotIn('reservation.numreservation', $paidReservationIds) // Exclure les IDs déjà payés
+            ->whereNotIn('reservation.numreservation', $paidReservationIds)
             ->select(
                 'reservation.*',
                 'resort.nomresort',
@@ -35,7 +34,6 @@ class PanierController extends Controller
             )
             ->get();
 
-        // Pour chaque réservation, récupérer ses chambres
         foreach ($reservations as $reservation) {
             $reservation->chambres = DB::table('choisir')
                 ->join('typechambre', 'choisir.numtype', '=', 'typechambre.numtype')
@@ -70,17 +68,14 @@ class PanierController extends Controller
 
         $resort = Resort::with('photos')->find($reservation->numresort);
         
-        // Récupérer les chambres avec quantités
         $chambres = DB::table('choisir')
             ->join('typechambre', 'choisir.numtype', '=', 'typechambre.numtype')
             ->where('choisir.numreservation', $numreservation)
             ->select('typechambre.*', 'choisir.quantite')
             ->get();
 
-        // Calculs
         $nbNuits = Carbon::parse($reservation->datedebut)->diffInDays(Carbon::parse($reservation->datefin));
         
-        // Récupérer les participants avec leurs transports
         $participants = DB::table('participant')
             ->leftJoin('transport', 'participant.numtransport', '=', 'transport.numtransport')
             ->where('participant.numreservation', $numreservation)
@@ -91,7 +86,6 @@ class PanierController extends Controller
             )
             ->get();
         
-        // Compter adultes et enfants
         $nbAdultes = $participants->filter(function($p) {
             return str_contains($p->nomparticipant, 'Adulte');
         })->count();
@@ -102,7 +96,6 @@ class PanierController extends Controller
         
         $nbPersonnes = $nbAdultes + $nbEnfants;
         
-        // Récupérer les activités avec les participants qui les ont choisies
         $activitesData = DB::table('participant_activite')
             ->join('activite', 'participant_activite.numactivite', '=', 'activite.numactivite')
             ->join('activitealacarte', 'activite.numactivite', '=', 'activitealacarte.numactivite')
@@ -145,10 +138,7 @@ class PanierController extends Controller
             $prixActivites += $activite['prixmin'] * $activite['nbParticipants'];
         }
         
-        // Utiliser le prix total enregistré dans la BDD
         $total = floatval($reservation->prixtotal);
-        
-        // Décomposer le total pour affichage (avec TVA 20%)
         $sousTotal = $total / 1.2;
         $tva = $total - $sousTotal;
 
@@ -206,31 +196,24 @@ class PanierController extends Controller
             ->first();
 
         if ($reservation) {
-            // Récupérer les IDs des participants de cette réservation
             $participantIds = DB::table('participant')
                 ->where('numreservation', $numreservation)
                 ->pluck('numparticipant');
             
-            // Supprimer les liens participant_activite
             if ($participantIds->isNotEmpty()) {
                 DB::table('participant_activite')
                     ->whereIn('numparticipant', $participantIds)
                     ->delete();
             }
             
-            // Supprimer les participants
             DB::table('participant')->where('numreservation', $numreservation)->delete();
             
-            // Supprimer les activités de la réservation
             DB::table('reservation_activite')->where('numreservation', $numreservation)->delete();
             
-            // Supprimer les chambres
             DB::table('choisir')->where('numreservation', $numreservation)->delete();
             
-            // Supprimer la réservation
             DB::table('reservation')->where('numreservation', $numreservation)->delete();
             
-            // Nettoyer aussi la session
             $reservationDetails = session('reservation_details', []);
             unset($reservationDetails[$numreservation]);
             session(['reservation_details' => $reservationDetails]);

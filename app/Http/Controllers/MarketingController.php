@@ -18,7 +18,6 @@ class MarketingController extends Controller
         $periodes = Periode::orderBy('datedebutperiode')->get();
         $typesChambre = TypeChambre::all(); 
 
-        // Récupération des resorts filtrés
         $query = Resort::query();
         if ($request->filled('type_club')) {
             $query->whereHas('typeClubs', function($q) use ($request) {
@@ -32,7 +31,6 @@ class MarketingController extends Controller
         $stats = [];
 
         if ($selectedResort) {
-            // On vérifie quelles chambres existent réellement dans ce resort
             $typesProposes = DB::table('proposer')
                                ->where('numresort', $selectedResort->numresort)
                                ->pluck('numtype')
@@ -42,7 +40,6 @@ class MarketingController extends Controller
                 foreach ($typesChambre as $tc) {
                     if (!in_array($tc->numtype, $typesProposes)) continue;
 
-                    // Lecture directe plus sûre
                     $tarif = DB::table('tarifer')
                                ->where('numperiode', $p->numperiode)
                                ->where('numtype', $tc->numtype)
@@ -81,20 +78,16 @@ class MarketingController extends Controller
         $resort = Resort::find($request->numresort);
         $prixStandard = $this->calculateStandardPrice($request->numtype, $resort->nbtridents);
 
-        // 1. On cherche la ligne EXACTE avec DB::table (contourne le bug Eloquent)
         $existingTarif = DB::table('tarifer')
             ->where('numperiode', $request->numperiode)
             ->where('numtype', $request->numtype)
             ->where('numresort', $request->numresort)
             ->first();
 
-        // Prix de base à utiliser pour le calcul
         $basePriceToUse = $existingTarif ? $existingTarif->prix : $prixStandard;
 
-        // 2. Calcul du prix promo
         $nouveauPrixPromo = null;
 
-        // Si on annule (valeur vide, ou 100%, ou 0€)
         $isCancelled = ($request->valeur === null || 
                        ($request->mode == 'percentage' && $request->valeur >= 100) || 
                        ($request->mode == 'amount' && $request->valeur == 0));

@@ -16,19 +16,14 @@ class StripeController extends Controller
         return view('index');
     }
 
-    /**
-     * Affiche la page de paiement pour une réservation
-     */
     public function showPaymentPage($numreservation)
     {
         $reservation = Reservation::with(['resort', 'user'])->findOrFail($numreservation);
         
-        // Vérifier que l'utilisateur est propriétaire de la réservation
         if ($reservation->user_id !== Auth::id()) {
             abort(403, 'Unauthorized');
         }
 
-        // Récupérer les détails de la réservation
         $details = DB::table('reservation')
             ->join('resort', 'reservation.numresort', '=', 'resort.numresort')
             ->join('choisir', 'reservation.numreservation', '=', 'choisir.numreservation')
@@ -51,16 +46,13 @@ class StripeController extends Controller
 
         $reservation = Reservation::findOrFail($request->numreservation);
 
-        // Vérifier que l'utilisateur est propriétaire
         if ($reservation->user_id !== Auth::id()) {
             abort(403, 'Unauthorized');
         }
 
-        // Initialiser Stripe
         \Stripe\Stripe::setApiKey(config('stripe.secret_key'));
 
         try {
-            // Créer la session de paiement
             $session = \Stripe\Checkout\Session::create([
                 'payment_method_types' => ['card'],
                 'line_items' => [[
@@ -98,14 +90,10 @@ class StripeController extends Controller
         }
     }
 
-    /**
-     * Traite le succès du paiement
-     */
     public function success(Request $request, $numreservation)
     {
         $reservation = Reservation::findOrFail($numreservation);
 
-        // Vérifier que l'utilisateur est propriétaire
         if ($reservation->user_id !== Auth::id()) {
             abort(403, 'Unauthorized');
         }
@@ -118,16 +106,13 @@ class StripeController extends Controller
         \Stripe\Stripe::setApiKey(config('stripe.secret_key'));
 
         try {
-            // Récupérer les détails de la session
             $session = \Stripe\Checkout\Session::retrieve($request->session_id);
 
-            // Vérifier que le paiement a bien été effectué
             if ($session->payment_status !== 'paid') {
                 return redirect()->route('panier.show', $numreservation)
                     ->with('error', 'Le paiement n\'a pas été complété.');
             }
 
-            // Vérifier si le paiement existe déjà pour éviter les doublons
             $existingPaymentQuery = DB::table('paiement')->where('numreservation', $numreservation);
             if (Schema::hasColumn('paiement', 'stripe_session_id')) {
                 $existingPaymentQuery->where('stripe_session_id', $session->id);
@@ -135,7 +120,6 @@ class StripeController extends Controller
             $existingPayment = $existingPaymentQuery->first();
 
             if (!$existingPayment) {
-                // Créer un enregistrement de paiement compatible avec le schéma actuel
                 $data = [ 'numreservation' => $numreservation ];
                 if (Schema::hasColumn('paiement', 'montant')) {
                     $data['montant'] = $reservation->prixtotal;
@@ -163,14 +147,12 @@ class StripeController extends Controller
                 DB::table('paiement')->insert($data);
             }
 
-            // Mettre à jour le statut de la réservation (sans dépendre de l'ancien statut)
             $updated = DB::table('reservation')
                 ->where('numreservation', $numreservation)
                 ->update([
                     'statut' => 'Confirmée'
                 ]);
 
-            // Log pour déboguer
             \Log::info('Paiement traité', [
                 'numreservation' => $numreservation,
                 'session_id' => $session->id,
@@ -181,7 +163,6 @@ class StripeController extends Controller
             return redirect()->route('reservations.index')
                 ->with('success', 'Paiement effectué avec succès! Votre réservation #' . $numreservation . ' est maintenant confirmée.');
         } catch (\Exception $e) {
-            // Rediriger vers Mes réservations pour rester cohérent avec le flux souhaité
             return redirect()->route('reservations.index')
                 ->with('error', 'Erreur lors de la confirmation du paiement: ' . $e->getMessage());
         }
