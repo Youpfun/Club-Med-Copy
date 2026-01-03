@@ -312,29 +312,7 @@ class ReservationController extends Controller
             }
         }
 
-        $reservationLoaded = \App\Models\Reservation::with(['resort', 'user', 'activites.activite', 'chambres.typechambre'])->find($numreservation);
-        
-        $resortToken = (string) Str::uuid();
-        $expiresAt = now()->addDays(3);
-
-        DB::table('reservation')
-            ->where('numreservation', $numreservation)
-            ->update([
-                'resort_validation_token' => $resortToken,
-                'resort_validation_token_expires_at' => $expiresAt,
-                'resort_validation_status' => 'pending',
-            ]);
-
-        // Envoyer l'email au resort
-        $resort = $reservationLoaded->resort;
-        $resortEmail = $resort->emailresort ?? config('mail.from.address');
-        $resortLink = url('/resort/validate/' . $resortToken);
-
-        try {
-            Mail::to($resortEmail)->send(new ResortValidationMail($reservationLoaded, $resort, $resortLink));
-        } catch (\Exception $e) {
-            \Log::error('Envoi email resort échec: ' . $e->getMessage());
-        }
+        // L'email au resort sera envoyé après le paiement (via webhook Stripe)
 
         // Stocker les détails de réservation en session
         $reservationDetails = session('reservation_details', []);

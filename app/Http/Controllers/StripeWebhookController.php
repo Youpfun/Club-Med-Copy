@@ -6,7 +6,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use App\Models\Reservation;
+use App\Mail\ResortValidationMail;
 
 class StripeWebhookController extends Controller
 {
@@ -129,6 +132,32 @@ class StripeWebhookController extends Controller
                 DB::table('reservation')
                     ->where('numreservation', $numreservation)
                     ->update(['statut' => 'Confirmée']);
+
+                // Envoyer l'email de validation au resort après paiement
+                $reservationLoaded = Reservation::with(['resort', 'user', 'activites.activite', 'chambres.typechambre'])->find($numreservation);
+                if ($reservationLoaded && $reservationLoaded->resort) {
+                    $resortToken = (string) Str::uuid();
+                    $expiresAt = now()->addDays(3);
+
+                    DB::table('reservation')
+                        ->where('numreservation', $numreservation)
+                        ->update([
+                            'resort_validation_token' => $resortToken,
+                            'resort_validation_token_expires_at' => $expiresAt,
+                            'resort_validation_status' => 'pending',
+                        ]);
+
+                    $resort = $reservationLoaded->resort;
+                    $resortEmail = $resort->emailresort ?? config('mail.from.address');
+                    $resortLink = url('/resort/validate/' . $resortToken);
+
+                    try {
+                        Mail::to($resortEmail)->send(new ResortValidationMail($reservationLoaded, $resort, $resortLink));
+                        Log::info('Resort validation email sent', ['numreservation' => $numreservation, 'resort_email' => $resortEmail]);
+                    } catch (\Exception $e) {
+                        Log::error('Envoi email resort échec après paiement: ' . $e->getMessage(), ['numreservation' => $numreservation]);
+                    }
+                }
 
                 Log::info('Webhook: Reservation updated', [
                     'numreservation' => $numreservation,
