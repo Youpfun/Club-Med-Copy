@@ -48,7 +48,12 @@
                                         <a href="{{ route('resort.create') }}" class="inline-flex items-center justify-center px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-full font-semibold text-base transition-colors">
                                             ✨ Créer un nouveau séjour
                                         </a>
+                                        <a href="{{ route('marketing.indisponibilite.select') }}" class="inline-flex items-center justify-center px-8 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full font-semibold text-base transition-colors ml-4">
+                                            🚫 Bloquer Chambre
+                                        </a>
                                     @endif
+
+                                    
                                 @endauth
                             </div>
                         </div>

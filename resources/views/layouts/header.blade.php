@@ -8,8 +8,11 @@
         <a href="{{ url('/resorts') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">Nos Resorts</a>
         <a href="{{ url('/clients') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">Clients (Admin)</a>
         @auth
-            @if(Auth::user()->role === 'Directeur du Service Marketing')
-                <a href="{{ route('marketing.dashboard') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">Espace Marketing (Responsable Marketing)</a>
+            {{-- Vérifie si le rôle contient "marketing" (Directeur OU Membre) --}}
+            @if(strpos(strtolower(Auth::user()->role ?? ''), 'marketing') !== false)
+                <a href="{{ route('marketing.dashboard') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                    Espace Marketing
+                </a>
             @endif
         @endauth
     </nav>

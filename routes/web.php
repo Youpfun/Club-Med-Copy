@@ -21,6 +21,7 @@ use App\Http\Controllers\ResortValidationController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\MarketingController;
+use App\Http\Controllers\IndisponibiliteController;
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('stripe.webhook');
 
@@ -57,6 +58,11 @@ Route::middleware(['auth', 'marketing'])->prefix('marketing')->group(function ()
     Route::post('/reset-promos', [MarketingController::class, 'resetPromos'])->name('marketing.reset_promos');
     Route::get('/resorts/create', [ResortController::class, 'create'])->name('resort.create');
     Route::post('/resorts', [ResortController::class, 'store'])->name('resort.store');
+    Route::get('/indisponibilite/select', [IndisponibiliteController::class, 'selectResort'])->name('marketing.indisponibilite.select');
+    Route::get('/indisponibilite/create/{numresort}', [IndisponibiliteController::class, 'create'])->name('marketing.indisponibilite.create');
+    Route::post('/indisponibilite', [IndisponibiliteController::class, 'store'])->name('marketing.indisponibilite.store');
+    Route::get('/indisponibilites', [IndisponibiliteController::class, 'index'])->name('marketing.indisponibilite.index');
+    Route::delete('/indisponibilite/{id}', [IndisponibiliteController::class, 'destroy'])->name('marketing.indisponibilite.destroy');
 });
 
 Route::middleware([
