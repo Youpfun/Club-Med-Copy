@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Reservation;
 use App\Models\ReservationRejection;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\PartnerConfirmationMail;
 
 class VenteController extends Controller
 {
@@ -17,7 +19,7 @@ class VenteController extends Controller
         }
 
         $reservationsPendingConfirmation = Reservation::with(['resort', 'user', 'activites.activite'])
-            ->whereIn('statut', ['en_attente', 'payee'])
+            ->whereIn('statut', ['en_attente', 'payee', 'Confirmée'])
             ->orderBy('datedebut', 'asc')
             ->paginate(15);
 
@@ -55,7 +57,7 @@ class VenteController extends Controller
         }
 
         $stats = [
-            'total_pending' => Reservation::whereIn('statut', ['en_attente', 'payee'])->count(),
+            'total_pending' => Reservation::whereIn('statut', ['en_attente', 'payee', 'Confirmée'])->count(),
             'total_confirmed' => Reservation::where('statut', 'confirmee')->count(),
             'total_upcoming' => Reservation::where('statut', 'confirmee')
                 ->where('datedebut', '>=', now())
@@ -123,6 +125,11 @@ class VenteController extends Controller
         }
     }
 
+    public function confirmReservation($numreservation)
+    {
+        if (!Auth::user() || (strpos(strtolower(Auth::user()->role ?? ''), 'vente') === false)) {
+            abort(403, 'Accès réservé au service vente');
+        }
 
         $reservation = Reservation::with(['resort', 'user', 'activites'])->findOrFail($numreservation);
 
