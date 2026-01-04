@@ -5,10 +5,14 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use App\Models\Reservation;
+use App\Models\Resort;
 use App\Models\ReservationRejection;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\PartnerConfirmationMail;
+use App\Mail\AlternativeResortProposalMail;
+use App\Mail\ReservationRejectedMail;
 
 class VenteController extends Controller
 {
@@ -38,6 +42,14 @@ class VenteController extends Controller
             $reservation->partenaires_status = $partenairesStatus;
         }
 
+        // Récupérer les réservations dont le resort a refusé (nécessite proposition alternative)
+        $reservationsResortRefused = Reservation::with(['resort', 'user', 'alternativeResort'])
+            ->where('resort_validation_status', 'refused')
+            ->whereIn('alternative_resort_status', ['none', 'refused'])
+            ->whereNotIn('statut', ['rejetee', 'annulee'])
+            ->orderBy('datedebut', 'asc')
+            ->get();
+
         $confirmedIds = DB::table('reservation_confirmations')
             ->orderBy('confirmed_at', 'desc')
             ->limit(10)
@@ -62,11 +74,13 @@ class VenteController extends Controller
             'total_upcoming' => Reservation::where('statut', 'confirmee')
                 ->where('datedebut', '>=', now())
                 ->count(),
+            'total_resort_refused' => $reservationsResortRefused->count(),
         ];
 
         return view('vente.dashboard', compact(
             'reservationsPendingConfirmation',
             'confirmedReservations',
+            'reservationsResortRefused',
             'stats'
         ));
     }
@@ -116,6 +130,25 @@ class VenteController extends Controller
                 'statut' => 'rejetee',
             ]);
 
+            // Envoyer un email au client pour l'informer du rejet
+            $reservation->load(['resort', 'user']);
+            if ($reservation->user && $reservation->user->email) {
+                try {
+                    Mail::to($reservation->user->email)->send(
+                        new ReservationRejectedMail($reservation, $request->input('reason'))
+                    );
+                    \Log::info('Email de rejet envoyé au client', [
+                        'numreservation' => $numreservation,
+                        'client_email' => $reservation->user->email,
+                        'reason' => $request->input('reason'),
+                    ]);
+                } catch (\Exception $e) {
+                    \Log::error('Erreur envoi email rejet au client: ' . $e->getMessage(), [
+                        'numreservation' => $numreservation,
+                    ]);
+                }
+            }
+
             DB::commit();
 
             return redirect()->route('vente.dashboard')->with('success', "Réservation #{$numreservation} rejetée avec succès.");
@@ -161,5 +194,91 @@ class VenteController extends Controller
         }
 
         return back()->with('success', 'Réservation confirmée et partenaires notifiés.');
+    }
+
+    /**
+     * Affiche le formulaire pour proposer un resort alternatif
+     */
+    public function showProposeAlternativeForm($numreservation)
+    {
+        if (!Auth::user() || (strpos(strtolower(Auth::user()->role ?? ''), 'vente') === false)) {
+            abort(403, 'Accès réservé au service vente');
+        }
+
+        $reservation = Reservation::with(['resort', 'user'])->findOrFail($numreservation);
+
+        // Vérifier que le resort a bien refusé
+        if ($reservation->resort_validation_status !== 'refused') {
+            return redirect()->route('vente.dashboard')->with('error', 'Le resort n\'a pas refusé cette réservation.');
+        }
+
+        // Récupérer les resorts alternatifs disponibles (même pays ou similaires)
+        $originalResort = $reservation->resort;
+        $alternativeResorts = Resort::with(['pays', 'photos'])
+            ->where('numresort', '!=', $originalResort->numresort)
+            ->orderBy('nomresort')
+            ->get();
+
+        return view('vente.propose-alternative', compact('reservation', 'originalResort', 'alternativeResorts'));
+    }
+
+    /**
+     * Envoie la proposition de resort alternatif au client
+     */
+    public function proposeAlternativeResort(Request $request, $numreservation)
+    {
+        if (!Auth::user() || (strpos(strtolower(Auth::user()->role ?? ''), 'vente') === false)) {
+            abort(403, 'Accès réservé au service vente');
+        }
+
+        $request->validate([
+            'alternative_resort_id' => 'required|exists:resort,numresort',
+            'message' => 'nullable|string|max:2000',
+        ]);
+
+        $reservation = Reservation::with(['resort', 'user'])->findOrFail($numreservation);
+
+        if ($reservation->resort_validation_status !== 'refused') {
+            return back()->with('error', 'Le resort n\'a pas refusé cette réservation.');
+        }
+
+        $alternativeResort = Resort::findOrFail($request->alternative_resort_id);
+        $originalResort = $reservation->resort;
+
+        // Générer un token unique pour la réponse du client
+        $token = Str::uuid()->toString();
+        $expiresAt = now()->addDays(7);
+
+        // Mettre à jour la réservation
+        $reservation->update([
+            'alternative_resort_id' => $alternativeResort->numresort,
+            'alternative_resort_status' => 'proposed',
+            'alternative_resort_proposed_at' => now(),
+            'alternative_resort_token' => $token,
+            'alternative_resort_token_expires_at' => $expiresAt,
+            'alternative_resort_message' => $request->message,
+            'alternative_proposed_by' => Auth::id(),
+        ]);
+
+        // Envoyer l'email au client
+        $tokenLink = url('/client/alternative-resort/' . $token);
+
+        try {
+            Mail::to($reservation->user->email)->send(
+                new AlternativeResortProposalMail($reservation, $originalResort, $alternativeResort, $tokenLink, $request->message)
+            );
+            \Log::info('Email proposition resort alternatif envoyé', [
+                'numreservation' => $numreservation,
+                'client_email' => $reservation->user->email,
+                'alternative_resort' => $alternativeResort->nomresort,
+            ]);
+
+            return redirect()->route('vente.dashboard')->with('success', 
+                "Proposition de resort alternatif envoyée au client pour la réservation #{$numreservation}."
+            );
+        } catch (\Exception $e) {
+            \Log::error('Erreur envoi email proposition alternative: ' . $e->getMessage());
+            return back()->with('error', 'Erreur lors de l\'envoi de l\'email: ' . $e->getMessage());
+        }
     }
 }

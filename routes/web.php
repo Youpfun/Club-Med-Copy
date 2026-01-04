@@ -22,6 +22,7 @@ use App\Http\Controllers\StripeController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\IndisponibiliteController;
+use App\Http\Controllers\AlternativeResortController;
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('stripe.webhook');
 
@@ -128,6 +129,8 @@ Route::middleware([
         Route::get('/dashboard', [VenteController::class, 'dashboard'])->name('vente.dashboard');
         Route::get('/reject-reservation/{numreservation}', [VenteController::class, 'showRejectForm'])->name('vente.reject-form');
         Route::post('/reject-reservation/{numreservation}', [VenteController::class, 'rejectReservation'])->name('vente.reject');
+        Route::get('/propose-alternative/{numreservation}', [VenteController::class, 'showProposeAlternativeForm'])->name('vente.propose-alternative-form');
+        Route::post('/propose-alternative/{numreservation}', [VenteController::class, 'proposeAlternativeResort'])->name('vente.propose-alternative');
         
         Route::get('/test-reject/{numreservation}', function ($numreservation) {
             $reservation = \App\Models\Reservation::findOrFail($numreservation);
@@ -141,3 +144,7 @@ Route::get('/partner/validate/{token}', [PartnerValidationController::class, 'sh
 Route::post('/partner/validate/{token}', [PartnerValidationController::class, 'respond']);
 Route::get('/resort/validate/{token}', [ResortValidationController::class, 'show']);
 Route::post('/resort/validate/{token}', [ResortValidationController::class, 'respond']);
+
+// Routes pour la proposition de resort alternatif (réponse du client)
+Route::get('/client/alternative-resort/{token}', [AlternativeResortController::class, 'show']);
+Route::post('/client/alternative-resort/{token}', [AlternativeResortController::class, 'respond']);

@@ -12,8 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('participant', function (Blueprint $table) {
-            $table->integer('numtransport')->nullable()->after('datenaissanceparticipant');
-            $table->foreign('numtransport')->references('numtransport')->on('transport')->onDelete('set null');
+            if (!Schema::hasColumn('participant', 'numtransport')) {
+                $table->integer('numtransport')->nullable()->after('datenaissanceparticipant');
+                $table->foreign('numtransport')->references('numtransport')->on('transport')->onDelete('set null');
+            }
         });
     }
 

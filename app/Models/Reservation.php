@@ -29,16 +29,32 @@ class Reservation extends Model
         'resort_validation_token',
         'resort_validation_token_expires_at',
         'resort_validation_token_used_at',
+        'alternative_resort_id',
+        'alternative_resort_status',
+        'alternative_resort_proposed_at',
+        'alternative_resort_token',
+        'alternative_resort_token_expires_at',
+        'alternative_resort_responded_at',
+        'alternative_resort_message',
+        'alternative_proposed_by',
     ];
 
     protected $casts = [
         'datedebut' => 'date',
         'datefin' => 'date',
+        'alternative_resort_token_expires_at' => 'datetime',
+        'alternative_resort_proposed_at' => 'datetime',
+        'alternative_resort_responded_at' => 'datetime',
     ];
 
     public function resort()
     {
         return $this->belongsTo(Resort::class, 'numresort', 'numresort');
+    }
+
+    public function alternativeResort()
+    {
+        return $this->belongsTo(Resort::class, 'alternative_resort_id', 'numresort');
     }
 
     public function user()

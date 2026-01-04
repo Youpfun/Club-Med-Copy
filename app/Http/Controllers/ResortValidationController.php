@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use App\Models\Reservation;
 use App\Mail\PartnerValidationMail;
+use App\Mail\ResortRefusedMail;
 
 class ResortValidationController extends Controller
 {
@@ -77,6 +78,9 @@ class ResortValidationController extends Controller
 
         if ($status === 'accepted') {
             $this->sendPartnerValidationEmails($reservation);
+        } else {
+            // Envoyer un email au client pour l'informer du refus
+            $this->sendRefusedNotificationToClient($reservation, $comment);
         }
 
         return view('resort.validation-result', [
@@ -84,6 +88,30 @@ class ResortValidationController extends Controller
             'reservation' => $reservation,
             'comment' => $comment
         ]);
+    }
+
+    /**
+     * Envoie un email au client pour l'informer que le resort a refusé
+     */
+    private function sendRefusedNotificationToClient($reservation, $comment = null)
+    {
+        $reservation->load(['user', 'resort']);
+        
+        if ($reservation->user && $reservation->user->email) {
+            try {
+                Mail::to($reservation->user->email)->send(
+                    new ResortRefusedMail($reservation, $reservation->resort, $comment)
+                );
+                \Log::info('Email de refus resort envoyé au client', [
+                    'numreservation' => $reservation->numreservation,
+                    'client_email' => $reservation->user->email,
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Erreur envoi email refus resort au client: ' . $e->getMessage(), [
+                    'numreservation' => $reservation->numreservation,
+                ]);
+            }
+        }
     }
 
     private function sendPartnerValidationEmails($reservation)

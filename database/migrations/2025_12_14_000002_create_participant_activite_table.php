@@ -11,19 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('participant_activite', function (Blueprint $table) {
-            $table->integer('numparticipant');
-            $table->integer('numactivite');
-            $table->integer('numreservation');
-            
-            $table->primary(['numparticipant', 'numactivite']);
-            
-            $table->foreign('numparticipant')->references('numparticipant')->on('participant')->onDelete('cascade');
-            $table->foreign('numactivite')->references('numactivite')->on('activite')->onDelete('cascade');
-            $table->foreign('numreservation')->references('numreservation')->on('reservation')->onDelete('cascade');
-            
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('participant_activite')) {
+            Schema::create('participant_activite', function (Blueprint $table) {
+                $table->integer('numparticipant');
+                $table->integer('numactivite');
+                $table->integer('numreservation');
+                
+                $table->primary(['numparticipant', 'numactivite']);
+                
+                $table->foreign('numparticipant')->references('numparticipant')->on('participant')->onDelete('cascade');
+                $table->foreign('numactivite')->references('numactivite')->on('activite')->onDelete('cascade');
+                $table->foreign('numreservation')->references('numreservation')->on('reservation')->onDelete('cascade');
+                
+                $table->timestamps();
+            });
+        }
     }
 
     /**

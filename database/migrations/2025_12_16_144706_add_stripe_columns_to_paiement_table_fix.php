@@ -11,9 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('paiement_table_fix', function (Blueprint $table) {
-            //
-        });
+        // Cette migration est un placeholder - les colonnes sont gérées par une autre migration
     }
 
     /**
@@ -21,8 +19,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('paiement_table_fix', function (Blueprint $table) {
-            //
-        });
+        // Rien à faire
     }
 };

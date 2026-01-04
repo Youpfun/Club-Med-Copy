@@ -12,11 +12,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('reservation', function (Blueprint $table) {
-            $table->string('resort_validation_status')->default('pending')->after('statut'); // pending, accepted, refused
-            $table->timestamp('resort_validated_at')->nullable()->after('resort_validation_status');
-            $table->string('resort_validation_token')->nullable()->unique()->after('resort_validated_at');
-            $table->timestamp('resort_validation_token_expires_at')->nullable()->after('resort_validation_token');
-            $table->timestamp('resort_validation_token_used_at')->nullable()->after('resort_validation_token_expires_at');
+            if (!Schema::hasColumn('reservation', 'resort_validation_status')) {
+                $table->string('resort_validation_status')->default('pending')->after('statut');
+            }
+            if (!Schema::hasColumn('reservation', 'resort_validated_at')) {
+                $table->timestamp('resort_validated_at')->nullable()->after('resort_validation_status');
+            }
+            if (!Schema::hasColumn('reservation', 'resort_validation_token')) {
+                $table->string('resort_validation_token')->nullable()->unique()->after('resort_validated_at');
+            }
+            if (!Schema::hasColumn('reservation', 'resort_validation_token_expires_at')) {
+                $table->timestamp('resort_validation_token_expires_at')->nullable()->after('resort_validation_token');
+            }
+            if (!Schema::hasColumn('reservation', 'resort_validation_token_used_at')) {
+                $table->timestamp('resort_validation_token_used_at')->nullable()->after('resort_validation_token_expires_at');
+            }
         });
     }
 
