@@ -100,6 +100,9 @@ Route::middleware([
     Route::get('/reservation/{numresort}/step3', [ReservationController::class, 'step3'])->name('reservation.step3');
     Route::post('/reservation/{numresort}/addToCart', [ReservationController::class, 'addToCart'])->name('reservation.addToCart');
     
+    // Route d'édition complète de réservation (page unique)
+    Route::get('/reservation/{numreservation}/edit', [ReservationController::class, 'editReservation'])->name('reservation.edit');
+    Route::post('/reservation/{numreservation}/update', [ReservationController::class, 'updateReservationComplete'])->name('reservation.update.complete');
     Route::get('/reservation/{numreservation}/edit/step1', [ReservationController::class, 'editStep1'])->name('reservation.edit.step1');
     Route::post('/reservation/{numreservation}/update/step1', [ReservationController::class, 'updateStep1'])->name('reservation.update.step1');
     Route::get('/reservation/{numreservation}/edit/step2', [ReservationController::class, 'editStep2'])->name('reservation.edit.step2');

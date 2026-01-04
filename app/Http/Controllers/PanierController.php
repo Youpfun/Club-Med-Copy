@@ -87,11 +87,19 @@ class PanierController extends Controller
             ->get();
         
         $nbAdultes = $participants->filter(function($p) {
-            return str_contains($p->nomparticipant, 'Adulte');
+            if ($p->datenaissanceparticipant) {
+                $age = Carbon::parse($p->datenaissanceparticipant)->age;
+                return $age >= 15;
+            }
+            return str_contains($p->nomparticipant, 'Adulte'); // Fallback pour anciennes données
         })->count();
         
         $nbEnfants = $participants->filter(function($p) {
-            return str_contains($p->nomparticipant, 'Enfant');
+            if ($p->datenaissanceparticipant) {
+                $age = Carbon::parse($p->datenaissanceparticipant)->age;
+                return $age < 15;
+            }
+            return str_contains($p->nomparticipant, 'Enfant'); // Fallback pour anciennes données
         })->count();
         
         $nbPersonnes = $nbAdultes + $nbEnfants;
@@ -107,6 +115,9 @@ class PanierController extends Controller
                 'activite.descriptionactivite',
                 'activitealacarte.prixmin',
                 'participant.nomparticipant',
+                'participant.prenomparticipant',
+                'participant.genreparticipant',
+                'participant.datenaissanceparticipant',
                 'participant.numparticipant'
             )
             ->get();
@@ -114,12 +125,35 @@ class PanierController extends Controller
         // Regrouper les activités avec leurs participants
         $activites = $activitesData->groupBy('numactivite')->map(function($group) {
             $first = $group->first();
+            
+            // Formater les noms des participants
+            $participantsFormates = $group->map(function($p) {
+                $displayName = trim($p->prenomparticipant . ' ' . $p->nomparticipant);
+                if (!$displayName || $displayName === ' ') {
+                    $displayName = $p->nomparticipant ?: 'Participant';
+                }
+                if ($p->genreparticipant && $p->genreparticipant !== 'N/A') {
+                    $displayName = $p->genreparticipant . ' ' . $displayName;
+                }
+                
+                // Déterminer le type (adulte/enfant) selon l'âge
+                $age = $p->datenaissanceparticipant 
+                    ? \Carbon\Carbon::parse($p->datenaissanceparticipant)->age 
+                    : null;
+                $type = ($age === null || $age >= 15) ? 'adulte' : 'enfant';
+                
+                return [
+                    'nom' => $displayName,
+                    'type' => $type
+                ];
+            })->toArray();
+            
             return [
                 'numactivite' => $first->numactivite,
                 'nomactivite' => $first->nomactivite,
                 'descriptionactivite' => $first->descriptionactivite,
                 'prixmin' => $first->prixmin,
-                'participants' => $group->pluck('nomparticipant')->toArray(),
+                'participants' => $participantsFormates,
                 'nbParticipants' => $group->count(),
             ];
         })->values();

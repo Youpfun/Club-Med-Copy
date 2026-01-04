@@ -75,6 +75,14 @@
             @endforeach
             <input type="hidden" name="nbAdultes" value="{{ $nbAdultes }}">
             <input type="hidden" name="nbEnfants" value="{{ $nbEnfants }}">
+            
+            {{-- Passer les informations des participants --}}
+            @foreach($participants as $key => $participant)
+                <input type="hidden" name="participants[{{ $key }}][nom]" value="{{ $participant['nom'] ?? '' }}">
+                <input type="hidden" name="participants[{{ $key }}][prenom]" value="{{ $participant['prenom'] ?? '' }}">
+                <input type="hidden" name="participants[{{ $key }}][genre]" value="{{ $participant['genre'] ?? '' }}">
+                <input type="hidden" name="participants[{{ $key }}][datenaissance]" value="{{ $participant['datenaissance'] ?? '' }}">
+            @endforeach
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <!-- Colonne principale -->
@@ -122,6 +130,13 @@
                                                 <p class="text-sm font-medium text-gray-700 mb-3">Qui participe à cette activité ?</p>
                                                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                                                     @for($i = 1; $i <= $nbAdultes; $i++)
+                                                        @php
+                                                            $participantKey = 'adulte_' . $i;
+                                                            $participantInfo = $participants[$participantKey] ?? [];
+                                                            $nom = $participantInfo['nom'] ?? '';
+                                                            $prenom = $participantInfo['prenom'] ?? '';
+                                                            $displayName = trim($prenom . ' ' . $nom) ?: "Adulte $i";
+                                                        @endphp
                                                         <label class="flex items-center space-x-2 cursor-pointer group">
                                                             <input type="checkbox" 
                                                                    name="activites[{{ $activite->numactivite }}][]" 
@@ -133,12 +148,19 @@
                                                                 <svg class="w-4 h-4 inline mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                                                 </svg>
-                                                                Adulte {{ $i }}
+                                                                {{ $displayName }}
                                                             </span>
                                                         </label>
                                                     @endfor
                                                     
                                                     @for($i = 1; $i <= $nbEnfants; $i++)
+                                                        @php
+                                                            $participantKey = 'enfant_' . $i;
+                                                            $participantInfo = $participants[$participantKey] ?? [];
+                                                            $nom = $participantInfo['nom'] ?? '';
+                                                            $prenom = $participantInfo['prenom'] ?? '';
+                                                            $displayName = trim($prenom . ' ' . $nom) ?: "Enfant $i";
+                                                        @endphp
                                                         <label class="flex items-center space-x-2 cursor-pointer group">
                                                             <input type="checkbox" 
                                                                    name="activites[{{ $activite->numactivite }}][]" 
@@ -150,7 +172,7 @@
                                                                 <svg class="w-4 h-4 inline mr-1 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                                                 </svg>
-                                                                Enfant {{ $i }}
+                                                                {{ $displayName }}
                                                             </span>
                                                         </label>
                                                     @endfor

@@ -145,6 +145,21 @@
                         </div>
                     </div>
 
+                    {{-- Informations des participants --}}
+                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100" id="participants-section">
+                        <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-green-100 text-green-500 flex items-center justify-center mr-3">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </span>
+                            Informations des voyageurs
+                        </h2>
+                        <div id="participants-forms" class="space-y-4">
+                            {{-- Les formulaires seront générés dynamiquement --}}
+                        </div>
+                    </div>
+
                     <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                         <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
                             <span class="w-8 h-8 rounded-full bg-purple-100 text-purple-500 flex items-center justify-center mr-3">
@@ -367,11 +382,110 @@ document.addEventListener('DOMContentLoaded', function() {
         if (newVal >= input.min && newVal <= input.max) {
             input.value = newVal;
             updateRecap();
+            generateParticipantsForms(); // Générer les formulaires des participants
             // Quand on change le nb de personnes, on met à jour les prix
             updateAllPrices(); 
         }
     }
     window.changeValue = changeValue;
+    
+    // Générer les formulaires pour chaque participant
+    function generateParticipantsForms() {
+        const nbAdultes = parseInt(document.getElementById('nbAdultes').value) || 0;
+        const nbEnfants = parseInt(document.getElementById('nbEnfants').value) || 0;
+        const container = document.getElementById('participants-forms');
+        
+        container.innerHTML = '';
+        
+        // Générer les formulaires pour les adultes
+        for (let i = 1; i <= nbAdultes; i++) {
+            container.innerHTML += createParticipantForm('adulte', i);
+        }
+        
+        // Générer les formulaires pour les enfants
+        for (let i = 1; i <= nbEnfants; i++) {
+            container.innerHTML += createParticipantForm('enfant', i);
+        }
+    }
+    
+    function createParticipantForm(type, index) {
+        const isAdulte = type === 'adulte';
+        const label = isAdulte ? `Adulte ${index}` : `Enfant ${index}`;
+        const minAge = isAdulte ? 15 : 0;
+        const maxAge = isAdulte ? 120 : 14;
+        const maxDate = new Date();
+        maxDate.setFullYear(maxDate.getFullYear() - minAge);
+        const minDate = new Date();
+        minDate.setFullYear(minDate.getFullYear() - maxAge - 1);
+        
+        return `
+            <div class="border-2 border-gray-200 rounded-xl p-4 bg-gray-50">
+                <h3 class="font-bold text-gray-800 mb-3 flex items-center">
+                    <span class="w-6 h-6 rounded-full bg-${isAdulte ? 'blue' : 'purple'}-100 text-${isAdulte ? 'blue' : 'purple'}-600 flex items-center justify-center mr-2 text-sm">
+                        ${index}
+                    </span>
+                    ${label} ${isAdulte ? '(15 ans et plus)' : '(moins de 15 ans)'}
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Civilité *</label>
+                        <select name="participants[${type}_${index}][genre]" required 
+                                class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-orange-500 focus:ring-0">
+                            <option value="">-- Choisir --</option>
+                            <option value="M.">Monsieur</option>
+                            <option value="Mme">Madame</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
+                        <input type="text" name="participants[${type}_${index}][nom]" required 
+                               placeholder="Nom de famille"
+                               class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-orange-500 focus:ring-0">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
+                        <input type="text" name="participants[${type}_${index}][prenom]" required 
+                               placeholder="Prénom"
+                               class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-orange-500 focus:ring-0">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date de naissance *</label>
+                        <input type="date" name="participants[${type}_${index}][datenaissance]" required 
+                               min="${isAdulte ? '1920-01-01' : (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 15); return d.toISOString().split('T')[0]; })()}"
+                               max="${isAdulte ? (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 15); return d.toISOString().split('T')[0]; })() : new Date().toISOString().split('T')[0]}"
+                               onchange="validateAge(this, '${type}')"
+                               class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-orange-500 focus:ring-0">
+                        <p class="text-xs text-gray-500 mt-1">${isAdulte ? 'Né(e) entre 1920 et il y a 15 ans' : 'Moins de 15 ans'}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Validation de l'âge
+    function validateAge(input, type) {
+        const dateNaissance = new Date(input.value);
+        const aujourd = new Date();
+        const age = Math.floor((aujourd - dateNaissance) / (365.25 * 24 * 60 * 60 * 1000));
+        
+        if (type === 'adulte' && age < 15) {
+            alert('Un adulte doit avoir au moins 15 ans. Veuillez corriger la date de naissance ou sélectionner "Enfant".');
+            input.value = '';
+            input.classList.add('border-red-500');
+            return false;
+        }
+        
+        if (type === 'enfant' && age >= 15) {
+            alert('Un enfant doit avoir moins de 15 ans. Veuillez corriger la date de naissance ou sélectionner "Adulte".');
+            input.value = '';
+            input.classList.add('border-red-500');
+            return false;
+        }
+        
+        input.classList.remove('border-red-500');
+        return true;
+    }
+    window.validateAge = validateAge;
     
     function changeChambresQty(numtype, delta) {
         const input = document.getElementById('chambre-qty-' + numtype);
@@ -431,6 +545,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateRecap() {
         const adultes = parseInt(nbAdultes.value) || 0;
         const enfants = parseInt(nbEnfants.value) || 0;
+        const totalPersonnes = adultes + enfants;
         document.getElementById('recap-adultes').textContent = adultes;
         document.getElementById('recap-enfants').textContent = enfants;
         
@@ -445,13 +560,18 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('recap-nuits').textContent = nuits + ' nuit' + (nuits > 1 ? 's' : '');
         }
         
-        // Afficher les chambres sélectionnées
+        // Afficher les chambres sélectionnées et calculer la capacité
         let chambresTexte = [];
+        let capaciteTotale = 0;
+        let nbChambresTotal = 0;
         document.querySelectorAll('.chambre-quantity').forEach(input => {
             const qty = parseInt(input.value) || 0;
             if (qty > 0) {
                 const numtype = input.name.match(/\[(\d+)\]/)[1];
                 const nom = nomsChambres[numtype];
+                const capacite = capaciteChambres[numtype] || 2;
+                capaciteTotale += capacite * qty;
+                nbChambresTotal += qty;
                 chambresTexte.push(`${qty}x ${nom}`);
             }
         });
@@ -461,6 +581,9 @@ document.addEventListener('DOMContentLoaded', function() {
             : '--';
         
         nbChambresInput.value = calculerNbChambres();
+        
+        // Validation de la capacité
+        validateCapacity(totalPersonnes, capaciteTotale, nbChambresTotal);
     }
     
     // NOUVELLE FONCTION : Met à jour toutes les cartes (badges, prix barrés...)
@@ -581,16 +704,117 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Initialisation
+    generateParticipantsForms(); // Générer les formulaires des participants au chargement
     updateRecap();
     updateAllPrices(); // Charge les prix au démarrage
 });
 
+function validateCapacity(totalPersonnes, capaciteTotale, nbChambresTotal) {
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const form = document.getElementById('step1Form');
+    
+    // Supprimer les anciens messages d'erreur
+    const oldError = document.getElementById('capacity-error');
+    if (oldError) oldError.remove();
+    
+    let errorMessage = '';
+    
+    if (nbChambresTotal > 0) {
+        if (capaciteTotale < totalPersonnes) {
+            errorMessage = `⚠️ Capacité insuffisante : vos chambres peuvent accueillir ${capaciteTotale} personne(s) mais vous êtes ${totalPersonnes}. Veuillez ajouter ou modifier vos chambres.`;
+        } else if (nbChambresTotal > totalPersonnes) {
+            errorMessage = `⚠️ Trop de chambres : vous avez sélectionné ${nbChambresTotal} chambre(s) pour ${totalPersonnes} personne(s). Maximum 1 chambre par personne.`;
+        }
+    } else if (totalPersonnes > 0) {
+        errorMessage = '⚠️ Veuillez sélectionner au moins une chambre.';
+    }
+    
+    if (errorMessage) {
+        const errorDiv = document.createElement('div');
+        errorDiv.id = 'capacity-error';
+        errorDiv.className = 'bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-lg';
+        errorDiv.innerHTML = `<p class="font-semibold">${errorMessage}</p>`;
+        form.insertBefore(errorDiv, form.firstChild);
+        submitBtn.disabled = true;
+        submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        return false;
+    } else {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        return true;
+    }
+}
+
+function calculerNbChambres() {
+    let total = 0;
+    document.querySelectorAll('.chambre-quantity').forEach(input => {
+        total += parseInt(input.value) || 0;
+    });
+    return total;
+}
+
 function validateForm() {
+    const nbAdultes = parseInt(document.getElementById('nbAdultes').value) || 0;
+    const nbEnfants = parseInt(document.getElementById('nbEnfants').value) || 0;
+    const totalPersonnes = nbAdultes + nbEnfants;
+    
     const nbChambresTotal = calculerNbChambres();
+    
+    let capaciteTotale = 0;
+    document.querySelectorAll('.chambre-quantity').forEach(input => {
+        const qty = parseInt(input.value) || 0;
+        if (qty > 0) {
+            const numtype = input.name.match(/\[(\d+)\]/)[1];
+            const capacite = capaciteChambres[numtype] || 2;
+            capaciteTotale += capacite * qty;
+        }
+    });
+    
     if (nbChambresTotal === 0) {
         alert('Veuillez sélectionner au moins une chambre avant de continuer.');
         return false;
     }
+    
+    if (capaciteTotale < totalPersonnes) {
+        alert(`La capacité des chambres sélectionnées (${capaciteTotale} personnes) est insuffisante pour ${totalPersonnes} voyageurs.\nVeuillez ajouter ou modifier vos chambres.`);
+        return false;
+    }
+    
+    if (nbChambresTotal > totalPersonnes) {
+        alert(`Vous avez sélectionné ${nbChambresTotal} chambres pour ${totalPersonnes} personnes.\nMaximum 1 chambre par personne.`);
+        return false;
+    }
+    
+    // Vérifier que tous les participants ont rempli leurs informations
+    const participantInputs = document.querySelectorAll('#participants-forms input[required], #participants-forms select[required]');
+    let missingInfo = false;
+    
+    participantInputs.forEach(input => {
+        if (!input.value) {
+            missingInfo = true;
+            input.classList.add('border-red-500');
+        } else {
+            input.classList.remove('border-red-500');
+        }
+    });
+    
+    if (missingInfo) {
+        alert('Veuillez remplir toutes les informations des voyageurs (civilité, nom, prénom, date de naissance).');
+        document.getElementById('participants-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return false;
+    }
+    
+    // Vérifier que toutes les dates de naissance sont valides
+    const datesNaissance = document.querySelectorAll('input[name*="[datenaissance]"]');
+    for (let input of datesNaissance) {
+        if (input.value) {
+            const type = input.name.includes('adulte') ? 'adulte' : 'enfant';
+            if (!validateAge(input, type)) {
+                return false;
+            }
+        }
+    }
+    
     return true;
 }
 </script>
