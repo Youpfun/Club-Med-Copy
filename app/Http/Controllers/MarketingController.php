@@ -9,64 +9,112 @@ use App\Models\TypeChambre;
 use App\Models\Resort;
 use App\Models\TypeClub;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class MarketingController extends Controller
 {
+    /**
+     * Affiche le tableau de bord marketing.
+     */
     public function index(Request $request)
     {
-        $typeClubs = TypeClub::all();
+        $userRole = Auth::user()->role;
+        // On vérifie si l'utilisateur appartient au service marketing (Directeur ou Membre)
+        $isMarketing = str_contains(strtolower($userRole), 'marketing');
+        $isDirecteur = ($userRole === 'Directeur du Service Marketing');
+
+        if (!$isMarketing) {
+            abort(403, "Accès réservé au service marketing.");
+        }
+
+        // --- 1. DONNÉES COMMUNES (Accessibles à tout le marketing) ---
         $periodes = Periode::orderBy('datedebutperiode')->get();
+        $typeClubs = TypeClub::all();
         $typesChambre = TypeChambre::all(); 
 
-        $query = Resort::query();
-        if ($request->filled('type_club')) {
-            $query->whereHas('typeClubs', function($q) use ($request) {
-                $q->where('typeclub.numtypeclub', $request->type_club);
-            });
-        }
-        $resorts = $query->orderBy('nomresort')->get();
+        // Liste complète pour le "Catalogue des Séjours" (Tableau du bas)
+        // Permet à tout le monde de voir l'état et de reprendre la config (Step 2/3)
+        $resortsList = Resort::with(['pays'])
+                             ->withCount('typechambres') // Sert d'indicateur si l'étape 2 est faite
+                             ->orderBy('nomresort')
+                             ->get();
 
-        $selectedResortId = $request->input('numresort');
-        $selectedResort = $selectedResortId ? Resort::find($selectedResortId) : null;
+        // --- 2. DONNÉES SPÉCIFIQUES PRIX (Uniquement pour le DIRECTEUR) ---
+        $resorts = collect(); // Liste pour le menu déroulant du filtre prix
+        $selectedResort = null;
         $stats = [];
 
-        if ($selectedResort) {
-            $typesProposes = DB::table('proposer')
-                               ->where('numresort', $selectedResort->numresort)
-                               ->pluck('numtype')
-                               ->toArray();
+        if ($isDirecteur) {
+            // A. Liste pour le filtre "Choisir Resort" (Gestion Prix)
+            $query = Resort::query();
+            if ($request->filled('type_club')) {
+                $query->whereHas('typeClubs', function($q) use ($request) {
+                    $q->where('typeclub.numtypeclub', $request->type_club);
+                });
+            }
+            $resorts = $query->orderBy('nomresort')->get();
 
-            foreach ($periodes as $p) {
-                foreach ($typesChambre as $tc) {
-                    if (!in_array($tc->numtype, $typesProposes)) continue;
+            // B. Gestion détaillée d'un resort sélectionné (Grille de Prix)
+            $selectedResortId = $request->input('numresort');
+            $selectedResort = $selectedResortId ? Resort::find($selectedResortId) : null;
 
-                    $tarif = DB::table('tarifer')
-                               ->where('numperiode', $p->numperiode)
-                               ->where('numtype', $tc->numtype)
-                               ->where('numresort', $selectedResort->numresort)
-                               ->first();
+            if ($selectedResort) {
+                // On récupère les types de chambres proposés par ce resort
+                $typesProposes = DB::table('proposer')
+                                   ->where('numresort', $selectedResort->numresort)
+                                   ->pluck('numtype')
+                                   ->toArray();
 
-                    $prixBase = $tarif ? $tarif->prix : $this->calculateStandardPrice($tc->numtype, $selectedResort->nbtridents);
-                    $prixPromo = $tarif ? $tarif->prix_promo : null;
+                foreach ($periodes as $p) {
+                    foreach ($typesChambre as $tc) {
+                        // On ignore si le resort ne propose pas ce type de chambre
+                        if (!in_array($tc->numtype, $typesProposes)) continue;
 
-                    $stats[$p->numperiode][$tc->numtype] = [
-                        'valide_pour_resort' => true,
-                        'exists_in_db' => ($tarif !== null),
-                        'prix_base' => $prixBase,
-                        'current_promo' => $prixPromo,
-                        'isActive' => ($prixPromo !== null && $prixPromo < $prixBase),
-                        'taux_calcule' => ($prixPromo && $prixBase > 0) ? round(($prixPromo / $prixBase) * 100) : 100
-                    ];
+                        $tarif = DB::table('tarifer')
+                                   ->where('numperiode', $p->numperiode)
+                                   ->where('numtype', $tc->numtype)
+                                   ->where('numresort', $selectedResort->numresort)
+                                   ->first();
+
+                        // Calcul ou récupération du prix
+                        $prixBase = $tarif ? $tarif->prix : $this->calculateStandardPrice($tc->numtype, $selectedResort->nbtridents);
+                        $prixPromo = $tarif ? $tarif->prix_promo : null;
+
+                        $stats[$p->numperiode][$tc->numtype] = [
+                            'valide_pour_resort' => true,
+                            'exists_in_db' => ($tarif !== null),
+                            'prix_base' => $prixBase,
+                            'current_promo' => $prixPromo,
+                            'isActive' => ($prixPromo !== null && $prixPromo < $prixBase),
+                            'taux_calcule' => ($prixPromo && $prixBase > 0) ? round(($prixPromo / $prixBase) * 100) : 100
+                        ];
+                    }
                 }
             }
         }
 
-        return view('marketing.dashboard', compact('resorts', 'selectedResort', 'periodes', 'stats', 'typesChambre', 'typeClubs'));
+        return view('marketing.dashboard', compact(
+            'resorts', 
+            'selectedResort', 
+            'periodes', 
+            'stats', 
+            'typesChambre', 
+            'typeClubs', 
+            'resortsList', 
+            'isDirecteur'
+        ));
     }
 
-    // --- MISE À JOUR UNITAIRE BLINDÉE ---
+    /**
+     * Mise à jour unitaire d'un prix (via la grille).
+     */
     public function updatePrice(Request $request)
     {
+        // Seul le directeur peut modifier les prix
+        if (Auth::user()->role !== 'Directeur du Service Marketing') {
+            abort(403);
+        }
+
         $request->validate([
             'numperiode' => 'required|integer',
             'numtype' => 'required|integer',
@@ -78,6 +126,7 @@ class MarketingController extends Controller
         $resort = Resort::find($request->numresort);
         $prixStandard = $this->calculateStandardPrice($request->numtype, $resort->nbtridents);
 
+        // Vérifie si un tarif existe déjà
         $existingTarif = DB::table('tarifer')
             ->where('numperiode', $request->numperiode)
             ->where('numtype', $request->numtype)
@@ -85,12 +134,12 @@ class MarketingController extends Controller
             ->first();
 
         $basePriceToUse = $existingTarif ? $existingTarif->prix : $prixStandard;
-
         $nouveauPrixPromo = null;
 
+        // Vérification annulation (si vide ou valeur incohérente)
         $isCancelled = ($request->valeur === null || 
-                       ($request->mode == 'percentage' && $request->valeur >= 100) || 
-                       ($request->mode == 'amount' && $request->valeur == 0));
+                        ($request->mode == 'percentage' && $request->valeur >= 100) || 
+                        ($request->mode == 'amount' && $request->valeur == 0));
 
         if (!$isCancelled) {
             if ($request->mode == 'percentage') {
@@ -106,16 +155,14 @@ class MarketingController extends Controller
             }
         }
 
-        // 3. Application en Base (Insert ou Update strict)
+        // Application en Base
         if ($existingTarif) {
-            // Update strict
             DB::table('tarifer')
                 ->where('numperiode', $request->numperiode)
                 ->where('numtype', $request->numtype)
                 ->where('numresort', $request->numresort)
                 ->update(['prix_promo' => $nouveauPrixPromo]);
         } else {
-            // Insert si n'existe pas
             DB::table('tarifer')->insert([
                 'numperiode' => $request->numperiode,
                 'numtype' => $request->numtype,
@@ -132,10 +179,16 @@ class MarketingController extends Controller
         }
     }
 
-    // --- MISE À JOUR DE MASSE ---
+    /**
+     * Application d'une promotion de masse.
+     */
     public function applyBulkPromo(Request $request)
     {
-        // 1. On augmente le temps d'exécution (0 = illimité) pour éviter le crash
+        if (Auth::user()->role !== 'Directeur du Service Marketing') {
+            abort(403);
+        }
+
+        // Augmentation du temps d'exécution pour le traitement de masse
         set_time_limit(0);
 
         $request->validate([
@@ -154,47 +207,32 @@ class MarketingController extends Controller
                 $q->where('typeclub.numtypeclub', $request->type_club_id);
             });
         }
-        // On charge les relations pour éviter des requêtes dans la boucle
         $resorts = $query->get();
 
         $count = 0;
         $pourcentage = $request->pourcentage;
 
-        // 2. On ouvre une TRANSACTION. Tout ce qui se passe ici est groupé.
         DB::transaction(function () use ($resorts, $periode, $pourcentage, &$count) {
-            
             foreach ($resorts as $resort) {
-                // Récupération des types proposés (Optimisation possible ici mais on garde simple)
                 $typesProposes = DB::table('proposer')
                                    ->where('numresort', $resort->numresort)
                                    ->pluck('numtype')
                                    ->toArray();
 
                 foreach ($typesProposes as $idType) {
-                    // Calcul prix standard théorique (Logique PHP)
                     $prixStandard = $this->calculateStandardPrice($idType, $resort->nbtridents);
-
-                    // On utilise updateOrInsert ou une logique manuelle, mais on reste dans la transaction
                     
-                    // A. On cherche l'existant
                     $existing = DB::table('tarifer')
                         ->where('numperiode', $periode->numperiode)
                         ->where('numtype', $idType)
                         ->where('numresort', $resort->numresort)
                         ->first();
 
-                    // B. On détermine le prix de base
                     $basePrice = $existing ? $existing->prix : $prixStandard;
-                    
-                    // C. Calcul du prix promo
                     $nouveauPrix = round($basePrice * ($pourcentage / 100), 0);
                     
-                    // Sécurité : la promo doit être inférieure au prix
-                    if ($nouveauPrix >= $basePrice) {
-                        continue; // On ne fait rien si la promo n'est pas avantageuse
-                    }
+                    if ($nouveauPrix >= $basePrice) continue;
 
-                    // D. Sauvegarde (Insert ou Update)
                     if ($existing) {
                         DB::table('tarifer')
                             ->where('numperiode', $periode->numperiode)
@@ -215,33 +253,36 @@ class MarketingController extends Controller
             }
         });
 
-        return back()->with('success', "Mise à jour terminée ! **{$count}** tarifs ont été mis à jour.");
+        return back()->with('success', "Mise à jour terminée ! **{$count}** tarifs ont été modifiés.");
     }
 
+    /**
+     * Création d'une nouvelle période saisonnière.
+     */
     public function storePeriode(Request $request)
     {
+        if (Auth::user()->role !== 'Directeur du Service Marketing') {
+            abort(403);
+        }
+
         $request->validate([
             'nomperiode' => 'required|string|max:100',
             'datedebutperiode' => 'required|date',
             'datefinperiode' => 'required|date|after:datedebutperiode',
         ]);
         Periode::create($request->all());
-        return back()->with('success', "Période créée.");
+        return back()->with('success', "Période créée avec succès.");
     }
 
-    private function calculateStandardPrice($numType, $nbTridents)
-    {
-        $base = 250;
-        switch ($numType) {
-            case 1: $base = 200; break;
-            case 2: $base = 300; break;
-            case 3: $base = 500; break;
-        }
-        return $base + ($nbTridents * 50);
-    }
-
+    /**
+     * Réinitialisation de toutes les promos pour une période.
+     */
     public function resetPromos(Request $request)
     {
+        if (Auth::user()->role !== 'Directeur du Service Marketing') {
+            abort(403);
+        }
+
         $request->validate([
             'numperiode' => 'required|integer',
         ]);
@@ -253,5 +294,19 @@ class MarketingController extends Controller
             ->update(['prix_promo' => null]);
 
         return back()->with('success', "Réinitialisation réussie ! **{$affected}** promotions supprimées pour la période **{$periode->nomperiode}**.");
+    }
+
+    /**
+     * Helper : Calcul du prix standard théorique si absent de la base.
+     */
+    private function calculateStandardPrice($numType, $nbTridents)
+    {
+        $base = 250;
+        switch ($numType) {
+            case 1: $base = 200; break;
+            case 2: $base = 300; break;
+            case 3: $base = 500; break;
+        }
+        return $base + ($nbTridents * 50);
     }
 }

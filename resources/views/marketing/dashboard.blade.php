@@ -13,7 +13,7 @@
             </p>
         </div>
 
-        {{-- MESSAGES --}}
+        {{-- MESSAGES DE NOTIFICATION --}}
         @if(session('success'))
             <div class="p-4 mb-6 bg-green-100 text-green-700 rounded-lg border-l-4 border-green-500 shadow-sm flex items-center">
                 <span class="text-xl mr-2">✅</span> {!! session('success') !!}
@@ -26,60 +26,180 @@
         @endif
 
         {{-- ==============================
-             SECTION 0 : ACTIONS RAPIDES
+             SECTION 0 : ACTIONS RAPIDES (ACCESSIBLES À TOUS)
              ============================== --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
             
-            {{-- CARTE 1 : INDISPONIBILITÉS --}}
+            {{-- 1. NOUVEAU SÉJOUR (Accessible à tous les membres marketing selon ta demande) --}}
+            <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-blue-600 hover:shadow-lg transition">
+                <div class="flex items-center mb-4">
+                    <span class="text-3xl mr-3 bg-blue-100 p-2 rounded-lg">🏨</span>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Nouveau Séjour</h3>
+                        <p class="text-sm text-gray-500">Créer une fiche resort</p>
+                    </div>
+                </div>
+                <a href="{{ route('resort.create') }}" class="block w-full text-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Créer
+                </a>
+            </div>
+
+            {{-- 2. INDISPONIBILITÉS --}}
             <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-red-500 hover:shadow-lg transition">
                 <div class="flex items-center mb-4">
                     <span class="text-3xl mr-3 bg-red-100 p-2 rounded-lg">🚫</span>
                     <div>
-                        <h3 class="text-lg font-bold text-gray-900">Fermetures & Travaux</h3>
-                        <p class="text-sm text-gray-500">Bloquer des chambres à la vente</p>
+                        <h3 class="text-lg font-bold text-gray-900">Fermetures</h3>
+                        <p class="text-sm text-gray-500">Gérer les travaux/incidents</p>
                     </div>
                 </div>
-                
                 <div class="flex flex-col gap-2">
                     <a href="{{ route('marketing.indisponibilite.select') }}" class="block w-full text-center px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-bold transition flex items-center justify-center gap-2 text-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                         Bloquer une chambre
                     </a>
-                    
                     <a href="{{ route('marketing.indisponibilite.index') }}" class="block w-full text-center px-4 py-2 bg-white border border-red-200 text-red-600 hover:bg-red-50 rounded-lg font-bold transition flex items-center justify-center gap-2 text-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-                        Voir la liste des blocages
+                        Voir la liste
                     </a>
                 </div>
             </div>
 
-            {{-- CARTE 2 : NOUVEAU SÉJOUR (RÉSERVÉ AU DIRECTEUR) --}}
-            @if(Auth::user()->role === 'Directeur du Service Marketing')
-                <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-blue-600 hover:shadow-lg transition">
-                    <div class="flex items-center mb-4">
-                        <span class="text-3xl mr-3 bg-blue-100 p-2 rounded-lg">🏨</span>
-                        <div>
-                            <h3 class="text-lg font-bold text-gray-900">Nouveau Séjour</h3>
-                            <p class="text-sm text-gray-500">Lancer un nouveau produit</p>
-                        </div>
+            {{-- 3. DEMANDES DE DISPO --}}
+            <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-green-500 hover:shadow-lg transition">
+                <div class="flex items-center mb-4">
+                    <span class="text-3xl mr-3 bg-green-100 p-2 rounded-lg">📋</span>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Demandes Dispo</h3>
+                        <p class="text-sm text-gray-500">Vérifier avant création</p>
                     </div>
-                    <a href="{{ route('resort.create') }}" class="block w-full text-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        Créer une fiche resort
+                </div>
+                <div class="flex flex-col gap-2">
+                    <a href="{{ route('marketing.demandes.create') }}" class="block w-full text-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold transition flex items-center justify-center gap-2 text-sm">
+                        Nouvelle demande
+                    </a>
+                    <a href="{{ route('marketing.demandes.index') }}" class="block w-full text-center px-4 py-2 bg-white border border-green-200 text-green-600 hover:bg-green-50 rounded-lg font-bold transition flex items-center justify-center gap-2 text-sm">
+                        Voir les demandes
                     </a>
                 </div>
-            @endif
+            </div>
+
+            {{-- 4. PROSPECTION RESORTS --}}
+            <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-purple-500 hover:shadow-lg transition">
+                <div class="flex items-center mb-4">
+                    <span class="text-3xl mr-3 bg-purple-100 p-2 rounded-lg">🔍</span>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Prosp. Resorts</h3>
+                        <p class="text-sm text-gray-500">Contacter nouveaux resorts</p>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <a href="{{ route('marketing.prospection.create') }}" class="block w-full text-center px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-bold transition flex items-center justify-center gap-2 text-sm">
+                        Contacter
+                    </a>
+                    <a href="{{ route('marketing.prospection.index') }}" class="block w-full text-center px-4 py-2 bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 rounded-lg font-bold transition flex items-center justify-center gap-2 text-sm">
+                        Suivi
+                    </a>
+                </div>
+            </div>
+
+            {{-- 5. PROSPECTION PARTENAIRES --}}
+            <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-emerald-500 hover:shadow-lg transition">
+                <div class="flex items-center mb-4">
+                    <span class="text-3xl mr-3 bg-emerald-100 p-2 rounded-lg">🤝</span>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Prosp. Partenaires</h3>
+                        <p class="text-sm text-gray-500">Contacter ESF, Spa, etc.</p>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <a href="{{ route('marketing.prospection-partenaire.create') }}" class="block w-full text-center px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-bold transition flex items-center justify-center gap-2 text-sm">
+                        Contacter
+                    </a>
+                    <a href="{{ route('marketing.prospection-partenaire.index') }}" class="block w-full text-center px-4 py-2 bg-white border border-emerald-200 text-emerald-600 hover:bg-emerald-50 rounded-lg font-bold transition flex items-center justify-center gap-2 text-sm">
+                        Suivi
+                    </a>
+                </div>
+            </div>
+
         </div>
 
         {{-- ==============================
-             SECTION 1 & 2 : GESTION PRIX/PROMOS (RÉSERVÉ AU DIRECTEUR)
+             SECTION 1 : CATALOGUE DES SÉJOURS (VISIBLE PAR TOUS)
+             ============================== --}}
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden mb-10">
+            <div class="p-6 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-bold text-[#113559] flex items-center gap-2">
+                        📂 Catalogue des Séjours 
+                        <span class="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full">{{ $resortsList->count() }}</span>
+                    </h2>
+                    <p class="text-sm text-slate-500">Reprenez la création ou modifiez les configurations des séjours existants.</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto max-h-96">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50 sticky top-0 z-10">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Resort</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Pays</th>
+                            <th class="px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">État Config.</th>
+                            <th class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-slate-200">
+                        @foreach($resortsList as $resortItem)
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center text-xl">🏨</div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-bold text-gray-900">{{ $resortItem->nomresort }}</div>
+                                            <div class="text-xs text-gray-500">{{ $resortItem->nbtridents }} Tridents</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="text-sm text-gray-900">{{ $resortItem->pays->nompays ?? 'N/A' }}</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    @if($resortItem->typechambres_count > 0)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            ✅ Configuré
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            ⚠️ Incomplet
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex justify-end gap-2">
+                                        {{-- Tout le monde peut configurer les chambres et activités --}}
+                                        <a href="{{ route('resort.step2', $resortItem->numresort) }}" class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded border border-blue-200 transition text-xs" title="Configurer les chambres">
+                                            🛏️ Hébergement
+                                        </a>
+                                        <a href="{{ route('resort.step3', $resortItem->numresort) }}" class="text-purple-600 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 px-3 py-1 rounded border border-purple-200 transition text-xs" title="Configurer les activités">
+                                            ⛷️ Activités
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {{-- ==============================
+             SECTION 2 : GESTION PRIX & PROMOS (RÉSERVÉ AU DIRECTEUR)
              ============================== --}}
         
-        @if(Auth::user()->role === 'Directeur du Service Marketing')
+        @if($isDirecteur)
             
             <div class="bg-indigo-900 rounded-2xl shadow-xl p-6 mb-10 text-white">
                 <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-                    ⚡ Campagnes Promotionnelles
+                    ⚡ Campagnes Promotionnelles (Réservé Directeur)
                 </h2>
 
                 <div class="flex flex-col lg:flex-row gap-8 items-start">
@@ -147,7 +267,7 @@
                 </div>
             </div>
 
-            {{-- GESTION DÉTAILLÉE --}}
+            {{-- GESTION DÉTAILLÉE PRIX (TABLEAUX) --}}
             <div class="flex flex-col md:flex-row gap-4 mb-8 items-center justify-between">
                 <form action="{{ route('marketing.dashboard') }}" method="GET" class="flex gap-4 flex-grow bg-white p-4 rounded-xl shadow-sm border border-slate-200 w-full md:w-auto">
                     <div class="flex-grow">
@@ -232,9 +352,9 @@
 
         @else
             {{-- MESSAGE POUR LE MEMBRE (QUI N'A PAS ACCÈS AUX PROMOS) --}}
-            <div class="bg-blue-50 p-6 rounded-xl border-l-4 border-blue-500 text-blue-800">
-                <p class="font-bold">Accès restreint</p>
-                <p>En tant que membre, votre accès est limité à la gestion des indisponibilités. Pour gérer les prix, veuillez contacter votre directeur.</p>
+            <div class="bg-blue-50 p-6 rounded-xl border-l-4 border-blue-500 text-blue-800 mt-10">
+                <p class="font-bold">Accès Prix restreint</p>
+                <p>En tant que membre, l'accès à la gestion des prix et promotions est réservé au Directeur.</p>
             </div>
         @endif
 

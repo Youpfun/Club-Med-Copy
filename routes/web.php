@@ -23,6 +23,9 @@ use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\IndisponibiliteController;
 use App\Http\Controllers\AlternativeResortController;
+use App\Http\Controllers\DemandeDisponibiliteController;
+use App\Http\Controllers\ProspectionResortController;
+use App\Http\Controllers\ProspectionPartenaireController;
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('stripe.webhook');
 
@@ -51,19 +54,56 @@ Route::get('verify/otp', [TwoFactorController::class, 'index'])->name('2fa.verif
 Route::post('verify/otp', [TwoFactorController::class, 'store'])->name('2fa.store');
 Route::post('verify/resend', [TwoFactorController::class, 'resend'])->name('2fa.resend');
 
+// --- GROUPE MARKETING ---
 Route::middleware(['auth', 'marketing'])->prefix('marketing')->group(function () {
     Route::get('/dashboard', [MarketingController::class, 'index'])->name('marketing.dashboard');
+    
+    // --- ÉTAPES CRÉATION SÉJOUR ---
+    // Étape 1 : Structure (Resort, Photos, Restos)
+    Route::get('/resorts/create', [ResortController::class, 'create'])->name('resort.create');
+    Route::post('/resorts', [ResortController::class, 'store'])->name('resort.store');
+
+    // Étape 2 : Hébergements (Chambres, Prix)
+    Route::get('/resort/{id}/accommodation', [ResortController::class, 'createAccommodation'])->name('resort.step2');
+    Route::post('/resort/{id}/accommodation', [ResortController::class, 'storeAccommodation'])->name('resort.storeStep2');
+
+    // Étape 3 : Activités
+    Route::get('/resort/{id}/activities', [ResortController::class, 'createActivities'])->name('resort.step3');
+    Route::post('/resort/{id}/activities', [ResortController::class, 'storeActivities'])->name('resort.storeStep3');
+
+    // --- AUTRES ROUTES MARKETING ---
     Route::post('/update-price', [MarketingController::class, 'updatePrice'])->name('marketing.update_price');
     Route::post('/periodes', [MarketingController::class, 'storePeriode'])->name('marketing.store_periode');
     Route::post('/bulk-promo', [MarketingController::class, 'applyBulkPromo'])->name('marketing.bulk_promo');
     Route::post('/reset-promos', [MarketingController::class, 'resetPromos'])->name('marketing.reset_promos');
-    Route::get('/resorts/create', [ResortController::class, 'create'])->name('resort.create');
-    Route::post('/resorts', [ResortController::class, 'store'])->name('resort.store');
+    
     Route::get('/indisponibilite/select', [IndisponibiliteController::class, 'selectResort'])->name('marketing.indisponibilite.select');
     Route::get('/indisponibilite/create/{numresort}', [IndisponibiliteController::class, 'create'])->name('marketing.indisponibilite.create');
     Route::post('/indisponibilite', [IndisponibiliteController::class, 'store'])->name('marketing.indisponibilite.store');
     Route::get('/indisponibilites', [IndisponibiliteController::class, 'index'])->name('marketing.indisponibilite.index');
     Route::delete('/indisponibilite/{id}', [IndisponibiliteController::class, 'destroy'])->name('marketing.indisponibilite.destroy');
+    
+    Route::get('/demandes', [DemandeDisponibiliteController::class, 'index'])->name('marketing.demandes.index');
+    Route::get('/demandes/create', [DemandeDisponibiliteController::class, 'create'])->name('marketing.demandes.create');
+    Route::post('/demandes', [DemandeDisponibiliteController::class, 'store'])->name('marketing.demandes.store');
+    Route::get('/demandes/{numdemande}', [DemandeDisponibiliteController::class, 'show'])->name('marketing.demandes.show');
+    Route::post('/demandes/{numdemande}/resend', [DemandeDisponibiliteController::class, 'resend'])->name('marketing.demandes.resend');
+
+    Route::get('/prospection', [ProspectionResortController::class, 'index'])->name('marketing.prospection.index');
+    Route::get('/prospection/create', [ProspectionResortController::class, 'create'])->name('marketing.prospection.create');
+    Route::post('/prospection', [ProspectionResortController::class, 'store'])->name('marketing.prospection.store');
+    Route::get('/prospection/{numprospection}', [ProspectionResortController::class, 'show'])->name('marketing.prospection.show');
+    Route::put('/prospection/{numprospection}/statut', [ProspectionResortController::class, 'updateStatut'])->name('marketing.prospection.update-statut');
+    Route::post('/prospection/{numprospection}/resend', [ProspectionResortController::class, 'resend'])->name('marketing.prospection.resend');
+    Route::delete('/prospection/{numprospection}', [ProspectionResortController::class, 'destroy'])->name('marketing.prospection.destroy');
+
+    Route::get('/prospection-partenaire', [ProspectionPartenaireController::class, 'index'])->name('marketing.prospection-partenaire.index');
+    Route::get('/prospection-partenaire/create', [ProspectionPartenaireController::class, 'create'])->name('marketing.prospection-partenaire.create');
+    Route::post('/prospection-partenaire', [ProspectionPartenaireController::class, 'store'])->name('marketing.prospection-partenaire.store');
+    Route::get('/prospection-partenaire/{numprospection}', [ProspectionPartenaireController::class, 'show'])->name('marketing.prospection-partenaire.show');
+    Route::put('/prospection-partenaire/{numprospection}/statut', [ProspectionPartenaireController::class, 'updateStatut'])->name('marketing.prospection-partenaire.update-statut');
+    Route::post('/prospection-partenaire/{numprospection}/resend', [ProspectionPartenaireController::class, 'resend'])->name('marketing.prospection-partenaire.resend');
+    Route::delete('/prospection-partenaire/{numprospection}', [ProspectionPartenaireController::class, 'destroy'])->name('marketing.prospection-partenaire.destroy');
 });
 
 Route::middleware([
@@ -100,15 +140,8 @@ Route::middleware([
     Route::get('/reservation/{numresort}/step3', [ReservationController::class, 'step3'])->name('reservation.step3');
     Route::post('/reservation/{numresort}/addToCart', [ReservationController::class, 'addToCart'])->name('reservation.addToCart');
     
-    // Route d'édition complète de réservation (page unique)
     Route::get('/reservation/{numreservation}/edit', [ReservationController::class, 'editReservation'])->name('reservation.edit');
     Route::post('/reservation/{numreservation}/update', [ReservationController::class, 'updateReservationComplete'])->name('reservation.update.complete');
-    Route::get('/reservation/{numreservation}/edit/step1', [ReservationController::class, 'editStep1'])->name('reservation.edit.step1');
-    Route::post('/reservation/{numreservation}/update/step1', [ReservationController::class, 'updateStep1'])->name('reservation.update.step1');
-    Route::get('/reservation/{numreservation}/edit/step2', [ReservationController::class, 'editStep2'])->name('reservation.edit.step2');
-    Route::post('/reservation/{numreservation}/update/step2', [ReservationController::class, 'updateStep2'])->name('reservation.update.step2');
-    Route::get('/reservation/{numreservation}/edit/step3', [ReservationController::class, 'editStep3'])->name('reservation.edit.step3');
-    Route::post('/reservation/{numreservation}/update/step3', [ReservationController::class, 'updateStep3'])->name('reservation.update.step3');
     
     Route::get('/reservation/{numreservation}/activities', [ReservationController::class, 'showAddActivities'])->name('reservation.activities');
     Route::post('/reservation/{numreservation}/activities/checkout', [StripeController::class, 'checkoutActivities'])->name('activities.checkout');
@@ -137,7 +170,6 @@ Route::middleware([
         Route::get('/propose-alternative/{numreservation}', [VenteController::class, 'showProposeAlternativeForm'])->name('vente.propose-alternative-form');
         Route::post('/propose-alternative/{numreservation}', [VenteController::class, 'proposeAlternativeResort'])->name('vente.propose-alternative');
         
-        // Gestion des activités d'une réservation
         Route::get('/reservation/{numreservation}/activities', [VenteController::class, 'showActivities'])->name('vente.activities');
         Route::delete('/reservation/{numreservation}/activity/{numactivite}', [VenteController::class, 'cancelActivity'])->name('vente.cancel-activity');
         Route::delete('/reservation/{numreservation}/activities', [VenteController::class, 'cancelAllActivities'])->name('vente.cancel-all-activities');
@@ -155,6 +187,8 @@ Route::post('/partner/validate/{token}', [PartnerValidationController::class, 'r
 Route::get('/resort/validate/{token}', [ResortValidationController::class, 'show']);
 Route::post('/resort/validate/{token}', [ResortValidationController::class, 'respond']);
 
-// Routes pour la proposition de resort alternatif (réponse du client)
 Route::get('/client/alternative-resort/{token}', [AlternativeResortController::class, 'show']);
 Route::post('/client/alternative-resort/{token}', [AlternativeResortController::class, 'respond']);
+
+Route::get('/resort/disponibilite/{token}', [DemandeDisponibiliteController::class, 'showResortResponse']);
+Route::post('/resort/disponibilite/{token}', [DemandeDisponibiliteController::class, 'storeResortResponse']);
