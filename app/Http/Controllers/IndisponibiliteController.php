@@ -8,20 +8,16 @@ use App\Models\Indisponibilite;
 
 class IndisponibiliteController extends Controller
 {
-    // --- AJOUT : LISTER LES INDISPONIBILITÉS ---
     public function index()
     {
-        // On récupère les indisponibilités futures ou en cours
-        // On charge la relation 'chambre' et 'typechambre' pour afficher les infos
         $indisponibilites = Indisponibilite::with(['chambre.typechambre'])
-            ->where('datefin', '>=', now()) // On ne montre pas le passé
+            ->where('datefin', '>=', now()) 
             ->orderBy('datedebut')
             ->get();
 
         return view('marketing.indisponibilite.index', compact('indisponibilites'));
     }
 
-    // --- AJOUT : SUPPRIMER (LIBÉRER LA CHAMBRE) ---
     public function destroy($id)
     {
         $indispo = Indisponibilite::findOrFail($id);
@@ -30,7 +26,6 @@ class IndisponibiliteController extends Controller
         return back()->with('success', 'La chambre est de nouveau disponible à la vente.');
     }
 
-    // ... (Vos méthodes selectResort, create et store restent inchangées) ...
     public function selectResort()
     {
         $resorts = Resort::orderBy('nomresort')->get();
@@ -69,7 +64,6 @@ class IndisponibiliteController extends Controller
 
         Indisponibilite::create($request->all());
 
-        // On redirige vers la liste plutôt que le dashboard pour voir le résultat
         return redirect()->route('marketing.indisponibilite.index')
                          ->with('success', 'Indisponibilité enregistrée.');
     }

@@ -14,16 +14,11 @@ class EnsureUserIsMarketingDirector
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // On vérifie si l'utilisateur est connecté
         if (!Auth::check()) {
             return redirect('/login');
         }
 
-        // On récupère le rôle en minuscule pour comparer facilement
         $role = strtolower(Auth::user()->role);
-
-        // La condition : le rôle doit contenir le mot "marketing"
-        // Cela autorise "Directeur Marketing", "Membre du service Marketing", etc.
         if (strpos($role, 'marketing') === false) {
             abort(403, "Accès refusé. Vous devez être membre du service Marketing.");
         }
