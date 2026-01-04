@@ -358,4 +358,205 @@ class StripeController extends Controller
     {
         return redirect()->route('cart.index')->with('warning', 'Paiement annulé. Vos réservations restent en attente.');
     }
+
+    // ========== MÉTHODES POUR LES ACTIVITÉS SUPPLÉMENTAIRES ==========
+
+    public function checkoutActivities(Request $request, $numreservation)
+    {
+        $reservation = Reservation::with(['resort', 'user'])->findOrFail($numreservation);
+        
+        if ($reservation->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        $activites = $request->input('activites', []);
+        
+        if (empty($activites)) {
+            return redirect()->route('reservation.activities', $numreservation)
+                ->with('error', 'Veuillez sélectionner au moins une activité.');
+        }
+
+        \Stripe\Stripe::setApiKey(config('stripe.secret_key'));
+
+        try {
+            $lineItems = [];
+            $totalHT = 0;
+
+            foreach ($activites as $numactivite => $participants) {
+                $activite = DB::table('activitealacarte')
+                    ->join('activite', 'activitealacarte.numactivite', '=', 'activite.numactivite')
+                    ->where('activitealacarte.numactivite', $numactivite)
+                    ->select('activite.nomactivite', 'activitealacarte.prixmin')
+                    ->first();
+
+                if ($activite && !empty($participants)) {
+                    $quantity = count($participants);
+                    $totalHT += $activite->prixmin * $quantity;
+
+                    $lineItems[] = [
+                        'price_data' => [
+                            'currency' => 'eur',
+                            'product_data' => [
+                                'name' => $activite->nomactivite,
+                                'description' => 'Activité supplémentaire - Réservation #' . $numreservation,
+                            ],
+                            'unit_amount' => (int) ($activite->prixmin * 100),
+                        ],
+                        'quantity' => $quantity,
+                    ];
+                }
+            }
+
+            if (empty($lineItems)) {
+                return redirect()->route('reservation.activities', $numreservation)
+                    ->with('error', 'Aucune activité valide sélectionnée.');
+            }
+
+            // Stocker les activités dans la session pour les récupérer après paiement
+            $sessionData = [
+                'activites' => $activites,
+                'montant' => $totalHT * 1.20 // TTC
+            ];
+            
+            session(['activities_payment_' . $numreservation => $sessionData]);
+
+            $session = \Stripe\Checkout\Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => $lineItems,
+                'mode' => 'payment',
+                'success_url' => route('activities.success', ['numreservation' => $numreservation]) . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => route('activities.cancel', ['numreservation' => $numreservation]),
+                'customer_email' => $reservation->user->email,
+                'metadata' => [
+                    'reservation_id' => $numreservation,
+                    'type' => 'activities_supplement',
+                    'activities_data' => json_encode($activites), // Stocker les données dans Stripe
+                    'total_amount' => $totalHT * 1.20
+                ]
+            ]);
+
+            return redirect($session->url);
+
+        } catch (\Exception $e) {
+            return redirect()->route('reservation.activities', $numreservation)
+                ->with('error', 'Erreur lors de la création de la session de paiement: ' . $e->getMessage());
+        }
+    }
+
+    public function activitiesSuccess(Request $request, $numreservation)
+    {
+        $sessionId = $request->query('session_id');
+        
+        if (!$sessionId) {
+            return redirect()->route('reservation.show', $numreservation)
+                ->with('error', 'Session de paiement invalide.');
+        }
+
+        \Stripe\Stripe::setApiKey(config('stripe.secret_key'));
+
+        try {
+            $session = \Stripe\Checkout\Session::retrieve($sessionId);
+            
+            if ($session->payment_status === 'paid') {
+                // Récupérer les données depuis les metadata de Stripe
+                $activitesJson = $session->metadata->activities_data ?? null;
+                $montant = $session->metadata->total_amount ?? null;
+                
+                if (!$activitesJson || !$montant) {
+                    return redirect()->route('reservation.show', $numreservation)
+                        ->with('error', 'Données de paiement introuvables.');
+                }
+                
+                $activites = json_decode($activitesJson, true);
+                
+                $activitiesData = [
+                    'activites' => $activites,
+                    'montant' => $montant
+                ];
+
+                DB::beginTransaction();
+
+                try {
+                    // Ajouter les activités aux participants
+                    foreach ($activitiesData['activites'] as $numactivite => $participants) {
+                        $activite = DB::table('activitealacarte')->where('numactivite', $numactivite)->first();
+                        
+                        if ($activite) {
+                            foreach ($participants as $numparticipant) {
+                                // Vérifier si déjà existant
+                                $exists = DB::table('participant_activite')
+                                    ->where('numparticipant', $numparticipant)
+                                    ->where('numactivite', $numactivite)
+                                    ->exists();
+
+                                if (!$exists) {
+                                    // Vérifier si la colonne numreservation existe
+                                    if (Schema::hasColumn('participant_activite', 'numreservation')) {
+                                        DB::table('participant_activite')->insert([
+                                            'numparticipant' => $numparticipant,
+                                            'numactivite' => $numactivite,
+                                            'numreservation' => $numreservation,
+                                            'created_at' => now(),
+                                            'updated_at' => now(),
+                                        ]);
+                                    } else {
+                                        // Si numreservation n'existe pas dans la table
+                                        DB::table('participant_activite')->insert([
+                                            'numparticipant' => $numparticipant,
+                                            'numactivite' => $numactivite,
+                                            'created_at' => now(),
+                                            'updated_at' => now(),
+                                        ]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Enregistrer le paiement
+                    $paiementData = [
+                        'numreservation' => $numreservation,
+                        'montantpaiement' => $activitiesData['montant'],
+                        'datepaiement' => now(),
+                        'statut' => 'Complété',
+                        'stripe_session_id' => $sessionId,
+                    ];
+
+                    DB::table('paiement')->insert($paiementData);
+
+                    // Mettre à jour le prix total de la réservation
+                    $reservation = Reservation::find($numreservation);
+                    $nouveauTotal = $reservation->prixtotal + $activitiesData['montant'];
+                    $reservation->prixtotal = $nouveauTotal;
+                    $reservation->save();
+
+                    DB::commit();
+
+                    return redirect()->route('reservation.show', $numreservation)
+                        ->with('success', 'Activités ajoutées et paiement effectué avec succès !');
+
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    return redirect()->route('reservation.show', $numreservation)
+                        ->with('error', 'Erreur lors de l\'enregistrement des activités: ' . $e->getMessage());
+                }
+            } else {
+                return redirect()->route('reservation.show', $numreservation)
+                    ->with('error', 'Le paiement n\'a pas été complété.');
+            }
+
+        } catch (\Exception $e) {
+            return redirect()->route('reservation.show', $numreservation)
+                ->with('error', 'Erreur lors de la vérification du paiement: ' . $e->getMessage());
+        }
+    }
+
+    public function activitiesCancel($numreservation)
+    {
+        // Nettoyer la session
+        session()->forget('activities_payment_' . $numreservation);
+        
+        return redirect()->route('reservation.activities', $numreservation)
+            ->with('warning', 'Paiement annulé. Vous pouvez sélectionner d\'autres activités.');
+    }
 }

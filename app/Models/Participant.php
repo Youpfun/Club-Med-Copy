@@ -37,4 +37,9 @@ class Participant extends Model
     {
         return $this->belongsTo(Transport::class, 'numtransport', 'numtransport');
     }
+
+    public function activites()
+    {
+        return $this->belongsToMany(Activite::class, 'participant_activite', 'numparticipant', 'numactivite');
+    }
 }

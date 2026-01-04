@@ -104,7 +104,7 @@
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                         Voir le détail
                                     </a>
-                                    <a href="{{ route('reservation.activities', ['id' => $res->numreservation]) }}" class="flex-1 text-center px-6 py-3 bg-[#113559] hover:bg-[#0e2a47] text-white rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-md">
+                                    <a href="{{ route('reservation.activities', $res->numreservation) }}" class="flex-1 text-center px-6 py-3 bg-[#113559] hover:bg-[#0e2a47] text-white rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-md">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                                         Ajouter des activités
                                     </a>
@@ -162,7 +162,7 @@
                             </a>
 
                             {{-- Bouton activités --}}
-                            <a href="{{ route('reservation.activities', ['id' => $res->numreservation]) }}" class="w-full block text-center px-6 py-4 bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] rounded-xl font-bold text-sm transition-colors shadow-sm">
+                            <a href="{{ route('reservation.activities', $res->numreservation) }}" class="w-full block text-center px-6 py-4 bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] rounded-xl font-bold text-sm transition-colors shadow-sm">
                                 Activités à la carte
                             </a>
                         </div>

@@ -425,20 +425,21 @@ class ReservationController extends Controller
             'resort.pays', 
             'transport', 
             'activites.activite',
-            'participants',
+            'participants.transport',
+            'participants.activites.aLaCarte',
             'paiements'
         ])
         ->where('user_id', $userId)
         ->where('numreservation', $numreservation)
         ->firstOrFail();
 
-        $typeChambre = DB::table('choisir')
+        $chambres = DB::table('choisir')
             ->join('typechambre', 'choisir.numtype', '=', 'typechambre.numtype')
             ->where('choisir.numreservation', $numreservation)
-            ->select('typechambre.*')
-            ->first();
+            ->select('typechambre.*', 'choisir.quantite')
+            ->get();
 
-        return view('reservation.show', compact('reservation', 'typeChambre'));
+        return view('reservation.show', compact('reservation', 'chambres'));
     }
 
     // Édition complète (page unique) - NOUVEAU
@@ -691,5 +692,42 @@ class ReservationController extends Controller
         DB::table('reservation')
             ->where('numreservation', $numreservation)
             ->update(['prixtotal' => $totalTTC]);
+    }
+
+    // Afficher les activités disponibles pour ajouter à une réservation existante
+    public function showAddActivities($numreservation)
+    {
+        $userId = Auth::id();
+
+        $reservation = \App\Models\Reservation::with([
+            'resort.pays', 
+            'participants',
+        ])
+        ->where('user_id', $userId)
+        ->where('numreservation', $numreservation)
+        ->firstOrFail();
+
+        // Récupérer les activités disponibles pour ce resort
+        $activites = DB::table('activite')
+            ->join('activitealacarte', 'activite.numactivite', '=', 'activitealacarte.numactivite')
+            ->join('typeactivite', 'activite.numtypeactivite', '=', 'typeactivite.numtypeactivite')
+            ->join('partager', 'typeactivite.numtypeactivite', '=', 'partager.numtypeactivite')
+            ->where('partager.numresort', $reservation->numresort)
+            ->select('activite.numactivite', 'activite.nomactivite', 'activite.descriptionactivite', 'activitealacarte.prixmin')
+            ->distinct()
+            ->get();
+
+        // Récupérer les activités déjà réservées par participant
+        $activitesReservees = DB::table('participant_activite')
+            ->join('participant', 'participant_activite.numparticipant', '=', 'participant.numparticipant')
+            ->where('participant.numreservation', $numreservation)
+            ->select('participant_activite.numparticipant', 'participant_activite.numactivite')
+            ->get()
+            ->groupBy('numparticipant')
+            ->map(function($acts) {
+                return $acts->pluck('numactivite')->toArray();
+            });
+
+        return view('reservation.add-activities', compact('reservation', 'activites', 'activitesReservees'));
     }
 }

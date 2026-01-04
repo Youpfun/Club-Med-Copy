@@ -110,9 +110,11 @@ Route::middleware([
     Route::get('/reservation/{numreservation}/edit/step3', [ReservationController::class, 'editStep3'])->name('reservation.edit.step3');
     Route::post('/reservation/{numreservation}/update/step3', [ReservationController::class, 'updateStep3'])->name('reservation.update.step3');
     
-    Route::get('/reservation/{id}/activities', function ($id) {
-        return redirect("/reservation/{$id}/step3");
-    })->name('reservation.activities');
+    Route::get('/reservation/{numreservation}/activities', [ReservationController::class, 'showAddActivities'])->name('reservation.activities');
+    Route::post('/reservation/{numreservation}/activities/checkout', [StripeController::class, 'checkoutActivities'])->name('activities.checkout');
+    Route::get('/reservation/{numreservation}/activities/success', [StripeController::class, 'activitiesSuccess'])->name('activities.success');
+    Route::get('/reservation/{numreservation}/activities/cancel', [StripeController::class, 'activitiesCancel'])->name('activities.cancel');
+    
     Route::get('/reservation/{id}/participants', function ($id) {
         return redirect("/reservation/{$id}/step2");
     })->name('reservation.participants');
