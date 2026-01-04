@@ -14,12 +14,14 @@ class ReservationRejectedMail extends Mailable
     public $reservation;
     public $reason;
     public $reasonLabel;
+    public $alternativeResorts;
 
-    public function __construct(Reservation $reservation, $reason)
+    public function __construct(Reservation $reservation, $reason, $alternativeResorts = null)
     {
         $this->reservation = $reservation;
         $this->reason = $reason;
         $this->reasonLabel = $this->getReasonLabel($reason);
+        $this->alternativeResorts = $alternativeResorts ?? collect();
     }
 
     private function getReasonLabel($reason)
@@ -41,6 +43,7 @@ class ReservationRejectedMail extends Mailable
                 'reservation' => $this->reservation,
                 'reason' => $this->reason,
                 'reasonLabel' => $this->reasonLabel,
+                'alternativeResorts' => $this->alternativeResorts,
             ]);
     }
 }

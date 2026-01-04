@@ -130,17 +130,21 @@ class VenteController extends Controller
                 'statut' => 'rejetee',
             ]);
 
-            // Envoyer un email au client pour l'informer du rejet
-            $reservation->load(['resort', 'user']);
+            // Envoyer un email au client pour l'informer du rejet avec des alternatives
+            $reservation->load(['resort', 'resort.pays', 'user']);
             if ($reservation->user && $reservation->user->email) {
                 try {
+                    // Récupérer des resorts alternatifs
+                    $alternativeResorts = $this->getAlternativeResorts($reservation);
+                    
                     Mail::to($reservation->user->email)->send(
-                        new ReservationRejectedMail($reservation, $request->input('reason'))
+                        new ReservationRejectedMail($reservation, $request->input('reason'), $alternativeResorts)
                     );
-                    \Log::info('Email de rejet envoyé au client', [
+                    \Log::info('Email de rejet envoyé au client avec alternatives', [
                         'numreservation' => $numreservation,
                         'client_email' => $reservation->user->email,
                         'reason' => $request->input('reason'),
+                        'nb_alternatives' => $alternativeResorts->count(),
                     ]);
                 } catch (\Exception $e) {
                     \Log::error('Erreur envoi email rejet au client: ' . $e->getMessage(), [
@@ -280,5 +284,39 @@ class VenteController extends Controller
             \Log::error('Erreur envoi email proposition alternative: ' . $e->getMessage());
             return back()->with('error', 'Erreur lors de l\'envoi de l\'email: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Récupère des resorts alternatifs pour proposer au client
+     */
+    private function getAlternativeResorts($reservation)
+    {
+        $originalResort = $reservation->resort;
+        
+        if (!$originalResort) {
+            return Resort::with(['pays'])->orderBy('nbtridents', 'desc')->limit(3)->get();
+        }
+        
+        // D'abord, chercher des resorts dans le même pays
+        $sameCountryResorts = Resort::with(['pays'])
+            ->where('numresort', '!=', $originalResort->numresort)
+            ->where('codepays', $originalResort->codepays)
+            ->orderBy('nbtridents', 'desc')
+            ->limit(3)
+            ->get();
+        
+        // Si on a moins de 3 resorts du même pays, compléter avec d'autres
+        if ($sameCountryResorts->count() < 3) {
+            $otherResorts = Resort::with(['pays'])
+                ->where('numresort', '!=', $originalResort->numresort)
+                ->where('codepays', '!=', $originalResort->codepays)
+                ->orderBy('nbtridents', 'desc')
+                ->limit(3 - $sameCountryResorts->count())
+                ->get();
+            
+            return $sameCountryResorts->concat($otherResorts);
+        }
+        
+        return $sameCountryResorts;
     }
 }

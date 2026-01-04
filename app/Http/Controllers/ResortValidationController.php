@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use App\Models\Reservation;
+use App\Models\Resort;
 use App\Mail\PartnerValidationMail;
 use App\Mail\ResortRefusedMail;
 
@@ -95,16 +96,20 @@ class ResortValidationController extends Controller
      */
     private function sendRefusedNotificationToClient($reservation, $comment = null)
     {
-        $reservation->load(['user', 'resort']);
+        $reservation->load(['user', 'resort', 'resort.pays']);
         
         if ($reservation->user && $reservation->user->email) {
+            // Récupérer des resorts alternatifs (même pays en priorité, puis autres)
+            $alternativeResorts = $this->getAlternativeResorts($reservation);
+            
             try {
                 Mail::to($reservation->user->email)->send(
-                    new ResortRefusedMail($reservation, $reservation->resort, $comment)
+                    new ResortRefusedMail($reservation, $reservation->resort, $comment, $alternativeResorts)
                 );
                 \Log::info('Email de refus resort envoyé au client', [
                     'numreservation' => $reservation->numreservation,
                     'client_email' => $reservation->user->email,
+                    'nb_alternatives' => $alternativeResorts->count(),
                 ]);
             } catch (\Exception $e) {
                 \Log::error('Erreur envoi email refus resort au client: ' . $e->getMessage(), [
@@ -112,6 +117,36 @@ class ResortValidationController extends Controller
                 ]);
             }
         }
+    }
+
+    /**
+     * Récupère des resorts alternatifs pour proposer au client
+     */
+    private function getAlternativeResorts($reservation)
+    {
+        $originalResort = $reservation->resort;
+        
+        // D'abord, chercher des resorts dans le même pays
+        $sameCountryResorts = Resort::with(['pays'])
+            ->where('numresort', '!=', $originalResort->numresort)
+            ->where('codepays', $originalResort->codepays)
+            ->orderBy('nbtridents', 'desc')
+            ->limit(3)
+            ->get();
+        
+        // Si on a moins de 3 resorts du même pays, compléter avec d'autres
+        if ($sameCountryResorts->count() < 3) {
+            $otherResorts = Resort::with(['pays'])
+                ->where('numresort', '!=', $originalResort->numresort)
+                ->where('codepays', '!=', $originalResort->codepays)
+                ->orderBy('nbtridents', 'desc')
+                ->limit(3 - $sameCountryResorts->count())
+                ->get();
+            
+            return $sameCountryResorts->concat($otherResorts);
+        }
+        
+        return $sameCountryResorts;
     }
 
     private function sendPartnerValidationEmails($reservation)

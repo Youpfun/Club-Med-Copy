@@ -9,9 +9,14 @@
         .content { background: #f9f9f9; padding: 30px; border: 1px solid #ddd; }
         .info-box { background: white; padding: 15px; margin: 15px 0; border-left: 4px solid #0066cc; border-radius: 4px; }
         .warning-box { background: #fff3cd; padding: 15px; margin: 15px 0; border-left: 4px solid #ffc107; border-radius: 4px; }
+        .success-box { background: #d4edda; padding: 15px; margin: 15px 0; border-left: 4px solid #28a745; border-radius: 4px; }
         table { width: 100%; border-collapse: collapse; margin: 15px 0; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #f0f0f0; font-weight: bold; }
+        .resort-card { background: white; border: 2px solid #28a745; border-radius: 8px; padding: 15px; margin: 10px 0; }
+        .resort-card h4 { margin: 0 0 10px 0; color: #28a745; }
+        .resort-card p { margin: 5px 0; font-size: 14px; }
+        .trident { color: #ffc107; }
     </style>
 </head>
 <body>
@@ -55,13 +60,46 @@
                 </div>
             @endif
 
-            <div class="warning-box">
-                <h3 style="margin-top: 0;">📞 Que se passe-t-il maintenant ?</h3>
-                <p style="margin-bottom: 0;">
-                    Notre équipe commerciale va étudier votre dossier et vous proposer très prochainement un resort alternatif de qualité équivalente.
-                    Vous recevrez un email avec notre proposition sous 24 à 48 heures.
-                </p>
-            </div>
+            @if($alternativeResorts && $alternativeResorts->count() > 0)
+                <div class="success-box">
+                    <h3 style="margin-top: 0; color: #155724;">🏨 Resorts alternatifs suggérés</h3>
+                    <p>Nous vous proposons les resorts suivants, disponibles aux mêmes dates :</p>
+                    
+                    @foreach($alternativeResorts as $altResort)
+                        <div class="resort-card">
+                            <h4>{{ $altResort->nomresort }}</h4>
+                            <p>
+                                <strong>📍 Pays :</strong> {{ $altResort->pays->nompays ?? 'N/A' }}
+                            </p>
+                            @if($altResort->nbtridents)
+                                <p>
+                                    <strong>Classement :</strong> 
+                                    <span class="trident">
+                                        @for($i = 0; $i < $altResort->nbtridents; $i++)🔱@endfor
+                                    </span>
+                                </p>
+                            @endif
+                            @if($altResort->descriptionresort)
+                                <p style="font-size: 13px; color: #666;">
+                                    {{ Str::limit($altResort->descriptionresort, 150) }}
+                                </p>
+                            @endif
+                        </div>
+                    @endforeach
+                    
+                    <p style="margin-top: 15px; font-weight: bold;">
+                        Notre équipe commerciale vous contactera très prochainement pour vous proposer l'une de ces alternatives.
+                    </p>
+                </div>
+            @else
+                <div class="warning-box">
+                    <h3 style="margin-top: 0;">📞 Que se passe-t-il maintenant ?</h3>
+                    <p style="margin-bottom: 0;">
+                        Notre équipe commerciale va étudier votre dossier et vous proposer très prochainement un resort alternatif de qualité équivalente.
+                        Vous recevrez un email avec notre proposition sous 24 à 48 heures.
+                    </p>
+                </div>
+            @endif
 
             <p style="margin-top: 30px;">
                 Si vous avez des questions, n'hésitez pas à nous contacter.<br><br>

@@ -10,9 +10,14 @@
         .info-box { background: white; padding: 15px; margin: 15px 0; border-left: 4px solid #0066cc; border-radius: 4px; }
         .alert-box { background: #f8d7da; padding: 15px; margin: 15px 0; border-left: 4px solid #dc3545; border-radius: 4px; }
         .help-box { background: #d4edda; padding: 15px; margin: 15px 0; border-left: 4px solid #28a745; border-radius: 4px; }
+        .success-box { background: #d4edda; padding: 15px; margin: 15px 0; border-left: 4px solid #28a745; border-radius: 4px; }
         table { width: 100%; border-collapse: collapse; margin: 15px 0; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #f0f0f0; font-weight: bold; }
+        .resort-card { background: white; border: 2px solid #28a745; border-radius: 8px; padding: 15px; margin: 10px 0; }
+        .resort-card h4 { margin: 0 0 10px 0; color: #28a745; }
+        .resort-card p { margin: 5px 0; font-size: 14px; }
+        .trident { color: #ffc107; }
     </style>
 </head>
 <body>
@@ -65,13 +70,46 @@
                 </p>
             </div>
 
-            <div class="info-box">
-                <h3 style="margin-top: 0;">🏖️ Envie de réserver à nouveau ?</h3>
-                <p style="margin-bottom: 0;">
-                    Nous vous invitons à consulter nos autres destinations disponibles sur notre site. 
-                    Notre équipe reste à votre disposition pour vous aider à trouver le séjour idéal.
-                </p>
-            </div>
+            @if(isset($alternativeResorts) && $alternativeResorts->count() > 0)
+                <div class="success-box">
+                    <h3 style="margin-top: 0; color: #155724;">🏨 Resorts alternatifs suggérés</h3>
+                    <p>Nous vous proposons les resorts suivants qui pourraient vous intéresser :</p>
+                    
+                    @foreach($alternativeResorts as $altResort)
+                        <div class="resort-card">
+                            <h4>{{ $altResort->nomresort }}</h4>
+                            <p>
+                                <strong>📍 Pays :</strong> {{ $altResort->pays->nompays ?? 'N/A' }}
+                            </p>
+                            @if($altResort->nbtridents)
+                                <p>
+                                    <strong>Classement :</strong> 
+                                    <span class="trident">
+                                        @for($i = 0; $i < $altResort->nbtridents; $i++)🔱@endfor
+                                    </span>
+                                </p>
+                            @endif
+                            @if($altResort->descriptionresort)
+                                <p style="font-size: 13px; color: #666;">
+                                    {{ Str::limit($altResort->descriptionresort, 150) }}
+                                </p>
+                            @endif
+                        </div>
+                    @endforeach
+                    
+                    <p style="margin-top: 15px; font-weight: bold;">
+                        N'hésitez pas à nous contacter pour réserver l'un de ces resorts !
+                    </p>
+                </div>
+            @else
+                <div class="info-box">
+                    <h3 style="margin-top: 0;">🏖️ Envie de réserver à nouveau ?</h3>
+                    <p style="margin-bottom: 0;">
+                        Nous vous invitons à consulter nos autres destinations disponibles sur notre site. 
+                        Notre équipe reste à votre disposition pour vous aider à trouver le séjour idéal.
+                    </p>
+                </div>
+            @endif
 
             <p style="margin-top: 30px;">
                 Nous vous prions de nous excuser pour ce désagrément et espérons avoir le plaisir de vous accueillir prochainement dans l'un de nos resorts.<br><br>
