@@ -67,6 +67,14 @@
             @endforeach
             <input type="hidden" name="nbAdultes" value="{{ $nbAdultes }}">
             <input type="hidden" name="nbEnfants" value="{{ $nbEnfants }}">
+            
+            {{-- Passer les informations des participants --}}
+            @foreach($participants as $key => $participant)
+                <input type="hidden" name="participants[{{ $key }}][nom]" value="{{ $participant['nom'] ?? '' }}">
+                <input type="hidden" name="participants[{{ $key }}][prenom]" value="{{ $participant['prenom'] ?? '' }}">
+                <input type="hidden" name="participants[{{ $key }}][genre]" value="{{ $participant['genre'] ?? '' }}">
+                <input type="hidden" name="participants[{{ $key }}][datenaissance]" value="{{ $participant['datenaissance'] ?? '' }}">
+            @endforeach
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <!-- Colonne principale -->
@@ -86,6 +94,13 @@
                         
                         <div class="p-6 space-y-4">
                             @for($i = 1; $i <= $nbAdultes; $i++)
+                                @php
+                                    $participantKey = 'adulte_' . $i;
+                                    $participantInfo = $participants[$participantKey] ?? [];
+                                    $nom = $participantInfo['nom'] ?? '';
+                                    $prenom = $participantInfo['prenom'] ?? '';
+                                    $displayName = trim($prenom . ' ' . $nom) ?: "Adulte $i";
+                                @endphp
                                 <div class="border-2 border-gray-200 rounded-xl p-5">
                                     <div class="flex items-center justify-between mb-4">
                                         <div class="flex items-center space-x-3">
@@ -95,8 +110,8 @@
                                                 </svg>
                                             </div>
                                             <div>
-                                                <h3 class="font-bold text-lg text-gray-800">Adulte {{ $i }}</h3>
-                                                <p class="text-sm text-gray-500">12 ans et plus</p>
+                                                <h3 class="font-bold text-lg text-gray-800">{{ $displayName }}</h3>
+                                                <p class="text-sm text-gray-500">Adulte - 15 ans et plus</p>
                                             </div>
                                         </div>
                                     </div>
@@ -140,6 +155,13 @@
                             @endfor
                             
                             @for($i = 1; $i <= $nbEnfants; $i++)
+                                @php
+                                    $participantKey = 'enfant_' . $i;
+                                    $participantInfo = $participants[$participantKey] ?? [];
+                                    $nom = $participantInfo['nom'] ?? '';
+                                    $prenom = $participantInfo['prenom'] ?? '';
+                                    $displayName = trim($prenom . ' ' . $nom) ?: "Enfant $i";
+                                @endphp
                                 <div class="border-2 border-gray-200 rounded-xl p-5">
                                     <div class="flex items-center justify-between mb-4">
                                         <div class="flex items-center space-x-3">
@@ -149,8 +171,8 @@
                                                 </svg>
                                             </div>
                                             <div>
-                                                <h3 class="font-bold text-lg text-gray-800">Enfant {{ $i }}</h3>
-                                                <p class="text-sm text-gray-500">2 à 11 ans</p>
+                                                <h3 class="font-bold text-lg text-gray-800">{{ $displayName }}</h3>
+                                                <p class="text-sm text-gray-500">Enfant - Moins de 15 ans</p>
                                             </div>
                                         </div>
                                     </div>
