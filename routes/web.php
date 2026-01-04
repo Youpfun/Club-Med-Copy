@@ -135,6 +135,11 @@ Route::middleware([
         Route::get('/propose-alternative/{numreservation}', [VenteController::class, 'showProposeAlternativeForm'])->name('vente.propose-alternative-form');
         Route::post('/propose-alternative/{numreservation}', [VenteController::class, 'proposeAlternativeResort'])->name('vente.propose-alternative');
         
+        // Gestion des activités d'une réservation
+        Route::get('/reservation/{numreservation}/activities', [VenteController::class, 'showActivities'])->name('vente.activities');
+        Route::delete('/reservation/{numreservation}/activity/{numactivite}', [VenteController::class, 'cancelActivity'])->name('vente.cancel-activity');
+        Route::delete('/reservation/{numreservation}/activities', [VenteController::class, 'cancelAllActivities'])->name('vente.cancel-all-activities');
+        
         Route::get('/test-reject/{numreservation}', function ($numreservation) {
             $reservation = \App\Models\Reservation::findOrFail($numreservation);
             return view('vente.reject-reservation-test', ['reservation' => $reservation]);

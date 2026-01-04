@@ -227,15 +227,26 @@
                    {{ ucfirst($reservation->statut) }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-sm">
-                                        <a href="{{ route('stay-confirmation.form', $reservation->numreservation) }}" 
-                                           class="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold transition">
-                                            Confirmer
-                                        </a>
+                                    <td class="px-6 py-4 text-sm space-y-2">
+                                        <div class="flex flex-wrap gap-2">
+                                            <a href="{{ route('stay-confirmation.form', $reservation->numreservation) }}" 
+                                               class="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold transition">
+                                                Confirmer
+                                            </a>
                                             <a href="{{ route('vente.reject-form', $reservation->numreservation) }}" 
                                                class="inline-block px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-bold transition">
                                                 Rejeter
                                             </a>
+                                        </div>
+                                        @if($reservation->activites && $reservation->activites->count() > 0)
+                                            <a href="{{ route('vente.activities', $reservation->numreservation) }}" 
+                                               class="inline-flex items-center px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white rounded text-sm transition">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                                </svg>
+                                                Activités ({{ $reservation->activites->count() }})
+                                            </a>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach

@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\PartnerConfirmationMail;
 use App\Mail\AlternativeResortProposalMail;
 use App\Mail\ReservationRejectedMail;
+use App\Mail\ActivityCancelledMail;
+use App\Models\Activite;
 
 class VenteController extends Controller
 {
@@ -318,5 +320,178 @@ class VenteController extends Controller
         }
         
         return $sameCountryResorts;
+    }
+
+    /**
+     * Affiche les activités d'une réservation pour gestion
+     */
+    public function showActivities($numreservation)
+    {
+        if (!Auth::user() || (strpos(strtolower(Auth::user()->role ?? ''), 'vente') === false)) {
+            abort(403, 'Accès réservé au service vente');
+        }
+
+        $reservation = Reservation::with(['resort', 'user', 'activites.activite.typeActivite'])
+            ->findOrFail($numreservation);
+
+        return view('vente.manage-activities', compact('reservation'));
+    }
+
+    /**
+     * Annule une activité spécifique d'une réservation
+     */
+    public function cancelActivity(Request $request, $numreservation, $numactivite)
+    {
+        if (!Auth::user() || (strpos(strtolower(Auth::user()->role ?? ''), 'vente') === false)) {
+            abort(403, 'Accès réservé au service vente');
+        }
+
+        $reservation = Reservation::findOrFail($numreservation);
+
+        try {
+            DB::beginTransaction();
+
+            // Trouver l'activité
+            $activity = DB::table('reservation_activite')
+                ->where('numreservation', $numreservation)
+                ->where('numactivite', $numactivite)
+                ->first();
+
+            if (!$activity) {
+                return back()->with('error', 'Activité non trouvée.');
+            }
+
+            // Récupérer les infos de l'activité pour l'email
+            $activiteInfo = Activite::find($numactivite);
+            $activityTotal = $activity->prix_unitaire * $activity->quantite;
+            
+            // Préparer les données pour l'email
+            $cancelledActivities = [[
+                'nom' => $activiteInfo->nomactivite ?? 'Activité',
+                'quantite' => $activity->quantite,
+                'prix_unitaire' => $activity->prix_unitaire,
+                'total' => $activityTotal,
+            ]];
+
+            // Supprimer l'activité
+            DB::table('reservation_activite')
+                ->where('numreservation', $numreservation)
+                ->where('numactivite', $numactivite)
+                ->delete();
+
+            // Mettre à jour le prix total de la réservation
+            $newTotal = $reservation->prixtotal - $activityTotal;
+            $reservation->update(['prixtotal' => max(0, $newTotal)]);
+
+            DB::commit();
+
+            // Envoyer l'email au client
+            $reservation->load(['user', 'resort']);
+            if ($reservation->user && $reservation->user->email) {
+                try {
+                    Mail::to($reservation->user->email)->send(
+                        new ActivityCancelledMail($reservation, $cancelledActivities, $activityTotal, true)
+                    );
+                    \Log::info('Email annulation activité envoyé au client', [
+                        'numreservation' => $numreservation,
+                        'client_email' => $reservation->user->email,
+                    ]);
+                } catch (\Exception $e) {
+                    \Log::error('Erreur envoi email annulation activité: ' . $e->getMessage());
+                }
+            }
+
+            \Log::info('Activité annulée par le service vente', [
+                'numreservation' => $numreservation,
+                'numactivite' => $numactivite,
+                'montant_deduit' => $activityTotal,
+                'user_id' => Auth::id(),
+            ]);
+
+            return back()->with('success', "L'activité a été annulée avec succès. Montant déduit : " . number_format($activityTotal, 2, ',', ' ') . " €");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Erreur annulation activité: ' . $e->getMessage());
+            return back()->with('error', 'Erreur lors de l\'annulation de l\'activité: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Annule toutes les activités d'une réservation
+     */
+    public function cancelAllActivities(Request $request, $numreservation)
+    {
+        if (!Auth::user() || (strpos(strtolower(Auth::user()->role ?? ''), 'vente') === false)) {
+            abort(403, 'Accès réservé au service vente');
+        }
+
+        $reservation = Reservation::with(['activites.activite', 'user', 'resort'])->findOrFail($numreservation);
+
+        if ($reservation->activites->isEmpty()) {
+            return back()->with('error', 'Aucune activité à annuler.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Préparer les données des activités pour l'email AVANT suppression
+            $cancelledActivities = [];
+            foreach ($reservation->activites as $resActivity) {
+                $cancelledActivities[] = [
+                    'nom' => $resActivity->activite->nomactivite ?? 'Activité',
+                    'quantite' => $resActivity->quantite,
+                    'prix_unitaire' => $resActivity->prix_unitaire,
+                    'total' => $resActivity->prix_unitaire * $resActivity->quantite,
+                ];
+            }
+
+            // Calculer le montant total des activités
+            $totalActivities = DB::table('reservation_activite')
+                ->where('numreservation', $numreservation)
+                ->selectRaw('SUM(prix_unitaire * quantite) as total')
+                ->value('total') ?? 0;
+
+            // Supprimer toutes les activités
+            $deletedCount = DB::table('reservation_activite')
+                ->where('numreservation', $numreservation)
+                ->delete();
+
+            // Mettre à jour le prix total de la réservation
+            $newTotal = $reservation->prixtotal - $totalActivities;
+            $reservation->update(['prixtotal' => max(0, $newTotal)]);
+
+            DB::commit();
+
+            // Envoyer l'email au client
+            if ($reservation->user && $reservation->user->email) {
+                try {
+                    Mail::to($reservation->user->email)->send(
+                        new ActivityCancelledMail($reservation, $cancelledActivities, $totalActivities, false)
+                    );
+                    \Log::info('Email annulation toutes activités envoyé au client', [
+                        'numreservation' => $numreservation,
+                        'client_email' => $reservation->user->email,
+                        'nb_activites' => $deletedCount,
+                    ]);
+                } catch (\Exception $e) {
+                    \Log::error('Erreur envoi email annulation activités: ' . $e->getMessage());
+                }
+            }
+
+            \Log::info('Toutes les activités annulées par le service vente', [
+                'numreservation' => $numreservation,
+                'nb_activites' => $deletedCount,
+                'montant_deduit' => $totalActivities,
+                'user_id' => Auth::id(),
+            ]);
+
+            return redirect()->route('vente.dashboard')->with('success', 
+                "{$deletedCount} activité(s) annulée(s) avec succès. Montant total déduit : " . number_format($totalActivities, 2, ',', ' ') . " €"
+            );
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Erreur annulation toutes activités: ' . $e->getMessage());
+            return back()->with('error', 'Erreur lors de l\'annulation des activités: ' . $e->getMessage());
+        }
     }
 }
