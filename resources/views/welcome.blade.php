@@ -32,7 +32,7 @@
                             <p class="text-base lg:text-lg text-gray-700 leading-relaxed">
                                 Club Med, pionnier des vacances tout inclus, réinvente l'art de l'évasion pour faire de chaque instant une promesse de liberté, de partage et d'émotion. Vivez vos vacances à votre rythme, sans compromis et avec l'Esprit Libre.
                             </p>
-                            <div class="flex flex-col sm:flex-row gap-4">
+                            <div class="flex flex-col sm:flex-row gap-4 flex-wrap">
                                 <a href="{{ url('/resorts') }}" class="inline-flex items-center justify-center px-8 py-3 bg-yellow-500 hover:bg-yellow-600 text-black rounded-full font-semibold text-base transition-colors">
                                     Découvrir nos Resorts
                                 </a>
@@ -42,6 +42,18 @@
                                             📊 Tableau de Bord Vente
                                         </a>
                                     @endif
+                                    
+                                    {{-- BOUTON MARKETING --}}
+                                    @if(Auth::user() && strpos(strtolower(Auth::user()->role ?? ''), 'marketing') !== false)
+                                        <a href="{{ route('resort.create') }}" class="inline-flex items-center justify-center px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-full font-semibold text-base transition-colors">
+                                            ✨ Créer un nouveau séjour
+                                        </a>
+                                        <a href="{{ route('marketing.indisponibilite.select') }}" class="inline-flex items-center justify-center px-8 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full font-semibold text-base transition-colors ml-4">
+                                            🚫 Bloquer Chambre
+                                        </a>
+                                    @endif
+
+                                    
                                 @endauth
                             </div>
                         </div>
@@ -55,7 +67,6 @@
             </div>
         </section>
 
-        <!-- Search Section -->
         <section class="px-4 lg:px-8 xl:px-16 py-12 lg:py-16 bg-white">
             <div class="mx-auto max-w-7xl">
                 <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 lg:p-8">
@@ -93,7 +104,6 @@
             </div>
         </section>
 
-        <!-- Destinations Section -->
         <section class="px-4 lg:px-8 xl:px-16 py-12 lg:py-20 bg-gray-50">
             <div class="mx-auto max-w-7xl">
                 <div class="mb-12">
@@ -106,7 +116,6 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Card 1 -->
                     <article class="group relative isolate overflow-hidden rounded-lg bg-white shadow-sm hover:shadow-xl transition-all duration-300">
                         <div class="aspect-horizontal bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
                             <span class="text-white text-5xl">🏝️</span>
@@ -124,7 +133,6 @@
                         </div>
                     </article>
 
-                    <!-- Card 2 -->
                     <article class="group relative isolate overflow-hidden rounded-lg bg-white shadow-sm hover:shadow-xl transition-all duration-300">
                         <div class="aspect-horizontal bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
                             <span class="text-white text-5xl">🏔️</span>
@@ -142,7 +150,6 @@
                         </div>
                     </article>
 
-                    <!-- Card 3 -->
                     <article class="group relative isolate overflow-hidden rounded-lg bg-white shadow-sm hover:shadow-xl transition-all duration-300">
                         <div class="aspect-horizontal bg-gradient-to-br from-teal-400 to-cyan-600 flex items-center justify-center">
                             <span class="text-white text-5xl">🌴</span>
@@ -169,7 +176,6 @@
             </div>
         </section>
 
-        <!-- Features Section -->
         <section class="px-4 lg:px-8 xl:px-16 py-12 lg:py-20 bg-white">
             <div class="mx-auto max-w-7xl">
                 <h2 class="font-serif text-3xl lg:text-4xl font-bold text-gray-900 mb-12 text-center">
@@ -216,7 +222,6 @@
             </div>
         </section>
 
-        <!-- Temporary Admin Links (à supprimer plus tard) -->
         <section class="px-4 lg:px-8 xl:px-16 py-12 bg-gray-100">
             <div class="mx-auto max-w-7xl">
                 <h3 class="font-serif text-xl font-semibold text-gray-700 mb-6 text-center">
@@ -240,7 +245,6 @@
         </section>
     </main>
 
-    <!-- Footer -->
     <footer class="bg-white py-12 border-t border-gray-200" role="contentinfo">
         <div class="px-4 lg:px-8 xl:px-16">
             <div class="mx-auto max-w-7xl">

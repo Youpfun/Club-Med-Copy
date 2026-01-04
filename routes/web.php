@@ -20,8 +20,9 @@ use App\Http\Controllers\PartnerValidationController;
 use App\Http\Controllers\ResortValidationController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\StripeWebhookController;
+use App\Http\Controllers\MarketingController;
+use App\Http\Controllers\IndisponibiliteController;
 
-// Stripe Webhook (doit être AVANT les middlewares auth)
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('stripe.webhook');
 
 Route::get('/', function () {
@@ -50,11 +51,18 @@ Route::post('verify/otp', [TwoFactorController::class, 'store'])->name('2fa.stor
 Route::post('verify/resend', [TwoFactorController::class, 'resend'])->name('2fa.resend');
 
 Route::middleware(['auth', 'marketing'])->prefix('marketing')->group(function () {
-    Route::get('/dashboard', [App\Http\Controllers\MarketingController::class, 'index'])->name('marketing.dashboard');
-    Route::post('/update-price', [App\Http\Controllers\MarketingController::class, 'updatePrice'])->name('marketing.update_price');
-    Route::post('/periodes', [App\Http\Controllers\MarketingController::class, 'storePeriode'])->name('marketing.store_periode');
-    Route::post('/bulk-promo', [App\Http\Controllers\MarketingController::class, 'applyBulkPromo'])->name('marketing.bulk_promo');
-    Route::post('/reset-promos', [App\Http\Controllers\MarketingController::class, 'resetPromos'])->name('marketing.reset_promos');
+    Route::get('/dashboard', [MarketingController::class, 'index'])->name('marketing.dashboard');
+    Route::post('/update-price', [MarketingController::class, 'updatePrice'])->name('marketing.update_price');
+    Route::post('/periodes', [MarketingController::class, 'storePeriode'])->name('marketing.store_periode');
+    Route::post('/bulk-promo', [MarketingController::class, 'applyBulkPromo'])->name('marketing.bulk_promo');
+    Route::post('/reset-promos', [MarketingController::class, 'resetPromos'])->name('marketing.reset_promos');
+    Route::get('/resorts/create', [ResortController::class, 'create'])->name('resort.create');
+    Route::post('/resorts', [ResortController::class, 'store'])->name('resort.store');
+    Route::get('/indisponibilite/select', [IndisponibiliteController::class, 'selectResort'])->name('marketing.indisponibilite.select');
+    Route::get('/indisponibilite/create/{numresort}', [IndisponibiliteController::class, 'create'])->name('marketing.indisponibilite.create');
+    Route::post('/indisponibilite', [IndisponibiliteController::class, 'store'])->name('marketing.indisponibilite.store');
+    Route::get('/indisponibilites', [IndisponibiliteController::class, 'index'])->name('marketing.indisponibilite.index');
+    Route::delete('/indisponibilite/{id}', [IndisponibiliteController::class, 'destroy'])->name('marketing.indisponibilite.destroy');
 });
 
 Route::middleware([
@@ -68,7 +76,6 @@ Route::middleware([
     })->name('dashboard');
 
     Route::put('/user/update-custom', [UserController::class, 'updateCustom'])->name('user.update.custom');
-
     Route::post('/api/prix', [ResortController::class, 'getPrix'])->name('api.prix');
     
     Route::post('/logout', function () {
@@ -79,11 +86,9 @@ Route::middleware([
     })->name('logout');
 
     Route::get('/panier', [PanierController::class, 'index'])->name('cart.index');
-    // Paiement du panier (toutes les réservations en attente de l'utilisateur) - placer AVANT la route dynamique
     Route::post('/panier/checkout', [StripeController::class, 'checkoutCart'])->name('payment.cart.checkout');
     Route::get('/panier/payment-success', [StripeController::class, 'successCart'])->name('payment.cart.success');
     Route::get('/panier/payment-cancel', [StripeController::class, 'cancelCart'])->name('payment.cart.cancel');
-    // Route dynamique en dernier pour éviter les collisions
     Route::get('/panier/{numreservation}', [PanierController::class, 'show'])->name('panier.show');
     Route::delete('/panier/remove/{numreservation}', [PanierController::class, 'remove'])->name('panier.remove');
 
@@ -97,6 +102,12 @@ Route::middleware([
     // Route d'édition complète de réservation (page unique)
     Route::get('/reservation/{numreservation}/edit', [ReservationController::class, 'editReservation'])->name('reservation.edit');
     Route::post('/reservation/{numreservation}/update', [ReservationController::class, 'updateReservationComplete'])->name('reservation.update.complete');
+    Route::get('/reservation/{numreservation}/edit/step1', [ReservationController::class, 'editStep1'])->name('reservation.edit.step1');
+    Route::post('/reservation/{numreservation}/update/step1', [ReservationController::class, 'updateStep1'])->name('reservation.update.step1');
+    Route::get('/reservation/{numreservation}/edit/step2', [ReservationController::class, 'editStep2'])->name('reservation.edit.step2');
+    Route::post('/reservation/{numreservation}/update/step2', [ReservationController::class, 'updateStep2'])->name('reservation.update.step2');
+    Route::get('/reservation/{numreservation}/edit/step3', [ReservationController::class, 'editStep3'])->name('reservation.edit.step3');
+    Route::post('/reservation/{numreservation}/update/step3', [ReservationController::class, 'updateStep3'])->name('reservation.update.step3');
     
     Route::get('/reservation/{id}/activities', function ($id) {
         return redirect("/reservation/{$id}/step3");
@@ -111,13 +122,10 @@ Route::middleware([
     Route::get('/stay-confirmation/{numreservation}', [StayConfirmationController::class, 'showConfirmationForm'])->name('stay-confirmation.form');
     Route::post('/stay-confirmation/{numreservation}', [StayConfirmationController::class, 'sendConfirmation'])->name('stay-confirmation.send');
 
-    // Routes Stripe / Paiement
     Route::get('/reservation/{numreservation}/payment', [StripeController::class, 'showPaymentPage'])->name('payment.page');
     Route::post('/reservation/{numreservation}/checkout', [StripeController::class, 'checkout'])->name('payment.checkout');
     Route::get('/reservation/{numreservation}/payment-success', [StripeController::class, 'success'])->name('payment.success');
     Route::get('/reservation/{numreservation}/payment-cancel', [StripeController::class, 'cancel'])->name('payment.cancel');
-
-    
 
     Route::prefix('vente')->middleware('vente')->group(function () {
         Route::get('/dashboard', [VenteController::class, 'dashboard'])->name('vente.dashboard');
@@ -132,10 +140,7 @@ Route::middleware([
 
 });
 
-// Routes partenaires (pas d'auth obligatoire, sécurisées par token)
 Route::get('/partner/validate/{token}', [PartnerValidationController::class, 'show']);
 Route::post('/partner/validate/{token}', [PartnerValidationController::class, 'respond']);
-
-// Routes resort (pas d'auth obligatoire, sécurisées par token)
 Route::get('/resort/validate/{token}', [ResortValidationController::class, 'show']);
 Route::post('/resort/validate/{token}', [ResortValidationController::class, 'respond']);

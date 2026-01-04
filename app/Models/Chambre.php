@@ -25,4 +25,12 @@ class Chambre extends Model
     {
         return $this->belongsTo(TypeChambre::class, 'numtype', 'numtype');
     }
+
+    /**
+     * Relation avec les indisponibilités
+     */
+    public function indisponibilites()
+    {
+        return $this->hasMany(Indisponibilite::class, 'idchambre', 'idchambre');
+    }
 }

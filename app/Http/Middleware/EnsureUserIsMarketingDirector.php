@@ -9,12 +9,20 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsureUserIsMarketingDirector
 {
+    /**
+     * Handle an incoming request.
+     */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && Auth::user()->role === 'Directeur du Service Marketing') {
-            return $next($request);
+        if (!Auth::check()) {
+            return redirect('/login');
         }
 
-        return redirect('/')->with('error', 'Accès non autorisé.');
+        $role = strtolower(Auth::user()->role);
+        if (strpos($role, 'marketing') === false) {
+            abort(403, "Accès refusé. Vous devez être membre du service Marketing.");
+        }
+
+        return $next($request);
     }
 }
