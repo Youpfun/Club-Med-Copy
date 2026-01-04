@@ -20,9 +20,6 @@ class Restaurant extends Model
         'descriptionrestaurant'
     ];
 
-    /**
-     * Relation avec le resort
-     */
     public function resort()
     {
         return $this->belongsTo(Resort::class, 'numresort', 'numresort');
