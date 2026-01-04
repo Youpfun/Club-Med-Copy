@@ -53,7 +53,76 @@
                 </div>
             </div>
 
-            {{-- CARTE 2 : NOUVEAU SÉJOUR (RÉSERVÉ AU DIRECTEUR) --}}
+            {{-- CARTE 2 : DEMANDES DE DISPONIBILITÉ --}}
+            <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-green-500 hover:shadow-lg transition">
+                <div class="flex items-center mb-4">
+                    <span class="text-3xl mr-3 bg-green-100 p-2 rounded-lg">📋</span>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Demandes de Disponibilité</h3>
+                        <p class="text-sm text-gray-500">Vérifier les disponibilités avant création</p>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col gap-2">
+                    <a href="{{ route('marketing.demandes.create') }}" class="block w-full text-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold transition flex items-center justify-center gap-2 text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Nouvelle demande
+                    </a>
+                    
+                    <a href="{{ route('marketing.demandes.index') }}" class="block w-full text-center px-4 py-2 bg-white border border-green-200 text-green-600 hover:bg-green-50 rounded-lg font-bold transition flex items-center justify-center gap-2 text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                        Voir les demandes
+                    </a>
+                </div>
+            </div>
+
+            {{-- CARTE 3 : PROSPECTION RESORTS --}}
+            <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-purple-500 hover:shadow-lg transition">
+                <div class="flex items-center mb-4">
+                    <span class="text-3xl mr-3 bg-purple-100 p-2 rounded-lg">🔍</span>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Prospection Resorts</h3>
+                        <p class="text-sm text-gray-500">Contacter de nouveaux resorts potentiels</p>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col gap-2">
+                    <a href="{{ route('marketing.prospection.create') }}" class="block w-full text-center px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-bold transition flex items-center justify-center gap-2 text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        Contacter un resort
+                    </a>
+                    
+                    <a href="{{ route('marketing.prospection.index') }}" class="block w-full text-center px-4 py-2 bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 rounded-lg font-bold transition flex items-center justify-center gap-2 text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                        Voir les prospections
+                    </a>
+                </div>
+            </div>
+
+            {{-- CARTE 4 : PROSPECTION PARTENAIRES --}}
+            <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-emerald-500 hover:shadow-lg transition">
+                <div class="flex items-center mb-4">
+                    <span class="text-3xl mr-3 bg-emerald-100 p-2 rounded-lg">🤝</span>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Prospection Partenaires</h3>
+                        <p class="text-sm text-gray-500">Contacter des partenaires (ESF, spa, etc.)</p>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col gap-2">
+                    <a href="{{ route('marketing.prospection-partenaire.create') }}" class="block w-full text-center px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-bold transition flex items-center justify-center gap-2 text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        Contacter un partenaire
+                    </a>
+                    
+                    <a href="{{ route('marketing.prospection-partenaire.index') }}" class="block w-full text-center px-4 py-2 bg-white border border-emerald-200 text-emerald-600 hover:bg-emerald-50 rounded-lg font-bold transition flex items-center justify-center gap-2 text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                        Voir les prospections
+                    </a>
+                </div>
+            </div>
+
+            {{-- CARTE 5 : NOUVEAU SÉJOUR (RÉSERVÉ AU DIRECTEUR) --}}
             @if(Auth::user()->role === 'Directeur du Service Marketing')
                 <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-blue-600 hover:shadow-lg transition">
                     <div class="flex items-center mb-4">

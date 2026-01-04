@@ -23,6 +23,9 @@ use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\IndisponibiliteController;
 use App\Http\Controllers\AlternativeResortController;
+use App\Http\Controllers\DemandeDisponibiliteController;
+use App\Http\Controllers\ProspectionResortController;
+use App\Http\Controllers\ProspectionPartenaireController;
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('stripe.webhook');
 
@@ -64,6 +67,31 @@ Route::middleware(['auth', 'marketing'])->prefix('marketing')->group(function ()
     Route::post('/indisponibilite', [IndisponibiliteController::class, 'store'])->name('marketing.indisponibilite.store');
     Route::get('/indisponibilites', [IndisponibiliteController::class, 'index'])->name('marketing.indisponibilite.index');
     Route::delete('/indisponibilite/{id}', [IndisponibiliteController::class, 'destroy'])->name('marketing.indisponibilite.destroy');
+    
+    // Demandes de disponibilité
+    Route::get('/demandes', [DemandeDisponibiliteController::class, 'index'])->name('marketing.demandes.index');
+    Route::get('/demandes/create', [DemandeDisponibiliteController::class, 'create'])->name('marketing.demandes.create');
+    Route::post('/demandes', [DemandeDisponibiliteController::class, 'store'])->name('marketing.demandes.store');
+    Route::get('/demandes/{numdemande}', [DemandeDisponibiliteController::class, 'show'])->name('marketing.demandes.show');
+    Route::post('/demandes/{numdemande}/resend', [DemandeDisponibiliteController::class, 'resend'])->name('marketing.demandes.resend');
+
+    // Prospection de nouveaux resorts
+    Route::get('/prospection', [ProspectionResortController::class, 'index'])->name('marketing.prospection.index');
+    Route::get('/prospection/create', [ProspectionResortController::class, 'create'])->name('marketing.prospection.create');
+    Route::post('/prospection', [ProspectionResortController::class, 'store'])->name('marketing.prospection.store');
+    Route::get('/prospection/{numprospection}', [ProspectionResortController::class, 'show'])->name('marketing.prospection.show');
+    Route::put('/prospection/{numprospection}/statut', [ProspectionResortController::class, 'updateStatut'])->name('marketing.prospection.update-statut');
+    Route::post('/prospection/{numprospection}/resend', [ProspectionResortController::class, 'resend'])->name('marketing.prospection.resend');
+    Route::delete('/prospection/{numprospection}', [ProspectionResortController::class, 'destroy'])->name('marketing.prospection.destroy');
+
+    // Prospection de nouveaux partenaires (ESF, spa, etc.)
+    Route::get('/prospection-partenaire', [ProspectionPartenaireController::class, 'index'])->name('marketing.prospection-partenaire.index');
+    Route::get('/prospection-partenaire/create', [ProspectionPartenaireController::class, 'create'])->name('marketing.prospection-partenaire.create');
+    Route::post('/prospection-partenaire', [ProspectionPartenaireController::class, 'store'])->name('marketing.prospection-partenaire.store');
+    Route::get('/prospection-partenaire/{numprospection}', [ProspectionPartenaireController::class, 'show'])->name('marketing.prospection-partenaire.show');
+    Route::put('/prospection-partenaire/{numprospection}/statut', [ProspectionPartenaireController::class, 'updateStatut'])->name('marketing.prospection-partenaire.update-statut');
+    Route::post('/prospection-partenaire/{numprospection}/resend', [ProspectionPartenaireController::class, 'resend'])->name('marketing.prospection-partenaire.resend');
+    Route::delete('/prospection-partenaire/{numprospection}', [ProspectionPartenaireController::class, 'destroy'])->name('marketing.prospection-partenaire.destroy');
 });
 
 Route::middleware([
@@ -156,3 +184,7 @@ Route::post('/resort/validate/{token}', [ResortValidationController::class, 'res
 // Routes pour la proposition de resort alternatif (réponse du client)
 Route::get('/client/alternative-resort/{token}', [AlternativeResortController::class, 'show']);
 Route::post('/client/alternative-resort/{token}', [AlternativeResortController::class, 'respond']);
+
+// Routes pour les demandes de disponibilité (réponse du resort)
+Route::get('/resort/disponibilite/{token}', [DemandeDisponibiliteController::class, 'showResortResponse']);
+Route::post('/resort/disponibilite/{token}', [DemandeDisponibiliteController::class, 'storeResortResponse']);
