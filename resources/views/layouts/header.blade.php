@@ -7,8 +7,9 @@
     <nav class="hidden md:flex items-center gap-x-6 px-4">
         <a href="{{ url('/resorts') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">Nos Resorts</a>
         <a href="{{ url('/clients') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">Clients (Admin)</a>
+        
         @auth
-            {{-- Vérifie si le rôle contient "marketing" (Directeur OU Membre) --}}
+            {{-- Accès Espace Marketing pour Directeur OU Membre --}}
             @if(strpos(strtolower(Auth::user()->role ?? ''), 'marketing') !== false)
                 <a href="{{ route('marketing.dashboard') }}" class="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">
                     Espace Marketing
