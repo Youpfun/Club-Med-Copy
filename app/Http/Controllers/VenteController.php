@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\Reservation;
 use App\Models\Resort;
-use App\Models\ReservationRejection;
+use App\Models\Remboursement;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\PartnerConfirmationMail;
 use App\Mail\AlternativeResortProposalMail;
@@ -121,11 +121,13 @@ class VenteController extends Controller
         try {
             DB::beginTransaction();
 
-            ReservationRejection::create([
+            Remboursement::create([
                 'numreservation' => $numreservation,
                 'user_id' => Auth::id(),
-                'rejection_reason' => $request->input('reason'),
-                'rejected_at' => now(),
+                'montant' => $reservation->prixtotal ?? 0,
+                'statut' => Remboursement::STATUT_EN_ATTENTE,
+                'raison' => $request->input('reason'),
+                'date_demande' => now(),
             ]);
 
             $reservation->update([

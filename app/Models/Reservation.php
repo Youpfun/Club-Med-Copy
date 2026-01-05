@@ -99,13 +99,13 @@ class Reservation extends Model
         );
     }
 
-    public function rejections()
+    public function remboursements()
     {
-        return $this->hasMany(ReservationRejection::class, 'numreservation', 'numreservation');
+        return $this->hasMany(Remboursement::class, 'numreservation', 'numreservation');
     }
 
-    public function rejection()
+    public function remboursement()
     {
-        return $this->hasOne(ReservationRejection::class, 'numreservation', 'numreservation')->latest('rejected_at');
+        return $this->hasOne(Remboursement::class, 'numreservation', 'numreservation')->latest('date_demande');
     }
 }
