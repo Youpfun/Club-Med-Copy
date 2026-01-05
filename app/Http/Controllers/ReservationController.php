@@ -82,6 +82,28 @@ class ReservationController extends Controller
         ]);
     }
 
+    /**
+     * Sauvegarder les données de réservation en session pour les visiteurs non connectés
+     */
+    public function saveToSession(Request $request, $numresort)
+    {
+        $reservationData = [
+            'numresort' => $numresort,
+            'dateDebut' => $request->input('dateDebut'),
+            'dateFin' => $request->input('dateFin'),
+            'chambres' => $request->input('chambres', []),
+            'transports' => $request->input('transports', []),
+            'nbAdultes' => $request->input('nbAdultes'),
+            'nbEnfants' => $request->input('nbEnfants'),
+            'activites' => $request->input('activites', []),
+            'participants' => $request->input('participants', []),
+        ];
+
+        session(['pending_reservation' => $reservationData]);
+
+        return response()->json(['success' => true]);
+    }
+
     public function step1($numresort)
     {
         $resort = Resort::with(['photos', 'pays'])->findOrFail($numresort);

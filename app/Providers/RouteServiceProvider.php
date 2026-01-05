@@ -20,6 +20,20 @@ class RouteServiceProvider extends ServiceProvider
     public const HOME = '/dashboard';
 
     /**
+     * Get the path users should be redirected to after authentication.
+     */
+    public static function redirectTo(): string
+    {
+        // Si une réservation a été ajoutée au panier, rediriger vers le panier
+        if (session('redirect_to_cart')) {
+            session()->forget('redirect_to_cart');
+            return '/panier';
+        }
+        
+        return self::HOME;
+    }
+
+    /**
      * Define your route model bindings, pattern filters, and other route configuration.
      */
     public function boot(): void

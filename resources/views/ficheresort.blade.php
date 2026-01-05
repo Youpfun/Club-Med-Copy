@@ -320,13 +320,7 @@
                 <div class="mt-6 flex flex-wrap gap-3">
                     <a href="{{ route('resort.types', ['id' => $resort->numresort]) }}" class="inline-flex items-center px-5 py-2.5 rounded-full bg-sky-700 hover:bg-sky-800 text-white font-semibold text-sm shadow-md transition">Voir les types d'activités disponibles</a>
                     
-                    @guest
-                        <button type="button" id="open-login-modal" class="inline-flex items-center px-6 py-2.5 rounded-full bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] font-bold text-sm shadow-md transition">Réserver ce resort</button>
-                    @endguest
-
-                    @auth
-                        <a href="{{ route('reservation.step1', ['numresort' => $resort->numresort]) }}" class="inline-flex items-center px-6 py-2.5 rounded-full bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] font-bold text-sm shadow-md transition">Réserver ce resort</a>
-                    @endauth
+                    <a href="{{ route('reservation.step1', ['numresort' => $resort->numresort]) }}" class="inline-flex items-center px-6 py-2.5 rounded-full bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] font-bold text-sm shadow-md transition">Réserver ce resort</a>
                 </div>
 
             </div>
@@ -342,19 +336,6 @@
         </button>
         <img id="modal-image-content" src="" alt="Agrandissement" class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl">
     </div>
-
-    {{-- MODAL CONNEXION --}}
-    @guest
-        <div id="login-modal-overlay" class="fixed inset-0 bg-black/40 flex items-center justify-center z-40 hidden">
-            <div class="relative bg-white rounded-3xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
-                <button id="close-login-modal" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-100">✕</button>
-                <div class="px-8 pt-10 pb-8">
-                    <h2 class="text-center text-xl font-semibold text-[#b46320] mb-4">Déjà client ?</h2>
-                    <a href="{{ route('login', ['reserve_resort' => $resort->numresort]) }}" class="block w-full text-center px-6 py-3 bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] font-bold text-sm rounded-full shadow-md transition">SE CONNECTER</a>
-                </div>
-            </div>
-        </div>
-    @endguest
 
     {{-- MODAL SIGNALEMENT --}}
     <div id="report-modal-overlay" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 hidden">
@@ -432,16 +413,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            const openBtn = document.getElementById('open-login-modal');
-            const closeBtn = document.getElementById('close-login-modal');
-            const overlay = document.getElementById('login-modal-overlay');
-
-            if (openBtn && closeBtn && overlay) {
-                openBtn.addEventListener('click', () => overlay.classList.remove('hidden'));
-                closeBtn.addEventListener('click', () => overlay.classList.add('hidden'));
-                overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.add('hidden'); });
-            }
-
             // Gestion du modal de signalement
             const reportCloseBtn = document.getElementById('close-report-modal');
             const reportOverlay = document.getElementById('report-modal-overlay');

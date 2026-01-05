@@ -341,15 +341,25 @@
 
                         <!-- Boutons -->
                         <div class="p-6 bg-gray-50 border-t space-y-3">
-                            <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-green-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center">
-                                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                </svg>
-                                <span id="submitBtnText">Ajouter au panier</span>
-                                <svg id="submitBtnSpinner" class="hidden w-6 h-6 ml-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                                </svg>
-                            </button>
+                            @auth
+                                <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-green-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center">
+                                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                    </svg>
+                                    <span id="submitBtnText">Ajouter au panier</span>
+                                    <svg id="submitBtnSpinner" class="hidden w-6 h-6 ml-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                                    </svg>
+                                </button>
+                            @endauth
+                            @guest
+                                <button type="button" id="open-login-modal" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-green-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center">
+                                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                    </svg>
+                                    Ajouter au panier
+                                </button>
+                            @endguest
                             <a href="{{ route('reservation.step2', $resort->numresort) }}" 
                                class="block w-full text-center border-2 border-gray-300 text-gray-600 py-3 px-6 rounded-xl font-semibold hover:bg-gray-100 transition-all">
                                 ← Retour
@@ -407,16 +417,82 @@
         const submitBtnText = document.getElementById('submitBtnText');
         const submitBtnSpinner = document.getElementById('submitBtnSpinner');
         
-        form.addEventListener('submit', function(e) {
-            if (submitBtn.disabled) {
-                e.preventDefault();
-                return false;
-            }
-            
-            submitBtn.disabled = true;
-            submitBtnText.textContent = 'Ajout en cours...';
-            submitBtnSpinner.classList.remove('hidden');
-        });
+        if (form && submitBtn) {
+            form.addEventListener('submit', function(e) {
+                if (submitBtn.disabled) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                submitBtn.disabled = true;
+                if (submitBtnText) submitBtnText.textContent = 'Ajout en cours...';
+                if (submitBtnSpinner) submitBtnSpinner.classList.remove('hidden');
+            });
+        }
+        
+        // Gestion du modal de connexion pour les invités
+        const openLoginBtn = document.getElementById('open-login-modal');
+        const closeLoginBtn = document.getElementById('close-login-modal');
+        const loginOverlay = document.getElementById('login-modal-overlay');
+
+        if (openLoginBtn && closeLoginBtn && loginOverlay) {
+            openLoginBtn.addEventListener('click', function() {
+                // Sauvegarder les données du formulaire en session avant d'ouvrir le modal
+                const formData = new FormData(document.getElementById('step3Form'));
+                
+                // Ajouter les activités cochées
+                const checkboxes = document.querySelectorAll('input[type="checkbox"][data-activite]:checked');
+                checkboxes.forEach(cb => {
+                    formData.append('activites[' + cb.dataset.activite + '][]', cb.value);
+                });
+                
+                fetch('{{ route("reservation.saveToSession", $resort->numresort) }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loginOverlay.classList.remove('hidden');
+                        document.body.style.overflow = 'hidden';
+                    }
+                }).catch(error => {
+                    console.error('Erreur:', error);
+                    loginOverlay.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                });
+            });
+            closeLoginBtn.addEventListener('click', function() {
+                loginOverlay.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            });
+            loginOverlay.addEventListener('click', function(e) {
+                if (e.target === loginOverlay) {
+                    loginOverlay.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        }
     });
 </script>
+
+{{-- MODAL CONNEXION pour les invités --}}
+@guest
+    <div id="login-modal-overlay" class="fixed inset-0 bg-black/40 flex items-center justify-center z-40 hidden">
+        <div class="relative bg-white rounded-3xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
+            <button id="close-login-modal" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-100">✕</button>
+            <div class="px-8 pt-10 pb-8">
+                <h2 class="text-center text-xl font-semibold text-[#b46320] mb-4">Déjà client ?</h2>
+                <p class="text-center text-gray-600 mb-6">Connectez-vous pour ajouter au panier</p>
+                <a href="{{ route('login', ['redirect_to' => url()->current()]) }}" class="block w-full text-center px-6 py-3 bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] font-bold text-sm rounded-full shadow-md transition">SE CONNECTER</a>
+                <div class="mt-4 text-center">
+                    <span class="text-gray-500 text-sm">Pas encore de compte ?</span>
+                    <a href="{{ route('register', ['redirect_to' => url()->current()]) }}" class="text-orange-500 hover:text-orange-600 font-semibold text-sm ml-1">S'inscrire</a>
+                </div>
+            </div>
+        </div>
+    </div>
+@endguest
 @endsection

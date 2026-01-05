@@ -106,6 +106,13 @@ Route::middleware(['auth', 'marketing'])->prefix('marketing')->group(function ()
     Route::delete('/prospection-partenaire/{numprospection}', [ProspectionPartenaireController::class, 'destroy'])->name('marketing.prospection-partenaire.destroy');
 });
 
+// Routes accessibles sans connexion pour voir les dates/prix/activités
+Route::get('/reservation/{numresort}/step1', [ReservationController::class, 'step1'])->name('reservation.step1');
+Route::get('/reservation/{numresort}/step2', [ReservationController::class, 'step2'])->name('reservation.step2');
+Route::get('/reservation/{numresort}/step3', [ReservationController::class, 'step3'])->name('reservation.step3');
+Route::post('/reservation/{numresort}/saveToSession', [ReservationController::class, 'saveToSession'])->name('reservation.saveToSession');
+Route::post('/api/prix', [ResortController::class, 'getPrix'])->name('api.prix');
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
@@ -117,7 +124,6 @@ Route::middleware([
     })->name('dashboard');
 
     Route::put('/user/update-custom', [UserController::class, 'updateCustom'])->name('user.update.custom');
-    Route::post('/api/prix', [ResortController::class, 'getPrix'])->name('api.prix');
     
     Route::post('/logout', function () {
         Auth::guard('web')->logout();
@@ -135,9 +141,6 @@ Route::middleware([
 
     Route::get('/mes-reservations', [ReservationController::class, 'index'])->name('reservations.index');
     Route::get('/reservation/{numreservation}/details', [ReservationController::class, 'show'])->name('reservation.show');
-    Route::get('/reservation/{numresort}/step1', [ReservationController::class, 'step1'])->name('reservation.step1');
-    Route::get('/reservation/{numresort}/step2', [ReservationController::class, 'step2'])->name('reservation.step2');
-    Route::get('/reservation/{numresort}/step3', [ReservationController::class, 'step3'])->name('reservation.step3');
     Route::post('/reservation/{numresort}/addToCart', [ReservationController::class, 'addToCart'])->name('reservation.addToCart');
     
     Route::get('/reservation/{numreservation}/edit', [ReservationController::class, 'editReservation'])->name('reservation.edit');
