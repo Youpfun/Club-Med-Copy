@@ -13,8 +13,22 @@ export default {
 
     theme: {
         extend: {
+            colors: {
+                // Charte graphique Club Med
+                'clubmed': {
+                    'beige': '#f5f2ec',
+                    'black': '#000000',
+                    'gold': '#ffc72c',
+                    'white': '#ffffff',
+                    'blue': '#005aab',
+                    'blue-dark': '#003d73',
+                    'blue-light': '#0073cf',
+                },
+            },
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                // Polices Club Med
+                'serif': ['Newsreader', ...defaultTheme.fontFamily.serif],
+                'sans': ['Inter', ...defaultTheme.fontFamily.sans],
             },
         },
     },
