@@ -4,27 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vérification - Club Med</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        clubmed: {
-                            DEFAULT: '#113559',
-                            light: '#006298',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-gray-50 text-clubmed">
+<body class="bg-gray-50 text-clubmed-blue">
 
 <div class="min-h-screen flex flex-col justify-center items-center py-10 px-4">
     
-    <div class="bg-white p-8 rounded-sm shadow-lg w-full max-w-md border-t-4 border-clubmed">
+    <div class="bg-white p-8 rounded-sm shadow-lg w-full max-w-md border-t-4 border-clubmed-blue">
         
         <div class="flex justify-center mb-6">
            <h2 class="text-2xl font-bold">Vérification Requise</h2>
@@ -56,11 +42,11 @@
             <div class="mb-6">
                 <label class="block text-xs font-bold text-gray-700 mb-2 text-center">CODE DE SÉCURITÉ</label>
                 <input type="text" name="two_factor_code" 
-                       class="w-full border p-3 text-center text-2xl tracking-[0.5em] font-bold outline-none focus:ring-1 focus:ring-clubmed border-gray-300 rounded" 
+                       class="w-full border p-3 text-center text-2xl tracking-[0.5em] font-bold outline-none focus:ring-1 focus:ring-clubmed-blue border-gray-300 rounded" 
                        placeholder="123456" maxlength="6" autofocus required>
             </div>
 
-            <button type="submit" class="w-full bg-clubmed text-white p-3 rounded font-bold uppercase tracking-wide hover:bg-opacity-90 transition shadow-lg">
+            <button type="submit" class="w-full bg-clubmed-blue text-white p-3 rounded font-bold uppercase tracking-wide hover:bg-opacity-90 transition shadow-lg">
                 Confirmer
             </button>
         </form>
@@ -69,7 +55,7 @@
             <p class="text-xs text-gray-500 mb-2">Vous n'avez pas reçu le code ?</p>
             <form action="{{ route('2fa.resend') }}" method="POST">
                 @csrf
-                <button type="submit" class="text-sm font-bold text-clubmed-light hover:underline">
+                <button type="submit" class="text-sm font-bold text-clubmed-blue-light hover:underline">
                     Renvoyer le code
                 </button>
             </form>

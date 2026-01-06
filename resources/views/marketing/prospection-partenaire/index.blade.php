@@ -11,7 +11,7 @@
                     <a href="{{ route('dashboard') }}" class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1 mb-2">
                         ← Retour au tableau de bord
                     </a>
-                    <h1 class="font-serif text-3xl text-[#113559] font-bold">🤝 Prospection Partenaires</h1>
+                    <h1 class="font-serif text-3xl text-clubmed-blue font-bold">🤝 Prospection Partenaires</h1>
                     <p class="text-slate-500 mt-1">Demandes d'information envoyées à des partenaires potentiels (ESF, prestataires, etc.)</p>
                 </div>
                 <a href="{{ route('marketing.prospection-partenaire.create') }}" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold transition flex items-center gap-2">

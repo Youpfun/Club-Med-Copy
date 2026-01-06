@@ -11,7 +11,7 @@
             </a>
             <div class="flex items-start justify-between">
                 <div>
-                    <h1 class="font-serif text-3xl text-[#113559] font-bold">{{ $prospection->nom_resort }}</h1>
+                    <h1 class="font-serif text-3xl text-clubmed-blue font-bold">{{ $prospection->nom_resort }}</h1>
                     <p class="text-slate-500 mt-1">Prospection #{{ $prospection->numprospection }}</p>
                 </div>
                 <div>

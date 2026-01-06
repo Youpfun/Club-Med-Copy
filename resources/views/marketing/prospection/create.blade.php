@@ -9,7 +9,7 @@
             <a href="{{ route('marketing.prospection.index') }}" class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1 mb-2">
                 ← Retour à la liste
             </a>
-            <h1 class="font-serif text-3xl text-[#113559] font-bold">✉️ Nouvelle Prospection Resort</h1>
+            <h1 class="font-serif text-3xl text-clubmed-blue font-bold">✉️ Nouvelle Prospection Resort</h1>
             <p class="text-slate-500 mt-1">Contacter un resort potentiel pour en savoir plus</p>
         </div>
 

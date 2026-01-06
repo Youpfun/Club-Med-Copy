@@ -11,7 +11,7 @@
                     <a href="{{ route('dashboard') }}" class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1 mb-2">
                         ← Retour au tableau de bord
                     </a>
-                    <h1 class="font-serif text-3xl text-[#113559] font-bold">🔍 Prospection Resorts</h1>
+                    <h1 class="font-serif text-3xl text-clubmed-blue font-bold">🔍 Prospection Resorts</h1>
                     <p class="text-slate-500 mt-1">Demandes d'information envoyées à des resorts potentiels</p>
                 </div>
                 <a href="{{ route('marketing.prospection.create') }}" class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold transition flex items-center gap-2">

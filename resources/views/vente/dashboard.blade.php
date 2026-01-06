@@ -5,7 +5,7 @@
     <div class="max-w-7xl mx-auto">
         {{-- En-tête --}}
         <div class="mb-12">
-            <h1 class="text-4xl font-bold mb-2">Tableau de Bord Service Vente</h1>
+            <h1 class="text-4xl font-bold font-serif text-clubmed-blue mb-2">Tableau de Bord Service Vente</h1>
             <p class="text-gray-600">Gérez les confirmations de séjours et les validations des partenaires</p>
                {{-- Messages de session --}}
         @if(session('success'))
@@ -62,9 +62,9 @@
                 <div class="flex items-center">
                     <div class="flex-1">
                         <p class="text-gray-600 text-sm">Séjours à venir</p>
-                        <p class="text-3xl font-bold text-blue-600">{{ $stats['total_upcoming'] }}</p>
+                        <p class="text-3xl font-bold text-clubmed-blue">{{ $stats['total_upcoming'] }}</p>
                     </div>
-                    <div class="text-4xl text-blue-200">
+                    <div class="text-4xl text-clubmed-blue/30">
                         <i class="fas fa-calendar"></i>
                     </div>
                 </div>
@@ -75,7 +75,7 @@
         @if($reservationsResortRefused->isNotEmpty())
         <div class="bg-white rounded-lg shadow mb-12 border-l-4 border-red-500">
             <div class="border-b p-6 bg-red-50">
-                <h2 class="text-2xl font-bold text-red-800">🚨 Resorts Indisponibles - Action Requise</h2>
+                <h2 class="text-2xl font-bold font-serif text-red-800">🚨 Resorts Indisponibles - Action Requise</h2>
                 <p class="text-red-600 text-sm mt-1">Ces réservations nécessitent la proposition d'un resort alternatif au client</p>
             </div>
 
@@ -155,7 +155,7 @@
         {{-- Réservations en attente de confirmation --}}
         <div class="bg-white rounded-lg shadow mb-12">
             <div class="border-b p-6">
-                <h2 class="text-2xl font-bold">Réservations en Attente de Confirmation</h2>
+                <h2 class="text-2xl font-bold font-serif text-clubmed-blue">Réservations en Attente de Confirmation</h2>
                 <p class="text-gray-600 text-sm mt-1">Confirmez les séjours dont les partenaires ont validé la disponibilité</p>
             </div>
 
@@ -181,7 +181,7 @@
                             @foreach($reservationsPendingConfirmation as $reservation)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4">
-                                        <span class="font-bold text-blue-600">#{{ $reservation->numreservation }}</span>
+                                        <span class="font-bold text-clubmed-blue">#{{ $reservation->numreservation }}</span>
                                     </td>
                                     <td class="px-6 py-4">
                                         <div>
@@ -230,7 +230,7 @@
                                     <td class="px-6 py-4 text-sm space-y-2">
                                         <div class="flex flex-wrap gap-2">
                                             <a href="{{ route('stay-confirmation.form', $reservation->numreservation) }}" 
-                                               class="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold transition">
+                                               class="inline-block px-4 py-2 bg-clubmed-blue hover:bg-clubmed-darkblue text-white rounded font-bold transition">
                                                 Confirmer
                                             </a>
                                             <a href="{{ route('vente.reject-form', $reservation->numreservation) }}" 
@@ -264,7 +264,7 @@
         {{-- Confirmations récentes --}}
         <div class="bg-white rounded-lg shadow">
             <div class="border-b p-6">
-                <h2 class="text-2xl font-bold">Confirmations Récentes</h2>
+                <h2 class="text-2xl font-bold font-serif text-clubmed-blue">Confirmations Récentes</h2>
                 <p class="text-gray-600 text-sm mt-1">Les 10 derniers séjours confirmés</p>
             </div>
 

@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" href="/img/logo-clubmed.png"/>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-gray-50 font-sans text-[#113559]">
+<body class="bg-gray-50 font-sans text-clubmed-blue">
     @include('layouts.header')
 
     <main class="max-w-7xl mx-auto px-4 py-12 lg:px-8 space-y-16">
@@ -46,7 +46,7 @@
                         <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                     </div>
                     <p class="text-gray-500 mb-6 text-lg">Vous n'avez aucun voyage prévu pour le moment.</p>
-                    <a href="{{ url('/resorts') }}" class="inline-flex items-center px-8 py-3 bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] rounded-full font-bold text-sm transition-colors shadow-md transform hover:scale-105 duration-200">
+                    <a href="{{ url('/resorts') }}" class="inline-flex items-center px-8 py-3 bg-clubmed-gold hover:bg-yellow-400 text-clubmed-blue rounded-full font-bold text-sm transition-colors shadow-md transform hover:scale-105 duration-200">
                         Réserver mon prochain séjour
                     </a>
                 </div>
@@ -67,7 +67,7 @@
                                 @else
                                     <div class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100">Image indisponible</div>
                                 @endif
-                                <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-[#113559] shadow-sm">
+                                <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-clubmed-blue shadow-sm">
                                     {{ $res->nompays }}
                                 </div>
                             </div>
@@ -100,11 +100,11 @@
                                 </div>
 
                                 <div class="mt-auto pt-6 border-t border-gray-100 flex flex-wrap gap-4">
-                                    <a href="{{ route('reservation.show', $res->numreservation) }}" class="flex-1 text-center px-6 py-3 bg-white border-2 border-[#113559] text-[#113559] hover:bg-gray-50 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
+                                    <a href="{{ route('reservation.show', $res->numreservation) }}" class="flex-1 text-center px-6 py-3 bg-white border-2 border-clubmed-blue text-clubmed-blue hover:bg-gray-50 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                         Voir le détail
                                     </a>
-                                    <a href="{{ route('reservation.activities', $res->numreservation) }}" class="flex-1 text-center px-6 py-3 bg-[#113559] hover:bg-[#0e2a47] text-white rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-md">
+                                    <a href="{{ route('reservation.activities', $res->numreservation) }}" class="flex-1 text-center px-6 py-3 bg-clubmed-blue hover:bg-clubmed-blue-dark text-white rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-md">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                                         Ajouter des activités
                                     </a>
@@ -147,13 +147,13 @@
                             @endif
                         </div>
                         <div class="md:w-2/4">
-                            <h3 class="text-2xl font-serif font-bold text-[#113559]">{{ $res->nomresort }}</h3>
+                            <h3 class="text-2xl font-serif font-bold text-clubmed-blue">{{ $res->nomresort }}</h3>
                             <p class="text-green-700 font-medium mb-2">Séjour en cours jusqu'au {{ \Carbon\Carbon::parse($res->datefin)->format('d/m') }}</p>
                             <p class="text-sm text-gray-600">Envie d'un soin au spa ou d'une excursion ? Réservez maintenant.</p>
                         </div>
                         <div class="md:w-1/4 w-full flex flex-col gap-3">
                             {{-- Bouton pour voir le détail --}}
-                            <a href="{{ route('reservation.show', $res->numreservation) }}" class="w-full block text-center px-6 py-4 bg-white border-2 border-[#113559] text-[#113559] hover:bg-gray-50 rounded-xl font-bold text-sm transition-colors shadow-sm flex items-center justify-center gap-2">
+                            <a href="{{ route('reservation.show', $res->numreservation) }}" class="w-full block text-center px-6 py-4 bg-white border-2 border-clubmed-blue text-clubmed-blue hover:bg-gray-50 rounded-xl font-bold text-sm transition-colors shadow-sm flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -162,7 +162,7 @@
                             </a>
 
                             {{-- Bouton activités --}}
-                            <a href="{{ route('reservation.activities', $res->numreservation) }}" class="w-full block text-center px-6 py-4 bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] rounded-xl font-bold text-sm transition-colors shadow-sm">
+                            <a href="{{ route('reservation.activities', $res->numreservation) }}" class="w-full block text-center px-6 py-4 bg-clubmed-gold hover:bg-yellow-400 text-clubmed-blue rounded-xl font-bold text-sm transition-colors shadow-sm">
                                 Activités à la carte
                             </a>
                         </div>
@@ -203,13 +203,13 @@
                             @endif
                         </div>
                         <div class="flex-grow">
-                            <h4 class="font-bold text-[#113559]">{{ $res->nomresort }}</h4>
+                            <h4 class="font-bold text-clubmed-blue">{{ $res->nomresort }}</h4>
                             <p class="text-xs text-gray-500 mb-3">
                                 {{ \Carbon\Carbon::parse($res->datedebut)->format('M Y') }} • {{ $res->nbpersonnes }} pers.
                             </p>
                             
                             <div class="flex flex-col gap-2">
-                                <a href="{{ route('reservation.show', $res->numreservation) }}" class="text-sm font-bold text-[#113559] hover:text-blue-800 hover:underline flex items-center gap-1">
+                                <a href="{{ route('reservation.show', $res->numreservation) }}" class="text-sm font-bold text-clubmed-blue hover:text-blue-800 hover:underline flex items-center gap-1">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                     Revoir les détails
                                 </a>

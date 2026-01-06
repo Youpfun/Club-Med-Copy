@@ -9,7 +9,7 @@
             <a href="{{ route('marketing.prospection-partenaire.index') }}" class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1 mb-2">
                 ← Retour à la liste
             </a>
-            <h1 class="font-serif text-3xl text-[#113559] font-bold">✉️ Contacter un Partenaire</h1>
+            <h1 class="font-serif text-3xl text-clubmed-blue font-bold">✉️ Contacter un Partenaire</h1>
             <p class="text-slate-500 mt-1">Envoyer une demande d'information à un partenaire potentiel (ESF, spa, etc.)</p>
         </div>
 

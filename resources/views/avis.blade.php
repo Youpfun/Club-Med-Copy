@@ -9,14 +9,14 @@
         .rating { display: flex; flex-direction: row-reverse; justify-content: center; gap: 5px; }
         .rating input { display: none; }
         .rating label { cursor: pointer; font-size: 2rem; color: #ccc; transition: color 0.2s; }
-        .rating input:checked ~ label, .rating label:hover, .rating label:hover ~ label { color: #ffc000; }
+        .rating input:checked ~ label, .rating label:hover, .rating label:hover ~ label { color: rgb(var(--color-clubmed-gold)); }
     </style>
 </head>
-<body class="bg-gray-50 font-sans text-[#113559]">
+<body class="bg-gray-50 font-sans text-clubmed-blue">
     @include('layouts.header')
 
     <main class="max-w-2xl mx-auto px-4 py-12">
-        <a href="{{ route('reservations.index') }}" class="text-sm text-gray-500 hover:text-[#113559] mb-6 inline-block">← Retour</a>
+        <a href="{{ route('reservations.index') }}" class="text-sm text-gray-500 hover:text-clubmed-blue mb-6 inline-block">← Retour</a>
 
         <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-8">
             <h1 class="text-3xl font-serif font-bold mb-2 text-center">Votre séjour à {{ $reservation->nomresort }}</h1>
@@ -41,7 +41,7 @@
                 {{-- Commentaire --}}
                 <div class="mb-6">
                     <label for="commentaire" class="block text-sm font-bold uppercase tracking-wide mb-2">Votre commentaire</label>
-                    <textarea name="commentaire" id="commentaire" rows="4" class="w-full p-4 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-[#113559]" placeholder="Racontez-nous..."></textarea>
+                    <textarea name="commentaire" id="commentaire" rows="4" class="w-full p-4 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-clubmed-blue" placeholder="Racontez-nous..."></textarea>
                 </div>
 
                 {{-- Photo Upload (MODIFIÉ) --}}
@@ -66,7 +66,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="w-full py-4 bg-[#113559] hover:bg-[#0e2a47] text-white rounded-xl font-bold uppercase tracking-wide shadow-md transition-all">
+                <button type="submit" class="w-full py-4 bg-clubmed-blue hover:bg-blue-900 text-white rounded-xl font-bold uppercase tracking-wide shadow-md transition-all">
                     Publier l'avis
                 </button>
             </form>

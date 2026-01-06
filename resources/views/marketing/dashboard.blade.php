@@ -6,10 +6,10 @@
         
         {{-- EN-TÊTE PRINCIPAL --}}
         <div class="mb-8 text-center">
-            <h1 class="font-serif text-4xl text-[#113559] font-bold mt-2 mb-4">Tableau de Bord Marketing</h1>
+            <h1 class="font-serif text-4xl text-clubmed-blue font-bold mt-2 mb-4">Tableau de Bord Marketing</h1>
             <p class="text-slate-500">
                 Bienvenue, {{ Auth::user()->name }} 
-                <span class="text-xs bg-blue-100 text-blue-800 py-1 px-2 rounded-full ml-2">{{ Auth::user()->role }}</span>
+                <span class="text-xs bg-clubmed-blue/10 text-clubmed-blue py-1 px-2 rounded-full ml-2">{{ Auth::user()->role }}</span>
             </p>
         </div>
 
@@ -31,15 +31,15 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
             
             {{-- 1. NOUVEAU SÉJOUR (Accessible à tous les membres marketing selon ta demande) --}}
-            <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-blue-600 hover:shadow-lg transition">
+            <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-clubmed-blue hover:shadow-lg transition">
                 <div class="flex items-center mb-4">
-                    <span class="text-3xl mr-3 bg-blue-100 p-2 rounded-lg">🏨</span>
+                    <span class="text-3xl mr-3 bg-clubmed-blue/10 p-2 rounded-lg">🏨</span>
                     <div>
-                        <h3 class="text-lg font-bold text-gray-900">Nouveau Séjour</h3>
+                        <h3 class="text-lg font-bold font-serif text-gray-900">Nouveau Séjour</h3>
                         <p class="text-sm text-gray-500">Créer une fiche resort</p>
                     </div>
                 </div>
-                <a href="{{ route('resort.create') }}" class="block w-full text-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition flex items-center justify-center gap-2">
+                <a href="{{ route('resort.create') }}" class="block w-full text-center px-4 py-3 bg-clubmed-blue hover:bg-clubmed-blue/90 text-white rounded-lg font-bold transition flex items-center justify-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     Créer
                 </a>
@@ -50,7 +50,7 @@
                 <div class="flex items-center mb-4">
                     <span class="text-3xl mr-3 bg-red-100 p-2 rounded-lg">🚫</span>
                     <div>
-                        <h3 class="text-lg font-bold text-gray-900">Fermetures</h3>
+                        <h3 class="text-lg font-bold font-serif text-gray-900">Fermetures</h3>
                         <p class="text-sm text-gray-500">Gérer les travaux/incidents</p>
                     </div>
                 </div>
@@ -69,7 +69,7 @@
                 <div class="flex items-center mb-4">
                     <span class="text-3xl mr-3 bg-green-100 p-2 rounded-lg">📋</span>
                     <div>
-                        <h3 class="text-lg font-bold text-gray-900">Demandes Dispo</h3>
+                        <h3 class="text-lg font-bold font-serif text-gray-900">Demandes Dispo</h3>
                         <p class="text-sm text-gray-500">Vérifier avant création</p>
                     </div>
                 </div>
@@ -88,7 +88,7 @@
                 <div class="flex items-center mb-4">
                     <span class="text-3xl mr-3 bg-purple-100 p-2 rounded-lg">🔍</span>
                     <div>
-                        <h3 class="text-lg font-bold text-gray-900">Prosp. Resorts</h3>
+                        <h3 class="text-lg font-bold font-serif text-gray-900">Prosp. Resorts</h3>
                         <p class="text-sm text-gray-500">Contacter nouveaux resorts</p>
                     </div>
                 </div>
@@ -107,7 +107,7 @@
                 <div class="flex items-center mb-4">
                     <span class="text-3xl mr-3 bg-emerald-100 p-2 rounded-lg">🤝</span>
                     <div>
-                        <h3 class="text-lg font-bold text-gray-900">Prosp. Partenaires</h3>
+                        <h3 class="text-lg font-bold font-serif text-gray-900">Prosp. Partenaires</h3>
                         <p class="text-sm text-gray-500">Contacter ESF, Spa, etc.</p>
                     </div>
                 </div>
@@ -129,7 +129,7 @@
         <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden mb-10">
             <div class="p-6 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                 <div>
-                    <h2 class="text-xl font-bold text-[#113559] flex items-center gap-2">
+                    <h2 class="text-xl font-bold font-serif text-clubmed-blue flex items-center gap-2">
                         📂 Catalogue des Séjours 
                         <span class="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full">{{ $resortsList->count() }}</span>
                     </h2>
@@ -152,7 +152,7 @@
                             <tr class="hover:bg-slate-50 transition">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center text-xl">🏨</div>
+                                        <div class="flex-shrink-0 h-10 w-10 bg-clubmed-blue/10 rounded-full flex items-center justify-center text-xl">🏨</div>
                                         <div class="ml-4">
                                             <div class="text-sm font-bold text-gray-900">{{ $resortItem->nomresort }}</div>
                                             <div class="text-xs text-gray-500">{{ $resortItem->nbtridents }} Tridents</div>
@@ -176,7 +176,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex justify-end gap-2">
                                         {{-- Tout le monde peut configurer les chambres et activités --}}
-                                        <a href="{{ route('resort.step2', $resortItem->numresort) }}" class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded border border-blue-200 transition text-xs" title="Configurer les chambres">
+                                        <a href="{{ route('resort.step2', $resortItem->numresort) }}" class="text-clubmed-blue hover:text-clubmed-blue/80 bg-clubmed-blue/10 hover:bg-clubmed-blue/20 px-3 py-1 rounded border border-clubmed-blue/20 transition text-xs" title="Configurer les chambres">
                                             🛏️ Hébergement
                                         </a>
                                         <a href="{{ route('resort.step3', $resortItem->numresort) }}" class="text-purple-600 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 px-3 py-1 rounded border border-purple-200 transition text-xs" title="Configurer les activités">
@@ -198,7 +198,7 @@
         @if($isDirecteur)
             
             <div class="bg-indigo-900 rounded-2xl shadow-xl p-6 mb-10 text-white">
-                <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                <h2 class="text-xl font-bold font-serif mb-4 flex items-center gap-2">
                     ⚡ Campagnes Promotionnelles (Réservé Directeur)
                 </h2>
 
@@ -296,13 +296,13 @@
             </div>
 
             @if(isset($selectedResort))
-                <h2 class="text-2xl font-bold text-[#113559] mb-6 pb-2 border-b border-slate-200">
-                    Gestion détaillée : <span class="text-blue-600">{{ $selectedResort->nomresort }}</span>
+                <h2 class="text-2xl font-bold font-serif text-clubmed-blue mb-6 pb-2 border-b border-slate-200">
+                    Gestion détaillée : <span class="text-clubmed-gold">{{ $selectedResort->nomresort }}</span>
                 </h2>
 
                 @foreach($periodes as $periode)
                     <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-slate-100">
-                        <h3 class="text-lg font-bold text-[#113559] mb-4">{{ $periode->nomperiode }}</h3>
+                        <h3 class="text-lg font-bold font-serif text-clubmed-blue mb-4">{{ $periode->nomperiode }}</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             @foreach($typesChambre as $typeChambre)
                                 @php $stat = $stats[$periode->numperiode][$typeChambre->numtype] ?? null; @endphp
@@ -336,10 +336,10 @@
 
                                             <div class="flex gap-2">
                                                 <div class="relative w-full">
-                                                    <input type="number" name="valeur" min="0" :placeholder="mode === 'percentage' ? '{{ $stat['taux_calcule'] }}' : '{{ $stat['current_promo'] ?? '' }}'" class="w-full pl-3 pr-8 py-2 border rounded-lg text-center font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                                                    <input type="number" name="valeur" min="0" :placeholder="mode === 'percentage' ? '{{ $stat['taux_calcule'] }}' : '{{ $stat['current_promo'] ?? '' }}'" class="w-full pl-3 pr-8 py-2 border rounded-lg text-center font-bold text-slate-700 focus:ring-2 focus:ring-clubmed-blue outline-none text-sm">
                                                     <span class="absolute right-3 top-2 text-slate-400 font-bold text-xs" x-text="mode === 'percentage' ? '%' : '€'"></span>
                                                 </div>
-                                                <button type="submit" class="bg-[#113559] text-white px-3 rounded-lg font-bold hover:bg-blue-800 text-sm">OK</button>
+                                                <button type="submit" class="bg-clubmed-blue text-white px-3 rounded-lg font-bold hover:bg-clubmed-blue/90 text-sm">OK</button>
                                             </div>
                                         </form>
                                     </div>
@@ -352,7 +352,7 @@
 
         @else
             {{-- MESSAGE POUR LE MEMBRE (QUI N'A PAS ACCÈS AUX PROMOS) --}}
-            <div class="bg-blue-50 p-6 rounded-xl border-l-4 border-blue-500 text-blue-800 mt-10">
+            <div class="bg-clubmed-blue/10 p-6 rounded-xl border-l-4 border-clubmed-blue text-clubmed-blue mt-10">
                 <p class="font-bold">Accès Prix restreint</p>
                 <p>En tant que membre, l'accès à la gestion des prix et promotions est réservé au Directeur.</p>
             </div>
@@ -374,7 +374,7 @@
 
     <div id="modalPeriode" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
-            <h3 class="text-xl font-bold text-[#113559] mb-4">Nouvelle Période</h3>
+            <h3 class="text-xl font-bold font-serif text-clubmed-blue mb-4">Nouvelle Période</h3>
             <form action="{{ route('marketing.store_periode') }}" method="POST">
                 @csrf
                 <div class="space-y-3">
@@ -386,7 +386,7 @@
                 </div>
                 <div class="flex justify-end gap-3 mt-6">
                     <button type="button" onclick="document.getElementById('modalPeriode').classList.add('hidden')" class="text-slate-500 hover:text-gray-700">Annuler</button>
-                    <button type="submit" class="bg-[#113559] hover:bg-blue-900 text-white px-4 py-2 rounded-lg font-bold transition">Créer</button>
+                    <button type="submit" class="bg-clubmed-blue hover:bg-clubmed-blue/90 text-white px-4 py-2 rounded-lg font-bold transition">Créer</button>
                 </div>
             </form>
         </div>

@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-sky-50 via-white to-orange-50">
+<div class="min-h-screen bg-clubmed-beige">
     <!-- Header -->
-    <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+    <div class="bg-clubmed-blue text-white">
         <div class="container mx-auto px-4 py-6">
             <nav class="flex items-center text-white/80 text-sm mb-2">
                 <a href="/" class="hover:text-white">Accueil</a>
@@ -16,7 +16,7 @@
                 </svg>
                 <span class="text-white font-medium">Réservation</span>
             </nav>
-            <h1 class="text-2xl md:text-3xl font-bold">{{ $resort->nomresort }}</h1>
+            <h1 class="text-2xl md:text-3xl font-bold font-serif">{{ $resort->nomresort }}</h1>
             @if($resort->pays)
                 <p class="text-white/90 flex items-center mt-1">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,8 +52,8 @@
                 </div>
                 <div class="w-8 md:w-16 h-0.5 bg-green-500"></div>
                 <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold text-sm">3</div>
-                    <span class="ml-2 font-semibold text-orange-500 hidden sm:inline">Activités</span>
+                    <div class="w-8 h-8 rounded-full bg-clubmed-gold text-white flex items-center justify-center font-bold text-sm">3</div>
+                    <span class="ml-2 font-semibold text-clubmed-gold hidden sm:inline">Activités</span>
                 </div>
             </div>
         </div>
@@ -90,8 +90,8 @@
                     
                     <!-- Section Activités -->
                     <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
-                        <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4">
-                            <h2 class="text-xl font-bold text-white flex items-center">
+                        <div class="bg-clubmed-blue px-6 py-4">
+                            <h2 class="text-xl font-bold font-serif text-white flex items-center">
                                 <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -108,8 +108,8 @@
                                         <div class="border-2 border-gray-200 rounded-xl p-5">
                                             <div class="flex items-start justify-between mb-4">
                                                 <div class="flex items-start space-x-4">
-                                                    <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                                                        <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <div class="w-14 h-14 bg-clubmed-beige rounded-xl flex items-center justify-center flex-shrink-0">
+                                                        <svg class="w-8 h-8 text-clubmed-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                                         </svg>
@@ -118,7 +118,7 @@
                                                         <h3 class="font-bold text-lg text-gray-800">{{ $activite->nomactivite }}</h3>
                                                         <p class="text-gray-500 text-sm mt-1">{{ $activite->descriptionactivite }}</p>
                                                         <div class="mt-2">
-                                                            <span class="text-2xl font-bold text-orange-600">{{ number_format($activite->prixmin, 0, ',', ' ') }} €</span>
+                                                            <span class="text-2xl font-bold text-clubmed-gold">{{ number_format($activite->prixmin, 0, ',', ' ') }} €</span>
                                                             <span class="text-sm text-gray-500"> / personne</span>
                                                         </div>
                                                     </div>
@@ -141,10 +141,10 @@
                                                             <input type="checkbox" 
                                                                    name="activites[{{ $activite->numactivite }}][]" 
                                                                    value="adulte_{{ $i }}" 
-                                                                   class="w-5 h-5 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+                                                                   class="w-5 h-5 text-clubmed-gold border-gray-300 rounded focus:ring-clubmed-gold"
                                                                    data-prix="{{ $activite->prixmin }}"
                                                                    data-activite="{{ $activite->numactivite }}">
-                                                            <span class="text-sm text-gray-700 group-hover:text-orange-600">
+                                                            <span class="text-sm text-gray-700 group-hover:text-clubmed-gold">
                                                                 <svg class="w-4 h-4 inline mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                                                 </svg>
@@ -165,10 +165,10 @@
                                                             <input type="checkbox" 
                                                                    name="activites[{{ $activite->numactivite }}][]" 
                                                                    value="enfant_{{ $i }}" 
-                                                                   class="w-5 h-5 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+                                                                   class="w-5 h-5 text-clubmed-gold border-gray-300 rounded focus:ring-clubmed-gold"
                                                                    data-prix="{{ $activite->prixmin }}"
                                                                    data-activite="{{ $activite->numactivite }}">
-                                                            <span class="text-sm text-gray-700 group-hover:text-orange-600">
+                                                            <span class="text-sm text-gray-700 group-hover:text-clubmed-gold">
                                                                 <svg class="w-4 h-4 inline mr-1 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                                                 </svg>
@@ -201,14 +201,14 @@
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-2xl shadow-lg overflow-hidden sticky top-4">
                         <div class="bg-gradient-to-r from-gray-800 to-gray-900 px-6 py-4">
-                            <h3 class="text-lg font-bold text-white">Récapitulatif complet</h3>
+                            <h3 class="text-lg font-bold font-serif text-white">Récapitulatif complet</h3>
                         </div>
                         
                         <div class="p-6 space-y-6">
                             <!-- Resort -->
                             <div class="flex items-start space-x-5">
-                                <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="w-10 h-10 bg-clubmed-beige rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-clubmed-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                                     </svg>
                                 </div>
@@ -229,7 +229,7 @@
                                 <div class="ml-2">
                                     <p class="text-sm text-gray-500 mb-1">Dates du séjour</p>
                                     <p class="font-semibold text-gray-800">{{ \Carbon\Carbon::parse($dateDebut)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($dateFin)->format('d/m/Y') }}</p>
-                                    <p class="text-sm text-orange-500 font-medium">{{ $nbNuits }} nuit(s)</p>
+                                    <p class="text-sm text-clubmed-gold font-medium">{{ $nbNuits }} nuit(s)</p>
                                 </div>
                             </div>
 
@@ -325,7 +325,7 @@
                             </div>
 
                             <!-- Total -->
-                            <div class="bg-gradient-to-r from-orange-500 to-orange-600 -mx-6 -mb-6 px-6 py-5">
+                            <div class="bg-clubmed-blue -mx-6 -mb-6 px-6 py-5">
                                 <div class="flex justify-between items-center">
                                     <div>
                                         <p class="text-white/80 text-sm">Prix total</p>
@@ -484,12 +484,12 @@
         <div class="relative bg-white rounded-3xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
             <button id="close-login-modal" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-100">✕</button>
             <div class="px-8 pt-10 pb-8">
-                <h2 class="text-center text-xl font-semibold text-[#b46320] mb-4">Déjà client ?</h2>
+                <h2 class="text-center text-xl font-semibold text-amber-600 mb-4">Déjà client ?</h2>
                 <p class="text-center text-gray-600 mb-6">Connectez-vous pour ajouter au panier</p>
-                <a href="{{ route('login', ['redirect_to' => url()->current()]) }}" class="block w-full text-center px-6 py-3 bg-[#ffc000] hover:bg-[#e0a800] text-[#113559] font-bold text-sm rounded-full shadow-md transition">SE CONNECTER</a>
+                <a href="{{ route('login', ['redirect_to' => url()->current()]) }}" class="block w-full text-center px-6 py-3 bg-clubmed-gold hover:bg-yellow-500 text-clubmed-blue font-bold text-sm rounded-full shadow-md transition">SE CONNECTER</a>
                 <div class="mt-4 text-center">
                     <span class="text-gray-500 text-sm">Pas encore de compte ?</span>
-                    <a href="{{ route('register', ['redirect_to' => url()->current()]) }}" class="text-orange-500 hover:text-orange-600 font-semibold text-sm ml-1">S'inscrire</a>
+                    <a href="{{ route('register', ['redirect_to' => url()->current()]) }}" class="text-clubmed-gold hover:text-yellow-400 font-semibold text-sm ml-1">S'inscrire</a>
                 </div>
             </div>
         </div>

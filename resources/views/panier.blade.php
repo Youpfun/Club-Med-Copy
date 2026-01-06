@@ -4,9 +4,10 @@
 <div class="container mx-auto px-4 py-8 max-w-5xl">
     
     {{-- En-tête --}}
-    <div class="mb-8 border-b pb-4">
-        <h1 class="text-3xl font-serif font-bold text-[#113559]">Mon Panier</h1>
-        <p class="text-gray-600">Validez vos séjours avant qu'ils ne soient plus disponibles.</p>
+    <div class="mb-8 border-b border-gray-100 pb-6">
+        <p class="text-clubmed-gold font-semibold text-sm uppercase tracking-widest mb-2">Votre sélection</p>
+        <h1 class="text-4xl font-serif font-bold text-clubmed-blue">Mon Panier</h1>
+        <p class="text-gray-600 mt-2">Validez vos séjours avant qu'ils ne soient plus disponibles.</p>
     </div>
 
     {{-- Messages Flash --}}
@@ -24,8 +25,8 @@
                 @foreach($reservations as $reservation)
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative">
                         {{-- Bandeau supérieur de la carte --}}
-                        <div class="bg-gray-50 px-6 py-3 border-b border-gray-100 flex justify-between items-center">
-                            <h2 class="text-lg font-bold text-[#113559] flex items-center">
+                        <div class="bg-clubmed-beige px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-clubmed-blue flex items-center">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                                 {{ $reservation->nomresort }}
                             </h2>
@@ -84,7 +85,7 @@
                                 </div>
 
                                 <div class="text-right">
-                                    <p class="text-2xl font-bold text-[#113559]">{{ number_format($reservation->prixtotal, 2, ',', ' ') }} €</p>
+                                    <p class="text-2xl font-bold text-clubmed-blue">{{ number_format($reservation->prixtotal, 2, ',', ' ') }} €</p>
                                     <p class="text-xs text-gray-500">TTC</p>
                                 </div>
                             </div>
@@ -109,14 +110,14 @@
                         <div class="border-t border-dashed border-gray-300 pt-4 mb-6">
                             <div class="flex justify-between items-end">
                                 <span class="font-bold text-gray-800 text-lg">Total à régler</span>
-                                <span class="font-bold text-blue-600 text-3xl">{{ number_format($reservations->sum('prixtotal'), 2, ',', ' ') }} €</span>
+                                <span class="font-bold text-clubmed-gold text-3xl">{{ number_format($reservations->sum('prixtotal'), 2, ',', ' ') }} €</span>
                             </div>
                             <p class="text-xs text-right text-gray-400 mt-1">TVA incluse</p>
                         </div>
 
                         @if($reservations->count() === 1)
                             {{-- Une seule réservation : aller directement au paiement --}}
-                            <a href="{{ route('payment.page', $reservations->first()->numreservation) }}" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-green-700 transition-all shadow-md flex justify-center items-center">
+                            <a href="{{ route('payment.page', $reservations->first()->numreservation) }}" class="w-full bg-clubmed-blue text-white py-4 rounded-full font-bold text-lg hover:bg-clubmed-blue-dark transition-all shadow-lg flex justify-center items-center">
                                 Procéder au paiement
                                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                             </a>
@@ -124,7 +125,7 @@
                             {{-- Plusieurs réservations : payer tout en une fois ou une par une --}}
                             <form action="{{ route('payment.cart.checkout') }}" method="POST" class="mb-4">
                                 @csrf
-                                <button type="submit" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-green-700 transition-all shadow-md flex justify-center items-center">
+                                <button type="submit" class="w-full bg-clubmed-blue text-white py-4 rounded-full font-bold text-lg hover:bg-clubmed-blue-dark transition-all shadow-lg flex justify-center items-center">
                                     Payer toutes les réservations
                                     <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                                 </button>
@@ -153,7 +154,7 @@
                 
                 {{-- Bouton continuer mes achats --}}
                 <div class="mt-6 text-center">
-                    <a href="{{ route('resorts.index') }}" class="text-gray-500 hover:text-[#113559] text-sm font-semibold underline">
+                    <a href="{{ route('resorts.index') }}" class="text-gray-500 hover:text-clubmed-blue text-sm font-semibold underline transition-colors">
                         Continuer mes achats (ajouter un autre séjour)
                     </a>
                 </div>
@@ -169,7 +170,7 @@
             </div>d
             <h2 class="text-2xl font-bold text-gray-800 mb-2">Votre panier est vide</h2>
             <p class="text-gray-500 mb-8">Il semble que vous n'ayez pas encore sélectionné de voyage de rêve.</p>
-            <a href="{{ route('resorts.index') }}" class="inline-block bg-[#113559] text-white px-8 py-3 rounded-full font-bold hover:bg-[#0e2a47] transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+            <a href="{{ route('resorts.index') }}" class="inline-block bg-clubmed-blue text-white px-8 py-3.5 rounded-full font-bold hover:bg-clubmed-blue-dark transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
                 Explorer nos destinations
             </a>
         </div>

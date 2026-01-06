@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-sky-50 via-white to-orange-50">
+<div class="min-h-screen bg-clubmed-beige">
     <!-- Header -->
-    <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+    <div class="bg-clubmed-blue text-white">
         <div class="container mx-auto px-4 py-6">
             <nav class="flex items-center text-white/80 text-sm mb-2">
                 <a href="/" class="hover:text-white">Accueil</a>
@@ -16,7 +16,7 @@
                 </svg>
                 <span class="text-white font-medium">Réservation</span>
             </nav>
-            <h1 class="text-2xl md:text-3xl font-bold">{{ $resort->nomresort }}</h1>
+            <h1 class="text-2xl md:text-3xl font-bold font-serif">{{ $resort->nomresort }}</h1>
             @if($resort->pays)
                 <p class="text-white/90 flex items-center mt-1">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -43,8 +43,8 @@
                 </div>
                 <div class="w-8 md:w-16 h-0.5 bg-green-500"></div>
                 <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold text-sm">2</div>
-                    <span class="ml-2 font-semibold text-orange-500 hidden sm:inline">Transport</span>
+                    <div class="w-8 h-8 rounded-full bg-clubmed-gold text-white flex items-center justify-center font-bold text-sm">2</div>
+                    <span class="ml-2 font-semibold text-clubmed-gold hidden sm:inline">Transport</span>
                 </div>
                 <div class="w-8 md:w-16 h-0.5 bg-gray-300"></div>
                 <div class="flex items-center">
@@ -82,8 +82,8 @@
                     
                     <!-- Section choix transport par participant -->
                     <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
-                        <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4">
-                            <h2 class="text-xl font-bold text-white flex items-center">
+                        <div class="bg-clubmed-blue px-6 py-4">
+                            <h2 class="text-xl font-bold font-serif text-white flex items-center">
                                 <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                                 </svg>
@@ -229,8 +229,8 @@
                         <div class="p-6 space-y-6">
                             <!-- Dates -->
                             <div class="flex items-start space-x-5 pb-2">
-                                <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="w-10 h-10 bg-clubmed-beige rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-clubmed-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                     </svg>
                                 </div>
@@ -240,7 +240,7 @@
                                     @php
                                         $nuits = \Carbon\Carbon::parse($dateDebut)->diffInDays(\Carbon\Carbon::parse($dateFin));
                                     @endphp
-                                    <p class="text-sm text-orange-500 font-medium">{{ $nuits }} nuit(s)</p>
+                                    <p class="text-sm text-clubmed-gold font-medium">{{ $nuits }} nuit(s)</p>
                                 </div>
                             </div>
 
@@ -302,7 +302,7 @@
 
                         <!-- Boutons -->
                         <div class="p-6 bg-gray-50 border-t space-y-3">
-                            <button type="submit" class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center">
+                            <button type="submit" class="w-full bg-clubmed-blue text-white py-4 px-6 rounded-xl font-bold text-lg hover:bg-blue-900 transition-all shadow-lg hover:shadow-xl flex items-center justify-center">
                                 Continuer
                                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>

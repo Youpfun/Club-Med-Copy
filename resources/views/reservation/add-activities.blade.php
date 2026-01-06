@@ -3,7 +3,7 @@
 @section('content')
 <div class="min-h-screen bg-gradient-to-br from-sky-50 via-white to-orange-50">
     <!-- Header -->
-    <div class="bg-gradient-to-r from-[#113559] to-blue-800 text-white">
+    <div class="bg-gradient-to-r from-clubmed-blue to-blue-800 text-white">
         <div class="container mx-auto px-4 py-6">
             <nav class="flex items-center text-white/80 text-sm mb-2">
                 <a href="{{ route('reservations.index') }}" class="hover:text-white">Mes réservations</a>
@@ -32,7 +32,7 @@
                     
                     <!-- Section Activités -->
                     <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
-                        <div class="bg-[#113559] px-6 py-4">
+                        <div class="bg-clubmed-blue px-6 py-4">
                             <h2 class="text-xl font-bold text-white flex items-center">
                                 <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
@@ -47,7 +47,7 @@
                             @if($activites->count() > 0)
                                 <div class="space-y-6">
                                     @foreach($activites as $activite)
-                                        <div class="border-2 border-gray-200 rounded-xl p-5 hover:border-[#113559] transition-colors">
+                                        <div class="border-2 border-gray-200 rounded-xl p-5 hover:border-clubmed-blue transition-colors">
                                             <div class="flex items-start justify-between mb-4">
                                                 <div class="flex items-start space-x-4">
                                                     <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -60,7 +60,7 @@
                                                         <h3 class="font-bold text-lg text-gray-800">{{ $activite->nomactivite }}</h3>
                                                         <p class="text-gray-500 text-sm mt-1">{{ $activite->descriptionactivite }}</p>
                                                         <div class="mt-2">
-                                                            <span class="text-2xl font-bold text-[#113559]">{{ number_format($activite->prixmin, 0, ',', ' ') }} €</span>
+                                                            <span class="text-2xl font-bold text-clubmed-blue">{{ number_format($activite->prixmin, 0, ',', ' ') }} €</span>
                                                             <span class="text-sm text-gray-500"> / personne</span>
                                                         </div>
                                                     </div>
@@ -82,11 +82,11 @@
                                                             <input type="checkbox" 
                                                                    name="activites[{{ $activite->numactivite }}][]" 
                                                                    value="{{ $participant->numparticipant }}" 
-                                                                   class="w-5 h-5 text-[#113559] border-gray-300 rounded focus:ring-[#113559] activity-checkbox"
+                                                                   class="w-5 h-5 text-clubmed-blue border-gray-300 rounded focus:ring-clubmed-blue activity-checkbox"
                                                                    data-prix="{{ $activite->prixmin }}"
                                                                    data-activite="{{ $activite->numactivite }}"
                                                                    {{ $dejaReservee ? 'checked disabled' : '' }}>
-                                                            <span class="text-sm text-gray-700 group-hover:text-[#113559] flex items-center">
+                                                            <span class="text-sm text-gray-700 group-hover:text-clubmed-blue flex items-center">
                                                                 <svg class="w-4 h-4 inline mr-1 {{ $isAdulte ? 'text-blue-500' : 'text-pink-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                                                 </svg>
@@ -120,7 +120,7 @@
                 <!-- Colonne récapitulatif -->
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden sticky top-6">
-                        <div class="bg-[#113559] px-6 py-4">
+                        <div class="bg-clubmed-blue px-6 py-4">
                             <h3 class="font-bold text-white flex items-center">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
@@ -146,18 +146,18 @@
                                 <div class="border-t border-dashed border-gray-300 pt-3">
                                     <div class="flex justify-between items-center">
                                         <span class="font-bold text-gray-800 text-base">Total TTC</span>
-                                        <span class="font-bold text-[#113559] text-2xl" id="totalTTC">0,00 €</span>
+                                        <span class="font-bold text-clubmed-blue text-2xl" id="totalTTC">0,00 €</span>
                                     </div>
                                 </div>
                             </div>
                             
                             <button type="submit" id="btnPayer" disabled
-                                    class="w-full bg-[#ffc000] hover:bg-[#e0a800] disabled:bg-gray-300 disabled:cursor-not-allowed text-[#113559] font-bold py-3 px-6 rounded-lg transition-colors shadow-md disabled:shadow-none">
+                                    class="w-full bg-clubmed-gold hover:bg-yellow-400 disabled:bg-gray-300 disabled:cursor-not-allowed text-clubmed-blue font-bold py-3 px-6 rounded-lg transition-colors shadow-md disabled:shadow-none">
                                 Payer les activités supplémentaires
                             </button>
                             
                             <a href="{{ route('reservation.show', $reservation->numreservation) }}" 
-                               class="block w-full text-center border border-gray-300 hover:border-[#113559] text-gray-700 hover:text-[#113559] font-semibold py-3 px-6 rounded-lg transition-colors">
+                               class="block w-full text-center border border-gray-300 hover:border-clubmed-blue text-gray-700 hover:text-clubmed-blue font-semibold py-3 px-6 rounded-lg transition-colors">
                                 Retour aux détails
                             </a>
                         </div>
@@ -215,9 +215,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const act = selectedActivities[activiteId];
                 html += `
                     <div class="bg-blue-50 p-3 rounded-lg">
-                        <p class="font-semibold text-sm text-[#113559] mb-1">${act.nom}</p>
+                        <p class="font-semibold text-sm text-clubmed-blue mb-1">${act.nom}</p>
                         <p class="text-xs text-gray-600">${act.participants.join(', ')}</p>
-                        <p class="text-sm font-bold text-[#113559] mt-1">${(act.prix * act.participants.length).toFixed(0)} €</p>
+                        <p class="text-sm font-bold text-clubmed-blue mt-1">${(act.prix * act.participants.length).toFixed(0)} €</p>
                     </div>
                 `;
             }

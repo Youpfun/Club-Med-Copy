@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-sky-50 via-white to-orange-50">
-    <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+<div class="min-h-screen bg-clubmed-beige">
+    <div class="bg-clubmed-blue text-white">
         <div class="container mx-auto px-4 py-6">
             <nav class="flex items-center text-white/80 text-sm mb-2">
                 <a href="/" class="hover:text-white">Accueil</a>
@@ -15,7 +15,7 @@
                 </svg>
                 <span class="text-white font-medium">Réservation</span>
             </nav>
-            <h1 class="text-2xl md:text-3xl font-bold">{{ $resort->nomresort }}</h1>
+            <h1 class="text-2xl md:text-3xl font-bold font-serif">{{ $resort->nomresort }}</h1>
             @if($resort->pays)
                 <p class="text-white/90 flex items-center mt-1">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,8 +32,8 @@
         <div class="container mx-auto px-4 py-4">
             <div class="flex items-center justify-center space-x-4 md:space-x-8">
                 <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold text-sm">1</div>
-                    <span class="ml-2 font-semibold text-orange-500 hidden sm:inline">Séjour</span>
+                    <div class="w-8 h-8 rounded-full bg-clubmed-gold text-white flex items-center justify-center font-bold text-sm">1</div>
+                    <span class="ml-2 font-semibold text-clubmed-gold hidden sm:inline">Séjour</span>
                 </div>
                 <div class="w-8 md:w-16 h-0.5 bg-gray-300"></div>
                 <div class="flex items-center">
@@ -56,8 +56,8 @@
                 <div class="flex-1 space-y-6">
                     
                     <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-                        <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                            <span class="w-8 h-8 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center mr-3">
+                        <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center font-serif">
+                            <span class="w-8 h-8 rounded-full bg-clubmed-beige text-clubmed-gold flex items-center justify-center mr-3">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
@@ -68,7 +68,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Date d'arrivée</label>
                                 <input type="date" name="dateDebut" id="dateDebut" required 
-                                       class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-orange-500 focus:ring-0 transition-colors" 
+                                       class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-clubmed-gold focus:ring-clubmed-gold focus:ring-0 transition-colors" 
                                        min="{{ date('Y-m-d') }}"
                                        max="{{ date('Y-m-d', strtotime('+3 years')) }}"
                                        value="{{ request('dateDebut') }}">
@@ -76,7 +76,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Date de départ</label>
                                 <input type="date" name="dateFin" id="dateFin" required 
-                                       class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-orange-500 focus:ring-0 transition-colors" 
+                                       class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-clubmed-gold focus:ring-clubmed-gold focus:ring-0 transition-colors" 
                                        min="{{ date('Y-m-d') }}"
                                        max="{{ date('Y-m-d', strtotime('+3 years')) }}"
                                        value="{{ request('dateFin') }}">
@@ -102,7 +102,7 @@
                                     </div>
                                     <div class="flex items-center space-x-3">
                                         <button type="button" onclick="changeValue('nbAdultes', -1)" 
-                                                class="w-10 h-10 rounded-full bg-white border-2 border-gray-300 text-gray-600 hover:border-orange-500 hover:text-orange-500 transition-colors flex items-center justify-center">
+                                                class="w-10 h-10 rounded-full bg-white border-2 border-gray-300 text-gray-600 hover:border-clubmed-gold hover:text-clubmed-gold transition-colors flex items-center justify-center">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
                                             </svg>
@@ -110,7 +110,7 @@
                                         <input type="number" name="nbAdultes" id="nbAdultes" value="{{ request('nbAdultes', 2) }}" min="1" max="10" required 
                                                class="w-14 text-center text-xl font-bold border-0 bg-transparent focus:ring-0">
                                         <button type="button" onclick="changeValue('nbAdultes', 1)" 
-                                                class="w-10 h-10 rounded-full bg-white border-2 border-gray-300 text-gray-600 hover:border-orange-500 hover:text-orange-500 transition-colors flex items-center justify-center">
+                                                class="w-10 h-10 rounded-full bg-white border-2 border-gray-300 text-gray-600 hover:border-clubmed-gold hover:text-clubmed-gold transition-colors flex items-center justify-center">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                             </svg>
@@ -126,7 +126,7 @@
                                     </div>
                                     <div class="flex items-center space-x-3">
                                         <button type="button" onclick="changeValue('nbEnfants', -1)" 
-                                                class="w-10 h-10 rounded-full bg-white border-2 border-gray-300 text-gray-600 hover:border-orange-500 hover:text-orange-500 transition-colors flex items-center justify-center">
+                                                class="w-10 h-10 rounded-full bg-white border-2 border-gray-300 text-gray-600 hover:border-clubmed-gold hover:text-clubmed-gold transition-colors flex items-center justify-center">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
                                             </svg>
@@ -134,7 +134,7 @@
                                         <input type="number" name="nbEnfants" id="nbEnfants" value="{{ request('nbEnfants', 0) }}" min="0" max="10" required 
                                                class="w-14 text-center text-xl font-bold border-0 bg-transparent focus:ring-0">
                                         <button type="button" onclick="changeValue('nbEnfants', 1)" 
-                                                class="w-10 h-10 rounded-full bg-white border-2 border-gray-300 text-gray-600 hover:border-orange-500 hover:text-orange-500 transition-colors flex items-center justify-center">
+                                                class="w-10 h-10 rounded-full bg-white border-2 border-gray-300 text-gray-600 hover:border-clubmed-gold hover:text-clubmed-gold transition-colors flex items-center justify-center">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                             </svg>
@@ -203,7 +203,7 @@
                                                     --
                                                 </div>
 
-                                                <div class="text-2xl font-bold text-orange-500 transition-colors duration-200" id="container-prix-{{ $type->numtype }}">
+                                                <div class="text-2xl font-bold text-clubmed-gold transition-colors duration-200" id="container-prix-{{ $type->numtype }}">
                                                     <span id="prix-{{ $type->numtype }}">--</span>
                                                 </div>
                                                 <div class="text-sm text-gray-500">€ / nuit</div>
@@ -216,14 +216,14 @@
                                                 <span class="text-sm font-medium text-gray-700">Nombre de chambres :</span>
                                                 <div class="flex items-center space-x-3">
                                                     <button type="button" onclick="changeChambresQty({{ $type->numtype }}, -1)" 
-                                                            class="w-9 h-9 rounded-full bg-white border-2 border-gray-300 text-gray-600 hover:border-orange-500 hover:text-orange-500 transition-colors flex items-center justify-center">
+                                                            class="w-9 h-9 rounded-full bg-white border-2 border-gray-300 text-gray-600 hover:border-clubmed-gold hover:text-clubmed-gold transition-colors flex items-center justify-center">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
                                                         </svg>
                                                     </button>
                                                     <span class="w-12 text-center text-xl font-bold text-gray-800" id="display-qty-{{ $type->numtype }}">0</span>
                                                     <button type="button" onclick="changeChambresQty({{ $type->numtype }}, 1)" 
-                                                            class="w-9 h-9 rounded-full bg-white border-2 border-gray-300 text-gray-600 hover:border-orange-500 hover:text-orange-500 transition-colors flex items-center justify-center">
+                                                            class="w-9 h-9 rounded-full bg-white border-2 border-gray-300 text-gray-600 hover:border-clubmed-gold hover:text-clubmed-gold transition-colors flex items-center justify-center">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                                         </svg>
@@ -241,9 +241,9 @@
                 <div class="lg:w-96">
                     <div class="sticky top-4">
                         <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                            <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-5 text-white">
-                                <h3 class="font-bold text-lg">Récapitulatif</h3>
-                                <p class="text-orange-100 text-sm">{{ $resort->nomresort }}</p>
+                            <div class="bg-clubmed-blue p-5 text-white">
+                                <h3 class="font-bold text-lg font-serif">Récapitulatif</h3>
+                                <p class="text-clubmed-beige text-sm">{{ $resort->nomresort }}</p>
                             </div>
                             
                             <div class="p-5 space-y-4">
@@ -295,14 +295,14 @@
                                     <div class="border-t border-gray-300 my-2"></div>
                                     <div class="flex justify-between items-center mb-3">
                                         <span class="text-gray-800 font-semibold">Total TTC</span>
-                                        <span class="text-2xl font-bold text-orange-500" id="recap-total">--</span>
+                                        <span class="text-2xl font-bold text-clubmed-gold" id="recap-total">--</span>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="p-5 border-t border-gray-100">
                                 <button type="submit" 
-                                        class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 rounded-xl font-bold text-lg hover:from-orange-600 hover:to-orange-700 transition-all">
+                                        class="w-full bg-clubmed-blue text-white py-4 rounded-xl font-bold text-lg hover:bg-yellow-400 transition-all">
                                     Continuer
                                 </button>
                             </div>
@@ -355,7 +355,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             if(prixContainer) {
-                prixContainer.classList.remove('text-orange-500', 'text-[#113559]');
+                prixContainer.classList.remove('text-clubmed-gold', 'text-clubmed-blue');
                 prixContainer.classList.add('text-green-600'); // PRIX EN VERT
             }
             
@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if(prixContainer) {
                 prixContainer.classList.remove('text-green-600', 'text-red-600');
-                prixContainer.classList.add('text-orange-500'); // Retour à l'orange
+                prixContainer.classList.add('text-clubmed-gold'); // Retour au clubmed-gold
             }
             
             if(prixActuel && data.prixParNuit) {
@@ -430,7 +430,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Civilité *</label>
                         <select name="participants[${type}_${index}][genre]" required 
-                                class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-orange-500 focus:ring-0">
+                                class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-clubmed-gold focus:ring-clubmed-gold focus:ring-0">
                             <option value="">-- Choisir --</option>
                             <option value="M.">Monsieur</option>
                             <option value="Mme">Madame</option>
@@ -440,13 +440,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
                         <input type="text" name="participants[${type}_${index}][nom]" required 
                                placeholder="Nom de famille"
-                               class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-orange-500 focus:ring-0">
+                               class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-clubmed-gold focus:ring-clubmed-gold focus:ring-0">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
                         <input type="text" name="participants[${type}_${index}][prenom]" required 
                                placeholder="Prénom"
-                               class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-orange-500 focus:ring-0">
+                               class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-clubmed-gold focus:ring-clubmed-gold focus:ring-0">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Date de naissance *</label>
@@ -454,7 +454,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                min="${isAdulte ? '1920-01-01' : (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 15); return d.toISOString().split('T')[0]; })()}"
                                max="${isAdulte ? (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 15); return d.toISOString().split('T')[0]; })() : new Date().toISOString().split('T')[0]}"
                                onchange="validateAge(this, '${type}')"
-                               class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-orange-500 focus:ring-0">
+                               class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-clubmed-gold focus:ring-clubmed-gold focus:ring-0">
                         <p class="text-xs text-gray-500 mt-1">${isAdulte ? 'Né(e) entre 1920 et il y a 15 ans' : 'Moins de 15 ans'}</p>
                     </div>
                 </div>
@@ -501,10 +501,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Styling de la carte selon la quantité
         if (newVal > 0) {
-            card.classList.add('border-orange-500', 'bg-orange-50', 'shadow-md');
+            card.classList.add('border-clubmed-gold', 'bg-clubmed-beige', 'shadow-md');
             card.classList.remove('border-gray-200');
         } else {
-            card.classList.remove('border-orange-500', 'bg-orange-50', 'shadow-md');
+            card.classList.remove('border-clubmed-gold', 'bg-clubmed-beige', 'shadow-md');
             card.classList.add('border-gray-200');
         }
         
@@ -692,11 +692,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     totalEl.textContent = prixTotalChambres.toFixed(2) + ' €';
                     
                     if (hasPromo) {
-                        totalEl.classList.remove('text-orange-500');
+                        totalEl.classList.remove('text-clubmed-gold');
                         totalEl.classList.add('text-green-600');
                     } else {
                         totalEl.classList.remove('text-green-600');
-                        totalEl.classList.add('text-orange-500');
+                        totalEl.classList.add('text-clubmed-gold');
                     }
                 }
             });

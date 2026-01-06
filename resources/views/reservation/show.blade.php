@@ -6,11 +6,11 @@
     {{-- En-tête avec Navigation --}}
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
-            <a href="{{ route('reservations.index') }}" class="text-gray-500 hover:text-[#113559] flex items-center mb-2 transition-colors">
+            <a href="{{ route('reservations.index') }}" class="text-gray-500 hover:text-clubmed-blue flex items-center mb-2 transition-colors">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 Retour à mes séjours
             </a>
-            <h1 class="text-3xl font-serif font-bold text-[#113559]">Détails de ma réservation</h1>
+            <h1 class="text-3xl font-serif font-bold text-clubmed-blue">Détails de ma réservation</h1>
             <p class="text-gray-500">Référence dossier : <span class="font-mono font-bold text-black">#{{ $reservation->numreservation }}</span></p>
         </div>
         
@@ -41,7 +41,7 @@
 
             {{-- 1. LE RESORT --}}
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="bg-[#113559] text-white px-6 py-4 flex justify-between items-center">
+                <div class="bg-clubmed-blue text-white px-6 py-4 flex justify-between items-center">
                     <h2 class="text-lg font-bold flex items-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                         Destination
@@ -54,7 +54,7 @@
                     @endif
                 </div>
                 <div class="p-6">
-                    <h3 class="text-2xl font-serif font-bold text-[#113559] mb-2">{{ $reservation->resort->nomresort }}</h3>
+                    <h3 class="text-2xl font-serif font-bold text-clubmed-blue mb-2">{{ $reservation->resort->nomresort }}</h3>
                     <p class="text-gray-600 mb-4">{{ $reservation->resort->descriptionresort }}</p>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -67,7 +67,7 @@
                             <p class="text-lg font-semibold text-gray-800">{{ \Carbon\Carbon::parse($reservation->datefin)->format('d/m/Y') }}</p>
                         </div>
                         <div class="md:col-span-2 border-t border-gray-200 pt-2 mt-2">
-                            <p class="text-sm text-gray-600">Durée du séjour : <span class="font-bold text-[#113559]">{{ \Carbon\Carbon::parse($reservation->datedebut)->diffInDays(\Carbon\Carbon::parse($reservation->datefin)) }} nuits</span></p>
+                            <p class="text-sm text-gray-600">Durée du séjour : <span class="font-bold text-clubmed-blue">{{ \Carbon\Carbon::parse($reservation->datedebut)->diffInDays(\Carbon\Carbon::parse($reservation->datefin)) }} nuits</span></p>
                         </div>
                     </div>
                 </div>
@@ -77,7 +77,7 @@
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="bg-gray-50 px-6 py-3 border-b border-gray-100">
                     <h2 class="text-lg font-bold text-gray-700 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-[#ffc000]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        <svg class="w-5 h-5 mr-2 text-clubmed-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                         Hébergement & Participants
                     </h2>
                 </div>
@@ -239,7 +239,7 @@
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="bg-gray-50 px-6 py-3 border-b border-gray-100">
                     <h2 class="text-lg font-bold text-gray-700 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-[#ffc000]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <svg class="w-5 h-5 mr-2 text-clubmed-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         Activités & Options
                     </h2>
                 </div>
@@ -271,7 +271,7 @@
                             @foreach($reservation->activites as $activite)
                                 <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
                                     <div class="flex items-center">
-                                        <div class="w-2 h-2 rounded-full bg-[#ffc000] mr-3"></div>
+                                        <div class="w-2 h-2 rounded-full bg-clubmed-gold mr-3"></div>
                                         <div>
                                             <p class="font-medium text-gray-800">{{ $activite->activite->nomactivite }}</p>
                                             <p class="text-xs text-gray-500">Quantité : {{ $activite->quantite }} x {{ number_format($activite->prix_unitaire, 2, ',', ' ') }} €</p>
@@ -296,7 +296,7 @@
             <div class="sticky top-6 space-y-6">
                 {{-- RECAPITULATIF FINANCIER --}}
                 <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                    <div class="bg-[#113559] px-6 py-4">
+                    <div class="bg-clubmed-blue px-6 py-4">
                         <h3 class="font-bold text-white flex items-center">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
@@ -393,7 +393,7 @@
                         <div class="border-t-2 border-dashed border-gray-300 pt-4 mt-4">
                             <div class="flex justify-between items-center mb-1">
                                 <span class="font-bold text-gray-800 text-base">Total TTC</span>
-                                <span class="font-bold text-[#113559] text-2xl">{{ number_format($reservation->prixtotal, 2, ',', ' ') }} €</span>
+                                <span class="font-bold text-clubmed-blue text-2xl">{{ number_format($reservation->prixtotal, 2, ',', ' ') }} €</span>
                             </div>
                             <p class="text-xs text-right text-gray-400">TVA incluse • Tous services</p>
                         </div>
@@ -436,10 +436,10 @@
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                     <h4 class="font-bold text-gray-800 mb-4">Besoin d'aide ?</h4>
                     <div class="space-y-3">
-                        <a href="#" class="block w-full text-center py-2 px-4 border border-[#113559] text-[#113559] rounded-lg hover:bg-blue-50 transition-colors text-sm font-semibold">
+                        <a href="#" class="block w-full text-center py-2 px-4 border border-clubmed-blue text-clubmed-blue rounded-lg hover:bg-blue-50 transition-colors text-sm font-semibold">
                             Contacter le service client
                         </a>
-                        <a href="{{ route('reservation.activities', $reservation->numreservation) }}" class="block w-full text-center py-2 px-4 bg-[#ffc000] text-[#113559] rounded-lg hover:bg-[#e0a800] transition-colors text-sm font-bold shadow-sm">
+                        <a href="{{ route('reservation.activities', $reservation->numreservation) }}" class="block w-full text-center py-2 px-4 bg-clubmed-gold text-clubmed-blue rounded-lg hover:bg-yellow-400 transition-colors text-sm font-bold shadow-sm">
                             Ajouter des activités
                         </a>
                     </div>
