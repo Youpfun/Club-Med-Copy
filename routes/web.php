@@ -26,12 +26,11 @@ use App\Http\Controllers\AlternativeResortController;
 use App\Http\Controllers\DemandeDisponibiliteController;
 use App\Http\Controllers\ProspectionResortController;
 use App\Http\Controllers\ProspectionPartenaireController;
+use App\Http\Controllers\WelcomeController;
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('stripe.webhook');
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [WelcomeController::class, 'index'])->name('home');
 
 Route::get('/resorts', [ResortController::class, 'index'])->name('resorts.index');
 Route::get('/ficheresort/{numresort}', [FicheResort::class, 'fiche'])->name('resort.show');

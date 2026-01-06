@@ -87,11 +87,29 @@
                         </svg>
                         Voir tous les Resorts
                     </a>
-                    <a href="{{ url('/resorts?type=ski') }}" class="inline-flex items-center justify-center h-14 px-10 bg-white border-2 border-black text-black hover:bg-black hover:text-white rounded-full font-semibold text-base transition-all gap-2">
+                    @php
+                        // Construire les URLs pour Ski et Soleil basées sur les données du controller
+                        // Ski : utiliser typeclub "Montagne" ou localisation "Les Alpes"
+                        $skiUrl = url('/resorts');
+                        if (isset($skiTypeclub) && $skiTypeclub) {
+                            $skiUrl = url('/resorts?typeclub=' . $skiTypeclub->numtypeclub);
+                        } elseif (isset($skiLocalisation) && $skiLocalisation) {
+                            $skiUrl = url('/resorts?localisation=' . $skiLocalisation->numlocalisation);
+                        }
+                        
+                        // Soleil : utiliser typeclub "Mer & Plage" ou regroupement "Soleil d'Hiver"
+                        $soleilUrl = url('/resorts');
+                        if (isset($soleilTypeclub) && $soleilTypeclub) {
+                            $soleilUrl = url('/resorts?typeclub=' . $soleilTypeclub->numtypeclub);
+                        } elseif (isset($soleilRegroupement) && $soleilRegroupement) {
+                            $soleilUrl = url('/resorts?regroupement=' . $soleilRegroupement->numregroupement);
+                        }
+                    @endphp
+                    <a href="{{ $skiUrl }}" class="inline-flex items-center justify-center h-14 px-10 bg-white border-2 border-black text-black hover:bg-black hover:text-white rounded-full font-semibold text-base transition-all gap-2">
                         <span class="text-xl">🏔️</span>
                         Ski & Montagne
                     </a>
-                    <a href="{{ url('/resorts?type=soleil') }}" class="inline-flex items-center justify-center h-14 px-10 bg-white border-2 border-black text-black hover:bg-black hover:text-white rounded-full font-semibold text-base transition-all gap-2">
+                    <a href="{{ $soleilUrl }}" class="inline-flex items-center justify-center h-14 px-10 bg-white border-2 border-black text-black hover:bg-black hover:text-white rounded-full font-semibold text-base transition-all gap-2">
                         <span class="text-xl">☀️</span>
                         Vacances au soleil
                     </a>
@@ -118,42 +136,75 @@
                     </div>
                 </div>
 
+                {{-- Affichage des resorts dynamiquement depuis la base de données --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    @php
-                        $destinations = [
-                            ['name' => 'Punta Cana', 'country' => 'République Dominicaine', 'image' => 'puntacana.webp', 'badge' => 'Avec espace Luxe'],
-                            ['name' => 'Seychelles', 'country' => 'Les Seychelles', 'image' => 'seychelles.webp', 'badge' => 'Gamme Luxe'],
-                            ['name' => 'Marrakech', 'country' => 'Maroc', 'image' => 'marrakech.webp', 'badge' => 'Avec espace Luxe'],
-                            ['name' => 'La Caravelle', 'country' => 'Guadeloupe', 'image' => 'lacaravelle.webp', 'badge' => null],
-                        ];
-                    @endphp
-
-                    @foreach($destinations as $dest)
-                        <article class="group">
-                            <a href="{{ url('/resorts') }}" class="block">
-                                <div class="relative aspect-[3/4] rounded-2xl overflow-hidden mb-4">
-                                    @php
-                                        $imgPath = public_path('img/ressort/' . $dest['image']);
-                                    @endphp
-                                    @if(file_exists($imgPath))
-                                        <img src="{{ asset('img/ressort/' . $dest['image']) }}" alt="{{ $dest['name'] }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                                    @else
-                                        <div class="w-full h-full bg-gradient-to-br from-clubmed-blue to-clubmed-blue-dark flex items-center justify-center">
-                                            <span class="text-white text-5xl">🏝️</span>
-                                        </div>
-                                    @endif
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
-                                    @if($dest['badge'])
-                                        <div class="absolute top-4 left-4 bg-white/95 backdrop-blur px-3 py-1.5 rounded-full">
-                                            <span class="text-xs font-semibold text-black">{{ $dest['badge'] }}</span>
-                                        </div>
-                                    @endif
-                                </div>
-                                <h3 class="font-serif text-xl font-semibold text-black group-hover:text-clubmed-blue transition-colors">{{ $dest['name'] }}</h3>
-                                <p class="text-gray-600 text-sm">{{ $dest['country'] }}</p>
-                            </a>
-                        </article>
-                    @endforeach
+                    @if(isset($featuredResorts) && $featuredResorts->count() > 0)
+                        @foreach($featuredResorts->take(4) as $resort)
+                            <article class="group">
+                                <a href="{{ route('resort.show', $resort->numresort) }}" class="block">
+                                    <div class="relative aspect-[3/4] rounded-2xl overflow-hidden mb-4">
+                                        @php
+                                            $photo = $resort->photos->first();
+                                            $hasImage = $photo && $photo->urlphoto;
+                                        @endphp
+                                        @if($hasImage)
+                                            <img src="{{ asset('img/ressort/' . $photo->urlphoto) }}" alt="{{ $resort->nomresort }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                                        @else
+                                            <div class="w-full h-full bg-gradient-to-br from-clubmed-blue to-clubmed-blue-dark flex items-center justify-center">
+                                                <span class="text-white text-5xl">🏝️</span>
+                                            </div>
+                                        @endif
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+                                        @if($resort->nbtridents >= 4)
+                                            <div class="absolute top-4 left-4 bg-white/95 backdrop-blur px-3 py-1.5 rounded-full">
+                                                <span class="text-xs font-semibold text-black">
+                                                    @if($resort->nbtridents == 5) Gamme Luxe @else Avec espace Luxe @endif
+                                                </span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <h3 class="font-serif text-xl font-semibold text-black group-hover:text-clubmed-blue transition-colors">{{ $resort->nomresort }}</h3>
+                                    <p class="text-gray-600 text-sm">{{ $resort->pays->nompays ?? 'Destination Club Med' }}</p>
+                                </a>
+                            </article>
+                        @endforeach
+                    @else
+                        {{-- Fallback si pas de données --}}
+                        @php
+                            $destinations = [
+                                ['name' => 'Punta Cana', 'country' => 'République Dominicaine', 'image' => 'puntacana.webp', 'badge' => 'Avec espace Luxe'],
+                                ['name' => 'Seychelles', 'country' => 'Les Seychelles', 'image' => 'seychelles.webp', 'badge' => 'Gamme Luxe'],
+                                ['name' => 'Marrakech', 'country' => 'Maroc', 'image' => 'marrakech.webp', 'badge' => 'Avec espace Luxe'],
+                                ['name' => 'La Caravelle', 'country' => 'Guadeloupe', 'image' => 'lacaravelle.webp', 'badge' => null],
+                            ];
+                        @endphp
+                        @foreach($destinations as $dest)
+                            <article class="group">
+                                <a href="{{ url('/resorts') }}" class="block">
+                                    <div class="relative aspect-[3/4] rounded-2xl overflow-hidden mb-4">
+                                        @php
+                                            $imgPath = public_path('img/ressort/' . $dest['image']);
+                                        @endphp
+                                        @if(file_exists($imgPath))
+                                            <img src="{{ asset('img/ressort/' . $dest['image']) }}" alt="{{ $dest['name'] }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                                        @else
+                                            <div class="w-full h-full bg-gradient-to-br from-clubmed-blue to-clubmed-blue-dark flex items-center justify-center">
+                                                <span class="text-white text-5xl">🏝️</span>
+                                            </div>
+                                        @endif
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+                                        @if($dest['badge'])
+                                            <div class="absolute top-4 left-4 bg-white/95 backdrop-blur px-3 py-1.5 rounded-full">
+                                                <span class="text-xs font-semibold text-black">{{ $dest['badge'] }}</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <h3 class="font-serif text-xl font-semibold text-black group-hover:text-clubmed-blue transition-colors">{{ $dest['name'] }}</h3>
+                                    <p class="text-gray-600 text-sm">{{ $dest['country'] }}</p>
+                                </a>
+                            </article>
+                        @endforeach
+                    @endif
                 </div>
             </div>
         </section>

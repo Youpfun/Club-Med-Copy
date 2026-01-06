@@ -1,4 +1,42 @@
 {{-- ===== HEADER CLUB MED - STYLE OFFICIEL ===== --}}
+@php
+    // Pour Ski : utiliser typeclub "Montagne" ou localisation "Les Alpes"
+    $headerSkiTypeclub = \DB::table('typeclub')
+        ->where('nomtypeclub', 'LIKE', '%Montagne%')
+        ->first();
+        
+    $headerSkiLocalisation = \DB::table('localisation')
+        ->where('nomlocalisation', 'LIKE', '%Alpes%')
+        ->first();
+        
+    // Pour Soleil : utiliser typeclub "Mer & Plage" ou regroupement "Soleil d'Hiver"
+    $headerSoleilTypeclub = \DB::table('typeclub')
+        ->where('nomtypeclub', 'LIKE', '%Mer%')
+        ->orWhere('nomtypeclub', 'LIKE', '%Plage%')
+        ->first();
+        
+    $headerSoleilRegroupement = \DB::table('regroupementclub')
+        ->where('nomregroupement', 'LIKE', '%Soleil%')
+        ->first();
+        
+    // Construire les URLs
+    $headerSkiUrl = url('/resorts');
+    $headerSoleilUrl = url('/resorts');
+    
+    // Ski : priorité au typeclub, puis localisation
+    if ($headerSkiTypeclub) {
+        $headerSkiUrl = url('/resorts?typeclub=' . $headerSkiTypeclub->numtypeclub);
+    } elseif ($headerSkiLocalisation) {
+        $headerSkiUrl = url('/resorts?localisation=' . $headerSkiLocalisation->numlocalisation);
+    }
+    
+    // Soleil : priorité au typeclub, puis regroupement
+    if ($headerSoleilTypeclub) {
+        $headerSoleilUrl = url('/resorts?typeclub=' . $headerSoleilTypeclub->numtypeclub);
+    } elseif ($headerSoleilRegroupement) {
+        $headerSoleilUrl = url('/resorts?regroupement=' . $headerSoleilRegroupement->numregroupement);
+    }
+@endphp
 <header class="sticky top-0 z-50 bg-clubmed-beige" role="banner">
     {{-- Barre supérieure --}}
     <div class="border-b border-black/10">
@@ -16,10 +54,10 @@
                     <a href="{{ url('/resorts') }}" class="text-sm font-medium text-black hover:text-clubmed-blue transition-colors py-2 border-b-2 border-transparent hover:border-clubmed-gold">
                         Destinations
                     </a>
-                    <a href="{{ url('/resorts?type=soleil') }}" class="text-sm font-medium text-black hover:text-clubmed-blue transition-colors py-2 border-b-2 border-transparent hover:border-clubmed-gold">
+                    <a href="{{ $headerSoleilUrl }}" class="text-sm font-medium text-black hover:text-clubmed-blue transition-colors py-2 border-b-2 border-transparent hover:border-clubmed-gold">
                         Vacances au soleil
                     </a>
-                    <a href="{{ url('/resorts?type=ski') }}" class="text-sm font-medium text-black hover:text-clubmed-blue transition-colors py-2 border-b-2 border-transparent hover:border-clubmed-gold">
+                    <a href="{{ $headerSkiUrl }}" class="text-sm font-medium text-black hover:text-clubmed-blue transition-colors py-2 border-b-2 border-transparent hover:border-clubmed-gold">
                         Ski
                     </a>
                     
@@ -203,8 +241,8 @@
     
     <nav class="p-4 space-y-2">
         <a href="{{ url('/resorts') }}" class="block py-3 text-lg font-medium text-black border-b border-black/10">Destinations</a>
-        <a href="{{ url('/resorts?type=soleil') }}" class="block py-3 text-lg font-medium text-black border-b border-black/10">Vacances au soleil</a>
-        <a href="{{ url('/resorts?type=ski') }}" class="block py-3 text-lg font-medium text-black border-b border-black/10">Ski</a>
+        <a href="{{ $headerSoleilUrl }}" class="block py-3 text-lg font-medium text-black border-b border-black/10">Vacances au soleil</a>
+        <a href="{{ $headerSkiUrl }}" class="block py-3 text-lg font-medium text-black border-b border-black/10">Ski</a>
     </nav>
     
     @auth
