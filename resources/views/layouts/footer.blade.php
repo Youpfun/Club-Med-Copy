@@ -1,4 +1,27 @@
 {{-- ===== FOOTER CLUB MED ===== --}}
+@php
+    // Pour Ski : utiliser typeclub "Montagne"
+    $footerSkiTypeclub = \DB::table('typeclub')
+        ->where('nomtypeclub', 'LIKE', '%Montagne%')
+        ->first();
+        
+    // Pour Soleil : utiliser typeclub "Mer & Plage"
+    $footerSoleilTypeclub = \DB::table('typeclub')
+        ->where('nomtypeclub', 'LIKE', '%Mer%')
+        ->orWhere('nomtypeclub', 'LIKE', '%Plage%')
+        ->first();
+        
+    // Pour Luxe : utiliser typeclub "Exclusive Collection"
+    $footerLuxeTypeclub = \DB::table('typeclub')
+        ->where('nomtypeclub', 'LIKE', '%Exclusive%')
+        ->orWhere('nomtypeclub', 'LIKE', '%Luxe%')
+        ->first();
+        
+    // Construire les URLs
+    $footerSkiUrl = $footerSkiTypeclub ? url('/resorts?typeclub=' . $footerSkiTypeclub->numtypeclub) : url('/resorts');
+    $footerSoleilUrl = $footerSoleilTypeclub ? url('/resorts?typeclub=' . $footerSoleilTypeclub->numtypeclub) : url('/resorts');
+    $footerLuxeUrl = $footerLuxeTypeclub ? url('/resorts?typeclub=' . $footerLuxeTypeclub->numtypeclub) : url('/resorts');
+@endphp
 <footer class="bg-black text-white py-16" role="contentinfo">
     <div class="max-w-7xl mx-auto px-4 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
@@ -19,9 +42,9 @@
             <div>
                 <h4 class="font-semibold mb-6">Nos destinations</h4>
                 <ul class="space-y-3 text-sm text-gray-400">
-                    <li><a href="{{ url('/resorts') }}" class="hover:text-white transition-colors">Vacances au soleil</a></li>
-                    <li><a href="{{ url('/resorts') }}" class="hover:text-white transition-colors">Ski & Montagne</a></li>
-                    <li><a href="{{ url('/resorts') }}" class="hover:text-white transition-colors">Gamme Luxe</a></li>
+                    <li><a href="{{ $footerSoleilUrl }}" class="hover:text-white transition-colors">Vacances au soleil</a></li>
+                    <li><a href="{{ $footerSkiUrl }}" class="hover:text-white transition-colors">Ski & Montagne</a></li>
+                    <li><a href="{{ $footerLuxeUrl }}" class="hover:text-white transition-colors">Gamme Luxe</a></li>
                 </ul>
             </div>
             <div>
