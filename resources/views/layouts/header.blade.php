@@ -19,9 +19,16 @@
         ->where('nomregroupement', 'LIKE', '%Soleil%')
         ->first();
         
+    // Pour Nos Offres : utiliser regroupement "Dernière minute"
+    $headerDerniereMinuteRegroupement = \DB::table('regroupementclub')
+        ->where('nomregroupement', 'LIKE', '%Dernière minute%')
+        ->orWhere('nomregroupement', 'LIKE', '%Derniere minute%')
+        ->first();
+        
     // Construire les URLs
     $headerSkiUrl = url('/resorts');
     $headerSoleilUrl = url('/resorts');
+    $headerOffresUrl = url('/resorts');
     
     // Ski : priorité au typeclub, puis localisation
     if ($headerSkiTypeclub) {
@@ -35,6 +42,11 @@
         $headerSoleilUrl = url('/resorts?typeclub=' . $headerSoleilTypeclub->numtypeclub);
     } elseif ($headerSoleilRegroupement) {
         $headerSoleilUrl = url('/resorts?regroupement=' . $headerSoleilRegroupement->numregroupement);
+    }
+    
+    // Nos Offres : regroupement "Dernière minute"
+    if ($headerDerniereMinuteRegroupement) {
+        $headerOffresUrl = url('/resorts?regroupement=' . $headerDerniereMinuteRegroupement->numregroupement);
     }
 @endphp
 <header class="sticky top-0 z-50 bg-clubmed-beige" role="banner">
@@ -98,8 +110,8 @@
                 {{-- Actions droites --}}
                 <div class="flex items-center gap-x-3 lg:gap-x-4">
                     
-                    {{-- Bouton Nos Offres --}}
-                    <a href="{{ url('/resorts') }}" class="inline-flex items-center justify-center px-4 lg:px-6 py-2 lg:py-2.5 bg-clubmed-gold hover:bg-yellow-400 text-black rounded-full font-semibold text-sm transition-all hover:shadow-md">
+                    {{-- Bouton Nos Offres (Dernière minute) --}}
+                    <a href="{{ $headerOffresUrl }}" class="inline-flex items-center justify-center px-4 lg:px-6 py-2 lg:py-2.5 bg-clubmed-gold hover:bg-yellow-400 text-black rounded-full font-semibold text-sm transition-all hover:shadow-md">
                         <span class="hidden sm:inline">Nos Offres</span>
                         <span class="sm:hidden">%</span>
                     </a>
