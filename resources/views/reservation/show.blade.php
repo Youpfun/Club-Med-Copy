@@ -21,6 +21,7 @@
                    ($reservation->statut === 'Annulée' ? 'bg-red-100 text-red-700 border-red-200' : 'bg-gray-100 text-gray-700 border-gray-200')) }}">
                 {{ $reservation->statut }}
             </span>
+            <x-tooltip text="@if($reservation->statut === 'Confirmée')Réservation confirmée. Documents par email.@elseif($reservation->statut === 'En attente')En cours de traitement. Confirmation prochaine.@elseif($reservation->statut === 'Annulée')Réservation annulée. Contactez-nous.@elseStatut de votre réservation.@endif" position="left" />
             <button onclick="window.print()" class="bg-white border border-gray-300 text-gray-700 p-2 rounded-lg hover:bg-gray-50 print:hidden" title="Imprimer">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
             </button>
@@ -59,11 +60,17 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
                         <div>
-                            <p class="text-xs text-gray-500 uppercase font-bold">Arrivée</p>
+                            <div class="flex items-center gap-2">
+                                <p class="text-xs text-gray-500 uppercase font-bold">Arrivée</p>
+                                <x-tooltip text="Date d'arrivée au resort. Vérifiez l'heure de check-in." position="right" />
+                            </div>
                             <p class="text-lg font-semibold text-gray-800">{{ \Carbon\Carbon::parse($reservation->datedebut)->format('d/m/Y') }}</p>
                         </div>
                         <div>
-                            <p class="text-xs text-gray-500 uppercase font-bold">Départ</p>
+                            <div class="flex items-center gap-2">
+                                <p class="text-xs text-gray-500 uppercase font-bold">Départ</p>
+                                <x-tooltip text="Date de départ. Libérez la chambre avant le check-out." position="right" />
+                            </div>
                             <p class="text-lg font-semibold text-gray-800">{{ \Carbon\Carbon::parse($reservation->datefin)->format('d/m/Y') }}</p>
                         </div>
                         <div class="md:col-span-2 border-t border-gray-200 pt-2 mt-2">
@@ -84,12 +91,15 @@
                 <div class="p-6 space-y-6">
                     {{-- Types de chambres réservées --}}
                     <div>
-                        <h4 class="font-semibold text-gray-700 mb-3 flex items-center">
-                            <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                            </svg>
-                            Chambres réservées ({{ $chambres->sum('quantite') }})
-                        </h4>
+                        <div class="flex items-center gap-2 mb-3">
+                            <h4 class="font-semibold text-gray-700 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                                </svg>
+                                Chambres réservées ({{ $chambres->sum('quantite') }})
+                            </h4>
+                            <x-tooltip text="Types de chambres réservées avec capacité d'accueil." position="right" />
+                        </div>
                         @if($chambres && $chambres->count() > 0)
                             <div class="space-y-3">
                                 @foreach($chambres as $chambre)

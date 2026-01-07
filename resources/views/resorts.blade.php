@@ -62,7 +62,10 @@
 
                         {{-- 3. PAYS (Nouveau filtre) --}}
                         <div class="relative">
-                            <label for="pays" class="block text-xs font-bold text-clubmed-blue uppercase tracking-wide mb-2">Pays</label>
+                            <label for="pays" class="block text-xs font-bold text-clubmed-blue uppercase tracking-wide mb-2 flex items-center gap-2">
+                                Pays
+                                <x-tooltip text="Sélectionnez un pays spécifique pour affiner votre recherche de resort." />
+                            </label>
                             <select name="pays" id="pays" class="w-full h-12 px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-clubmed-gold focus:border-clubmed-gold cursor-pointer bg-white transition-all">
                                 <option value="">Tous les pays</option>
                                 @foreach($paysList ?? [] as $code => $nom)
@@ -73,7 +76,10 @@
 
                         {{-- 4. ACTIVITÉ --}}
                         <div class="relative">
-                            <label for="activite" class="block text-xs font-bold text-clubmed-blue uppercase tracking-wide mb-2">Activité</label>
+                            <label for="activite" class="block text-xs font-bold text-clubmed-blue uppercase tracking-wide mb-2 flex items-center gap-2">
+                                Activité
+                                <x-tooltip text="Choisissez une activité principale que vous souhaitez pratiquer (ski, plongée, golf...)." />
+                            </label>
                             <select name="activite" id="activite" class="w-full h-12 px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-clubmed-gold focus:border-clubmed-gold cursor-pointer bg-white transition-all">
                                 <option value="">Toutes activités</option>
                                 @foreach($activitesList ?? [] as $id => $nom)
@@ -100,7 +106,10 @@
                     {{-- SECTION TRI ET BOUTONS --}}
                     <div class="flex flex-col md:flex-row justify-between items-center pt-6 border-t border-gray-100 gap-4">
                         <div class="flex items-center gap-3 w-full md:w-auto">
-                            <label for="tri" class="text-sm font-semibold text-gray-600 whitespace-nowrap">Trier par :</label>
+                            <div class="flex items-center gap-1">
+                                <label for="tri" class="text-sm font-semibold text-gray-600 whitespace-nowrap">Trier par :</label>
+                                <x-tooltip text="Organisez les résultats par ordre alphabétique ou par prix pour faciliter votre choix." position="right" />
+                            </div>
                             <select name="tri" id="tri" class="h-10 pl-4 pr-8 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-clubmed-gold cursor-pointer bg-clubmed-beige transition-all">
                                 <option value="nom" {{ request('tri') == 'nom' ? 'selected' : '' }}>Nom (A-Z)</option>
                                 <option value="prix_asc" {{ request('tri') == 'prix_asc' ? 'selected' : '' }}>Prix croissant</option>

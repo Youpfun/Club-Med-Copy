@@ -4,7 +4,10 @@
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-2xl mx-auto">
         <div class="bg-white rounded-lg shadow-md p-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-8">Finaliser votre paiement</h1>
+            <div class="flex items-center gap-2 mb-8">
+                <h1 class="text-3xl font-bold text-gray-800">Finaliser votre paiement</h1>
+                <x-tooltip text="Dernière étape ! Paiement 100% sécurisé via Stripe." />
+            </div>
 
             <!-- Résumé de la réservation -->
             <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-8">
@@ -37,7 +40,10 @@
 
                 <div class="border-t border-gray-300 mt-6 pt-4">
                     <div class="flex justify-between items-center text-lg">
-                        <p class="font-semibold text-gray-700">Montant à payer</p>
+                        <div class="flex items-center gap-2">
+                            <p class="font-semibold text-gray-700">Montant à payer</p>
+                            <x-tooltip text="Prix total TTC. Aucun frais supplémentaire." position="right" />
+                        </div>
                         <p class="text-2xl font-bold text-blue-600">{{ number_format($details->prixtotal, 2, ',', ' ') }} €</p>
                     </div>
                 </div>
@@ -57,10 +63,13 @@
                 </div>
 
                 <!-- Bouton de paiement -->
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
-                    <i class="fas fa-lock mr-2"></i>
-                    Procéder au paiement sécurisé
-                </button>
+                <div class="flex items-center gap-2">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+                        <i class="fas fa-lock mr-2"></i>
+                        Procéder au paiement sécurisé
+                    </button>
+                    <x-tooltip text="Redirection sécurisée vers Stripe. Confirmation par email après validation." position="left" />
+                </div>
 
                 <!-- Lien d'annulation -->
                 <a href="{{ route('panier.show', $reservation->numreservation) }}" class="block text-center text-gray-600 hover:text-gray-800 py-2">

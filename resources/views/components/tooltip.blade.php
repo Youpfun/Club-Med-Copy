@@ -7,22 +7,22 @@
         </svg>
     </span>
     
-    <div class="absolute z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 
-        @if($position === 'top') bottom-full left-1/2 -translate-x-1/2 mb-2
-        @elseif($position === 'bottom') top-full left-1/2 -translate-x-1/2 mt-2
-        @elseif($position === 'left') right-full top-1/2 -translate-y-1/2 mr-2
-        @elseif($position === 'right') left-full top-1/2 -translate-y-1/2 ml-2
+    <div class="absolute z-[9999] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none group-hover:pointer-events-auto
+        @if($position === 'top') bottom-full right-0 mb-2
+        @elseif($position === 'bottom') top-full right-0 mt-2
+        @elseif($position === 'left') bottom-full right-0 mb-2
+        @elseif($position === 'right') bottom-full left-0 mb-2
         @endif">
         
-        <div class="bg-gray-900 text-white text-sm rounded-lg shadow-lg px-4 py-3 max-w-xs whitespace-normal">
+        <div class="bg-gray-900 text-white text-xs rounded-lg shadow-xl px-3 py-2 w-60 break-words leading-relaxed">
             {{ $text }}
             
             {{-- Flèche du tooltip --}}
             <div class="absolute w-2 h-2 bg-gray-900 rotate-45
-                @if($position === 'top') -bottom-1 left-1/2 -translate-x-1/2
-                @elseif($position === 'bottom') -top-1 left-1/2 -translate-x-1/2
-                @elseif($position === 'left') -right-1 top-1/2 -translate-y-1/2
-                @elseif($position === 'right') -left-1 top-1/2 -translate-y-1/2
+                @if($position === 'top') -bottom-1 right-4
+                @elseif($position === 'bottom') -top-1 right-4
+                @elseif($position === 'left') -bottom-1 right-4
+                @elseif($position === 'right') -bottom-1 left-4
                 @endif">
             </div>
         </div>

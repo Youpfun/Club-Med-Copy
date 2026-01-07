@@ -6,7 +6,10 @@
     {{-- En-tête --}}
     <div class="mb-8 border-b border-gray-100 pb-6">
         <p class="text-clubmed-gold font-semibold text-sm uppercase tracking-widest mb-2">Votre sélection</p>
-        <h1 class="text-4xl font-serif font-bold text-clubmed-blue">Mon Panier</h1>
+        <div class="flex items-center gap-2">
+            <h1 class="text-4xl font-serif font-bold text-clubmed-blue">Mon Panier</h1>
+            <x-tooltip text="Retrouvez ici vos réservations. Payez-les ensemble ou séparément." />
+        </div>
         <p class="text-gray-600 mt-2">Validez vos séjours avant qu'ils ne soient plus disponibles.</p>
     </div>
 
@@ -98,7 +101,10 @@
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden sticky top-6">
                     <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                        <h3 class="font-bold text-gray-800">Récapitulatif de la commande</h3>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-bold text-gray-800">Récapitulatif de la commande</h3>
+                            <x-tooltip text="Total de vos réservations. Paiement groupé ou individuel disponible." position="bottom" />
+                        </div>
                     </div>
                     
                     <div class="p-6">
@@ -144,10 +150,13 @@
                         @endif
 
                         <div class="mt-4 text-center">
-                            <p class="text-xs text-gray-400 flex items-center justify-center">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                Paiement 100% sécurisé
-                            </p>
+                            <div class="flex items-center justify-center gap-1">
+                                <p class="text-xs text-gray-400 flex items-center">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                    Paiement 100% sécurisé
+                                </p>
+                                <x-tooltip text="Paiement sécurisé via Stripe. Vos données bancaires sont chiffrées et protégées." position="top" />
+                            </div>
                         </div>
                     </div>
                 </div>
