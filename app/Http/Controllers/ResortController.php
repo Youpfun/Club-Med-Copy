@@ -28,6 +28,7 @@ class ResortController extends Controller
         $activite = $request->input('activite');
         $regroupement = $request->input('regroupement');
         $tri = $request->input('tri');
+        $search = $request->input('search');
 
         $typeclubs = DB::table('typeclub')->pluck('nomtypeclub', 'numtypeclub');
         $localisations = DB::table('localisation')->pluck('nomlocalisation', 'numlocalisation');
@@ -48,6 +49,16 @@ class ResortController extends Controller
         $query->with(['avis' => function($q) {
             $q->select('numavis', 'numresort', 'noteavis');
         }]);
+
+        // Filtre de recherche textuelle (nom du resort ou pays)
+        $query->when($search, function($q, $val) {
+            return $q->where(function($sub) use ($val) {
+                $sub->where('nomresort', 'ILIKE', '%' . $val . '%')
+                    ->orWhereHas('pays', function($paysQuery) use ($val) {
+                        $paysQuery->where('nompays', 'ILIKE', '%' . $val . '%');
+                    });
+            });
+        });
 
         $query->when($typeclub, function($q, $val) { return $q->whereHas('typeclubs', function($sub) use ($val) { $sub->where('typeclub.numtypeclub', $val); }); });
         $query->when($localisation, function($q, $val) { return $q->whereHas('localisations', function($sub) use ($val) { $sub->where('localisation.numlocalisation', $val); }); });

@@ -11,12 +11,19 @@ class WelcomeController extends Controller
 {
     public function index()
     {
-        // Récupérer 4 resorts populaires pour les afficher sur la page d'accueil
+        // Récupérer 8 resorts populaires pour les afficher sur la page d'accueil
         // On cherche des resorts avec des images connues ou les mieux notés
         $featuredResorts = Resort::with(['pays', 'avis', 'photos'])
             ->withCount('avis')
             ->orderByDesc('avis_count')
             ->take(8)
+            ->get();
+
+        // Récupérer les resorts pour la barre de recherche dynamique
+        $searchResorts = Resort::with(['pays', 'avis', 'photos'])
+            ->withCount('avis')
+            ->orderByDesc('avis_count')
+            ->take(12)
             ->get();
 
         // Récupérer les localisations pour les filtres
@@ -48,6 +55,7 @@ class WelcomeController extends Controller
 
         return view('welcome', compact(
             'featuredResorts',
+            'searchResorts',
             'localisations',
             'skiLocalisation',
             'skiTypeclub',
