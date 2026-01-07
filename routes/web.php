@@ -44,6 +44,10 @@ Route::get('/typeclubs', [TypeclubController::class, 'index']);
 Route::get('/localisations', [LocalisationController::class, 'index']);
 Route::get('/clients', [UserController::class, 'index']);
 
+Route::get('/guide', function () {
+    return view('guide');
+})->name('guide');
+
 Route::get('/inscription', [InscriptionController::class, 'create'])->name('inscription.create');
 Route::post('/inscription', [InscriptionController::class, 'store'])->name('inscription.store');
 Route::get('/login', [ConnexionController::class, 'show'])->name('login');

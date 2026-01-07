@@ -34,7 +34,10 @@
                         
                         {{-- 1. COLLECTION --}}
                         <div class="relative">
-                            <label for="regroupement" class="block text-xs font-bold text-clubmed-blue uppercase tracking-wide mb-2">Collection</label>
+                            <label for="regroupement" class="block text-xs font-bold text-clubmed-blue uppercase tracking-wide mb-2 flex items-center gap-2">
+                                Collection
+                                <x-tooltip text="Les collections regroupent des resorts par thématique (Ski, Soleil d'Hiver, etc.)" />
+                            </label>
                             <select name="regroupement" id="regroupement" class="w-full h-12 px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-clubmed-gold focus:border-clubmed-gold cursor-pointer bg-white transition-all">
                                 <option value="">Toutes collections</option>
                                 @foreach($regroupementsList ?? [] as $id => $nom)
@@ -45,7 +48,10 @@
 
                         {{-- 2. DESTINATION (Localisation) --}}
                         <div class="relative">
-                            <label for="localisation" class="block text-xs font-bold text-clubmed-blue uppercase tracking-wide mb-2">Destination</label>
+                            <label for="localisation" class="block text-xs font-bold text-clubmed-blue uppercase tracking-wide mb-2 flex items-center gap-2">
+                                Destination
+                                <x-tooltip text="La destination correspond à la région géographique du resort (Alpes, Méditerranée...)" />
+                            </label>
                             <select name="localisation" id="localisation" class="w-full h-12 px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-clubmed-gold focus:border-clubmed-gold cursor-pointer bg-white transition-all">
                                 <option value="">Toutes destinations</option>
                                 @foreach($localisations ?? [] as $id => $nom)
@@ -78,7 +84,10 @@
 
                         {{-- 5. TYPE DE SÉJOUR --}}
                         <div class="relative">
-                            <label for="typeclub" class="block text-xs font-bold text-clubmed-blue uppercase tracking-wide mb-2">Type de séjour</label>
+                            <label for="typeclub" class="block text-xs font-bold text-clubmed-blue uppercase tracking-wide mb-2 flex items-center gap-2">
+                                Type de séjour
+                                <x-tooltip text="Le type de séjour définit l'environnement du resort : montagne, mer & plage, ville..." />
+                            </label>
                             <select name="typeclub" id="typeclub" class="w-full h-12 px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-clubmed-gold focus:border-clubmed-gold cursor-pointer bg-white transition-all">
                                 <option value="">Tous les types</option>
                                 @foreach($typeclubs ?? [] as $id => $nom)
