@@ -53,9 +53,12 @@
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                     <div>
                         <p class="text-clubmed-gold font-semibold text-sm uppercase tracking-widest mb-2">Resort Club Med</p>
-                        <h1 class="font-serif text-4xl md:text-5xl font-bold text-clubmed-blue">
-                            {{ $resort->nomresort }}
-                        </h1>
+                        <div class="flex items-center gap-3 mb-2">
+                            <h1 class="font-serif text-4xl md:text-5xl font-bold text-clubmed-blue">
+                                {{ $resort->nomresort }}
+                            </h1>
+                            <x-tooltip text="Défilez pour voir les chambres, activités et réserver !" position="right" />
+                        </div>
                         <p class="mt-4 text-gray-600 leading-relaxed text-lg">
                             {{ $resort->descriptionresort }}
                         </p>
@@ -320,9 +323,15 @@
 
                 {{-- Boutons actions --}}
                 <div class="mt-8 flex flex-wrap gap-4">
-                    <a href="{{ route('resort.types', ['id' => $resort->numresort]) }}" class="inline-flex items-center px-6 py-3 rounded-full bg-clubmed-blue hover:bg-clubmed-blue-dark text-white font-bold text-sm shadow-md transition-all">Voir les types d'activités disponibles</a>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('resort.types', ['id' => $resort->numresort]) }}" class="inline-flex items-center px-6 py-3 rounded-full bg-clubmed-blue hover:bg-clubmed-blue-dark text-white font-bold text-sm shadow-md transition-all">Voir les types d'activités disponibles</a>
+                        <x-tooltip text="Voir toutes les activités : ski, sports, spa..." position="top" />
+                    </div>
                     
-                    <a href="{{ route('reservation.step1', ['numresort' => $resort->numresort]) }}" class="inline-flex items-center px-8 py-3 rounded-full bg-clubmed-gold hover:bg-yellow-400 text-clubmed-blue font-bold text-sm shadow-lg transition-all hover:shadow-xl">Réserver ce resort</a>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('reservation.step1', ['numresort' => $resort->numresort]) }}" class="inline-flex items-center px-8 py-3 rounded-full bg-clubmed-gold hover:bg-yellow-400 text-clubmed-blue font-bold text-sm shadow-lg transition-all hover:shadow-xl">Réserver ce resort</a>
+                        <x-tooltip text="Réserver : choisissez dates et type de chambre." position="top" />
+                    </div>
                 </div>
 
             </div>
