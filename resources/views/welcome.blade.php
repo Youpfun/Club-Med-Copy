@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Séjours tout compris ou voyage all-inclusive | Club Med</title>
     <meta name="description" content="Trouvez la destination de vos rêves pour vos prochaines vacances parmi près de 80 Resorts Club Med en Europe, Asie, Amérique ou dans les Caraïbes.">
     
@@ -336,5 +337,8 @@
             </div>
         </div>
     </footer>
+
+    {{-- Bandeau de consentement cookies RGPD --}}
+    @include('components.cookie-banner')
 </body>
 </html>
