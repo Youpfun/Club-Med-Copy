@@ -46,5 +46,8 @@
         @stack('modals')
 
         @livewireScripts
+
+        {{-- Bandeau de consentement cookies RGPD --}}
+        @include('components.cookie-banner')
     </body>
 </html>

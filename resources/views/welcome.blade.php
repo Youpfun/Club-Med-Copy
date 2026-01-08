@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Séjours tout compris ou voyage all-inclusive | Club Med</title>
     <meta name="description" content="Trouvez la destination de vos rêves pour vos prochaines vacances parmi près de 80 Resorts Club Med en Europe, Asie, Amérique ou dans les Caraïbes.">
     
@@ -73,47 +74,16 @@
             </div>
         </section>
 
-        {{-- ===== BARRE DE RECHERCHE ===== --}}
+        {{-- ===== BARRE DE RECHERCHE DYNAMIQUE ===== --}}
         <section class="bg-white py-8 lg:py-12 border-y border-gray-200">
             <div class="max-w-7xl mx-auto px-4 lg:px-8">
                 <div class="text-center mb-6">
                     <h2 class="font-serif text-2xl lg:text-3xl font-bold text-black mb-2">Trouvez vos vacances idéales</h2>
                     <p class="text-gray-600">Explorez nos destinations et trouvez le resort parfait</p>
                 </div>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="{{ url('/resorts') }}" class="inline-flex items-center justify-center h-14 px-10 bg-clubmed-gold hover:bg-yellow-400 text-black rounded-full font-semibold text-base transition-all hover:shadow-lg gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                        Voir tous les Resorts
-                    </a>
-                    @php
-                        // Construire les URLs pour Ski et Soleil basées sur les données du controller
-                        // Ski : utiliser typeclub "Montagne" ou localisation "Les Alpes"
-                        $skiUrl = url('/resorts');
-                        if (isset($skiTypeclub) && $skiTypeclub) {
-                            $skiUrl = url('/resorts?typeclub=' . $skiTypeclub->numtypeclub);
-                        } elseif (isset($skiLocalisation) && $skiLocalisation) {
-                            $skiUrl = url('/resorts?localisation=' . $skiLocalisation->numlocalisation);
-                        }
-                        
-                        // Soleil : utiliser typeclub "Mer & Plage" ou regroupement "Soleil d'Hiver"
-                        $soleilUrl = url('/resorts');
-                        if (isset($soleilTypeclub) && $soleilTypeclub) {
-                            $soleilUrl = url('/resorts?typeclub=' . $soleilTypeclub->numtypeclub);
-                        } elseif (isset($soleilRegroupement) && $soleilRegroupement) {
-                            $soleilUrl = url('/resorts?regroupement=' . $soleilRegroupement->numregroupement);
-                        }
-                    @endphp
-                    <a href="{{ $skiUrl }}" class="inline-flex items-center justify-center h-14 px-10 bg-white border-2 border-black text-black hover:bg-black hover:text-white rounded-full font-semibold text-base transition-all gap-2">
-                        <span class="text-xl">🏔️</span>
-                        Ski & Montagne
-                    </a>
-                    <a href="{{ $soleilUrl }}" class="inline-flex items-center justify-center h-14 px-10 bg-white border-2 border-black text-black hover:bg-black hover:text-white rounded-full font-semibold text-base transition-all gap-2">
-                        <span class="text-xl">☀️</span>
-                        Vacances au soleil
-                    </a>
-                </div>
+                
+                {{-- Composant de barre de recherche dynamique --}}
+                <x-search-bar :resorts="$searchResorts ?? collect()" :localisations="$localisations ?? collect()" />
             </div>
         </section>
 
@@ -367,5 +337,8 @@
             </div>
         </div>
     </footer>
+
+    {{-- Bandeau de consentement cookies RGPD --}}
+    @include('components.cookie-banner')
 </body>
 </html>
