@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Séjours tout compris ou voyage all-inclusive | Club Med</title>
     <meta name="description" content="Trouvez la destination de vos rêves pour vos prochaines vacances parmi près de 80 Resorts Club Med en Europe, Asie, Amérique ou dans les Caraïbes.">
     
@@ -336,5 +337,203 @@
             </div>
         </div>
     </footer>
+
+    {{-- Bandeau de consentement cookies RGPD --}}
+    @include('components.cookie-banner')
+
+    {{-- Didacticiel de bienvenue (uniquement pour les visiteurs non connectés) --}}
+    @guest
+    <div id="tutorialOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[10000]">
+        {{-- Spotlight - zone éclairée autour de l'élément ciblé --}}
+        <div id="tutorialSpotlight" class="absolute border-4 border-white rounded-lg shadow-2xl transition-all duration-300"></div>
+    </div>
+
+    <div id="tutorialBox" class="hidden fixed z-[10001] bg-white rounded-xl shadow-2xl p-6 max-w-sm">
+        {{-- Contenu du tutoriel --}}
+        <div class="mb-4">
+            <div class="flex items-center justify-between mb-2">
+                <span id="tutorialStep" class="text-xs font-semibold text-blue-600 uppercase">Étape 1/5</span>
+                <button id="tutorialClose" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <h3 id="tutorialTitle" class="text-xl font-bold text-gray-900 mb-2">Bienvenue sur Club Med !</h3>
+            <p id="tutorialText" class="text-gray-700 leading-relaxed"></p>
+        </div>
+
+        {{-- Boutons de navigation --}}
+        <div class="flex gap-3">
+            <button id="tutorialSkip" class="flex-1 px-4 py-2 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors">
+                Passer
+            </button>
+            <button id="tutorialNext" class="flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+                Suivant
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration du tutoriel
+        const tutorialSteps = [
+            {
+                target: '.group button, button:has(svg path[d*="M16 7a4"])',
+                title: 'Bienvenue sur Club Med !',
+                text: 'Connectez-vous ou créez un compte pour profiter de toutes nos fonctionnalités : réservations, historique, compagnons de voyage...',
+                position: 'bottom'
+            },
+            {
+                target: '[href*="resorts"]',
+                title: 'Découvrez nos Resorts',
+                text: 'Explorez notre collection de resorts à travers le monde. Utilisez les filtres pour trouver votre destination idéale !',
+                position: 'bottom'
+            },
+            {
+                target: '.hero-cta, [href*="resorts"]',
+                title: 'Recherchez votre séjour',
+                text: 'Cliquez ici pour accéder à la page de recherche avec tous nos filtres : type de club, localisation, pays, activités...',
+                position: 'bottom'
+            },
+            {
+                target: '[href*="guide"]',
+                title: 'Besoin d\'aide ?',
+                text: 'Consultez notre guide utilisateur complet avec des captures d\'écran et des explications détaillées pour chaque fonctionnalité.',
+                position: 'bottom'
+            },
+            {
+                target: 'footer',
+                title: 'Prêt à partir ?',
+                text: 'Vous savez maintenant naviguer sur le site ! Explorez nos destinations et réservez votre prochain voyage en toute confiance.',
+                position: 'top'
+            }
+        ];
+
+        let currentStep = 0;
+
+        // Vérifier si le tutoriel a déjà été vu
+        function shouldShowTutorial() {
+            return !localStorage.getItem('clubmed_tutorial_completed');
+        }
+
+        // Trouver l'élément ciblé
+        function findTargetElement(selector) {
+            const selectors = selector.split(',').map(s => s.trim());
+            for (const sel of selectors) {
+                const element = document.querySelector(sel);
+                if (element) return element;
+            }
+            return null;
+        }
+
+        // Positionner le tutoriel
+        function positionTutorial() {
+            const step = tutorialSteps[currentStep];
+            const targetElement = findTargetElement(step.target);
+            
+            if (!targetElement) {
+                // Si l'élément n'existe pas, passer à l'étape suivante
+                nextStep();
+                return;
+            }
+
+            const overlay = document.getElementById('tutorialOverlay');
+            const spotlight = document.getElementById('tutorialSpotlight');
+            const box = document.getElementById('tutorialBox');
+
+            // Obtenir la position de l'élément
+            const rect = targetElement.getBoundingClientRect();
+            
+            // Positionner le spotlight
+            spotlight.style.left = (rect.left - 8) + 'px';
+            spotlight.style.top = (rect.top - 8) + 'px';
+            spotlight.style.width = (rect.width + 16) + 'px';
+            spotlight.style.height = (rect.height + 16) + 'px';
+
+            // Positionner la box de tutoriel
+            const boxRect = box.getBoundingClientRect();
+            let boxLeft, boxTop;
+
+            if (step.position === 'bottom') {
+                boxLeft = rect.left + (rect.width / 2) - (boxRect.width / 2);
+                boxTop = rect.bottom + 20;
+            } else if (step.position === 'top') {
+                boxLeft = rect.left + (rect.width / 2) - (boxRect.width / 2);
+                boxTop = rect.top - boxRect.height - 20;
+            }
+
+            // S'assurer que la box reste dans la fenêtre
+            boxLeft = Math.max(16, Math.min(boxLeft, window.innerWidth - boxRect.width - 16));
+            boxTop = Math.max(16, Math.min(boxTop, window.innerHeight - boxRect.height - 16));
+
+            box.style.left = boxLeft + 'px';
+            box.style.top = boxTop + 'px';
+
+            // Mettre à jour le contenu
+            document.getElementById('tutorialStep').textContent = `Étape ${currentStep + 1}/${tutorialSteps.length}`;
+            document.getElementById('tutorialTitle').textContent = step.title;
+            document.getElementById('tutorialText').textContent = step.text;
+
+            // Mettre à jour le bouton "Suivant"
+            const nextBtn = document.getElementById('tutorialNext');
+            if (currentStep === tutorialSteps.length - 1) {
+                nextBtn.textContent = 'Terminer';
+            } else {
+                nextBtn.textContent = 'Suivant';
+            }
+        }
+
+        // Afficher le tutoriel
+        function showTutorial() {
+            document.getElementById('tutorialOverlay').classList.remove('hidden');
+            document.getElementById('tutorialBox').classList.remove('hidden');
+            positionTutorial();
+        }
+
+        // Masquer le tutoriel
+        function hideTutorial() {
+            document.getElementById('tutorialOverlay').classList.add('hidden');
+            document.getElementById('tutorialBox').classList.add('hidden');
+            localStorage.setItem('clubmed_tutorial_completed', 'true');
+        }
+
+        // Étape suivante
+        function nextStep() {
+            currentStep++;
+            if (currentStep >= tutorialSteps.length) {
+                hideTutorial();
+            } else {
+                positionTutorial();
+            }
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            if (shouldShowTutorial()) {
+                // Attendre un peu que la page soit complètement chargée
+                setTimeout(showTutorial, 500);
+            }
+
+            // Événements
+            document.getElementById('tutorialNext').addEventListener('click', nextStep);
+            document.getElementById('tutorialSkip').addEventListener('click', hideTutorial);
+            document.getElementById('tutorialClose').addEventListener('click', hideTutorial);
+
+            // Repositionner lors du redimensionnement
+            window.addEventListener('resize', () => {
+                if (!document.getElementById('tutorialOverlay').classList.contains('hidden')) {
+                    positionTutorial();
+                }
+            });
+
+            // Repositionner lors du scroll
+            window.addEventListener('scroll', () => {
+                if (!document.getElementById('tutorialOverlay').classList.contains('hidden')) {
+                    positionTutorial();
+                }
+            });
+        });
+    </script>
+    @endguest
 </body>
 </html>

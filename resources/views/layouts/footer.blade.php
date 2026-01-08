@@ -82,7 +82,7 @@
                     <a href="#" class="hover:text-white transition-colors">Conditions de vente</a>
                     <a href="#" class="hover:text-white transition-colors">Informations légales</a>
                     <a href="#" class="hover:text-white transition-colors">Protection des données</a>
-                    <a href="#" class="hover:text-white transition-colors">Cookies</a>
+                    <button onclick="showCookieBanner()" class="hover:text-white transition-colors">Gérer les cookies</button>
                 </div>
             </div>
         </div>
@@ -90,3 +90,6 @@
 </footer>
 
 @include('layouts.chatbot')
+
+{{-- Bandeau de consentement cookies RGPD --}}
+@include('components.cookie-banner')

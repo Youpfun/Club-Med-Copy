@@ -48,5 +48,8 @@
         @livewireScripts
         
         @include('layouts.chatbot')
+
+        {{-- Bandeau de consentement cookies RGPD --}}
+        @include('components.cookie-banner')
     </body>
 </html>
