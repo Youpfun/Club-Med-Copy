@@ -46,5 +46,7 @@
         @stack('modals')
 
         @livewireScripts
+        
+        @include('layouts.chatbot')
     </body>
 </html>

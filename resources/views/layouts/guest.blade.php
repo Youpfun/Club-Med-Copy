@@ -23,5 +23,7 @@
         </div>
 
         @livewireScripts
+        
+        @include('layouts.chatbot')
     </body>
 </html>

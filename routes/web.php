@@ -27,6 +27,7 @@ use App\Http\Controllers\DemandeDisponibiliteController;
 use App\Http\Controllers\ProspectionResortController;
 use App\Http\Controllers\ProspectionPartenaireController;
 use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\BotManController;
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('stripe.webhook');
 
@@ -198,3 +199,5 @@ Route::post('/client/alternative-resort/{token}', [AlternativeResortController::
 
 Route::get('/resort/disponibilite/{token}', [DemandeDisponibiliteController::class, 'showResortResponse']);
 Route::post('/resort/disponibilite/{token}', [DemandeDisponibiliteController::class, 'storeResortResponse']);
+
+Route::match(['get', 'post'], '/botman', 'App\Http\Controllers\BotManController@handle');

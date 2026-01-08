@@ -88,3 +88,5 @@
         </div>
     </div>
 </footer>
+
+@include('layouts.chatbot')
