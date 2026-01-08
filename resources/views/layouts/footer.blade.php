@@ -81,7 +81,11 @@
                 <div class="flex flex-wrap justify-center gap-4 text-xs text-gray-500">
                     <a href="#" class="hover:text-white transition-colors">Conditions de vente</a>
                     <a href="#" class="hover:text-white transition-colors">Informations légales</a>
-                    <a href="#" class="hover:text-white transition-colors">Protection des données</a>
+                    @auth
+                        <a href="{{ route('profile.personal-data') }}" class="hover:text-white transition-colors">Mes données personnelles</a>
+                    @else
+                        <a href="#" class="hover:text-white transition-colors">Protection des données</a>
+                    @endauth
                     <button onclick="showCookieBanner()" class="hover:text-white transition-colors">Gérer les cookies</button>
                 </div>
             </div>

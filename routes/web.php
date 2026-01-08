@@ -27,6 +27,7 @@ use App\Http\Controllers\DemandeDisponibiliteController;
 use App\Http\Controllers\ProspectionResortController;
 use App\Http\Controllers\ProspectionPartenaireController;
 use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\PersonalDataController;
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('stripe.webhook');
 
@@ -127,6 +128,13 @@ Route::middleware([
     })->name('dashboard');
 
     Route::put('/user/update-custom', [UserController::class, 'updateCustom'])->name('user.update.custom');
+    
+    // RGPD - Données personnelles
+    Route::get('/profile/personal-data', [PersonalDataController::class, 'index'])->name('profile.personal-data');
+    Route::get('/profile/export-data', [PersonalDataController::class, 'export'])->name('profile.export-data');
+    Route::get('/profile/delete-account', [PersonalDataController::class, 'showDeleteForm'])->name('profile.delete-account');
+    Route::post('/profile/request-deletion', [PersonalDataController::class, 'requestDeletion'])->name('profile.request-deletion');
+    Route::post('/profile/cancel-deletion', [PersonalDataController::class, 'cancelDeletion'])->name('profile.cancel-deletion');
     
     Route::post('/logout', function () {
         Auth::guard('web')->logout();

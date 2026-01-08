@@ -18,7 +18,8 @@ class User extends Authenticatable
     protected $fillable = [
         'name', 'email', 'password', 'role', 'genre', 'datenaissance', 
         'telephone', 'numrue', 'nomrue', 'codepostal', 'ville',
-        'two_factor_code', 'two_factor_expires_at', 'two_factor_preference'
+        'two_factor_code', 'two_factor_expires_at', 'two_factor_preference',
+        'deletion_requested_at', 'deletion_reason'
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -26,6 +27,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'two_factor_expires_at' => 'datetime',
+        'deletion_requested_at' => 'datetime',
         'password' => 'hashed',
     ];
 
