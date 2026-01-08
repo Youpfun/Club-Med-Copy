@@ -14,6 +14,9 @@ class Kernel extends ConsoleKernel
     {
         // Réconciliation automatique des paiements Stripe
         $schedule->command('payments:reconcile --since=48')->hourly();
+        
+        // Laravel Pulse - Vérification des pings
+        $schedule->command('pulse:check')->everyMinute();
     }
 
     /**

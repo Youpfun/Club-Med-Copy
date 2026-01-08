@@ -82,28 +82,6 @@ class ReservationController extends Controller
         ]);
     }
 
-    /**
-     * Sauvegarder les données de réservation en session pour les visiteurs non connectés
-     */
-    public function saveToSession(Request $request, $numresort)
-    {
-        $reservationData = [
-            'numresort' => $numresort,
-            'dateDebut' => $request->input('dateDebut'),
-            'dateFin' => $request->input('dateFin'),
-            'chambres' => $request->input('chambres', []),
-            'transports' => $request->input('transports', []),
-            'nbAdultes' => $request->input('nbAdultes'),
-            'nbEnfants' => $request->input('nbEnfants'),
-            'activites' => $request->input('activites', []),
-            'participants' => $request->input('participants', []),
-        ];
-
-        session(['pending_reservation' => $reservationData]);
-
-        return response()->json(['success' => true]);
-    }
-
     public function step1($numresort)
     {
         $resort = Resort::with(['photos', 'pays'])->findOrFail($numresort);
@@ -128,14 +106,13 @@ class ReservationController extends Controller
         $numtransport = $request->query('numtransport');
         $nbAdultes = $request->query('nbAdultes', 1);
         $nbEnfants = $request->query('nbEnfants', 0);
-        $participants = $request->query('participants', []);
 
         // Si anciennes données (numtype unique), convertir en format chambres
         if ($numtype && empty($chambres)) {
             $chambres = [$numtype => 1];
         }
 
-        return view('reservation.step2', compact('resort', 'transports', 'dateDebut', 'dateFin', 'chambres', 'numtransport', 'nbAdultes', 'nbEnfants', 'participants'));
+        return view('reservation.step2', compact('resort', 'transports', 'dateDebut', 'dateFin', 'chambres', 'numtransport', 'nbAdultes', 'nbEnfants'));
     }
 
     public function step3(Request $request, $numresort)
@@ -147,7 +124,6 @@ class ReservationController extends Controller
         $chambres = $request->query('chambres', []);
         $nbAdultes = $request->query('nbAdultes', 1);
         $nbEnfants = $request->query('nbEnfants', 0);
-        $participants = $request->query('participants', []);
         
         // Récupérer les transports sélectionnés
         $transportsParticipants = [];
@@ -193,7 +169,7 @@ class ReservationController extends Controller
 
         return view('reservation.step3', compact(
             'resort', 'activites', 'dateDebut', 'dateFin', 'chambres', 'transportsParticipants',
-            'nbAdultes', 'nbEnfants', 'participants', 'nbNuits', 'prixChambre', 'prixTransport'
+            'nbAdultes', 'nbEnfants', 'nbNuits', 'prixChambre', 'prixTransport'
         ));
     }
 
@@ -273,68 +249,31 @@ class ReservationController extends Controller
         }
 
         $participantsMap = [];
-        $participantsData = $request->input('participants', []);
-        
         for ($i = 1; $i <= $nbAdultes; $i++) {
             $key = 'adulte_' . $i;
             $numtransport = $transports[$key] ?? null;
             
-            // Récupérer les informations du participant
-            $participantInfo = $participantsData[$key] ?? [];
-            $nom = $participantInfo['nom'] ?? '';
-            $prenom = $participantInfo['prenom'] ?? '';
-            $genre = $participantInfo['genre'] ?? 'N/A';
-            $dateNaissance = $participantInfo['datenaissance'] ?? null;
-            
-            // Validation de l'âge pour les adultes (>= 15 ans)
-            if ($dateNaissance) {
-                $age = \Carbon\Carbon::parse($dateNaissance)->age;
-                if ($age < 15) {
-                    return redirect()->back()
-                        ->with('error', "Le participant $prenom $nom (Adulte $i) doit avoir au moins 15 ans.")
-                        ->withInput();
-                }
-            }
-            
             $numparticipant = DB::table('participant')->insertGetId([
                 'numreservation' => $numreservation,
-                'nomparticipant' => $nom,
-                'prenomparticipant' => $prenom,
-                'genreparticipant' => $genre,
-                'datenaissanceparticipant' => $dateNaissance,
+                'nomparticipant' => 'Adulte ' . $i,
+                'prenomparticipant' => '',
+                'genreparticipant' => 'N/A',
+                'datenaissanceparticipant' => null,
                 'numtransport' => $numtransport,
             ], 'numparticipant');
             
             $participantsMap[$key] = $numparticipant;
         }
-        
         for ($i = 1; $i <= $nbEnfants; $i++) {
             $key = 'enfant_' . $i;
             $numtransport = $transports[$key] ?? null;
             
-            // Récupérer les informations du participant
-            $participantInfo = $participantsData[$key] ?? [];
-            $nom = $participantInfo['nom'] ?? '';
-            $prenom = $participantInfo['prenom'] ?? '';
-            $genre = $participantInfo['genre'] ?? 'N/A';
-            $dateNaissance = $participantInfo['datenaissance'] ?? null;
-            
-            // Validation de l'âge pour les enfants (< 15 ans)
-            if ($dateNaissance) {
-                $age = \Carbon\Carbon::parse($dateNaissance)->age;
-                if ($age >= 15) {
-                    return redirect()->back()
-                        ->with('error', "Le participant $prenom $nom (Enfant $i) doit avoir moins de 15 ans.")
-                        ->withInput();
-                }
-            }
-            
             $numparticipant = DB::table('participant')->insertGetId([
                 'numreservation' => $numreservation,
-                'nomparticipant' => $nom,
-                'prenomparticipant' => $prenom,
-                'genreparticipant' => $genre,
-                'datenaissanceparticipant' => $dateNaissance,
+                'nomparticipant' => 'Enfant ' . $i,
+                'prenomparticipant' => '',
+                'genreparticipant' => 'N/A',
+                'datenaissanceparticipant' => null,
                 'numtransport' => $numtransport,
             ], 'numparticipant');
             
@@ -373,7 +312,29 @@ class ReservationController extends Controller
             }
         }
 
-        // L'email au resort sera envoyé après le paiement (via webhook Stripe)
+        $reservationLoaded = \App\Models\Reservation::with(['resort', 'user', 'activites.activite', 'chambres.typechambre'])->find($numreservation);
+        
+        $resortToken = (string) Str::uuid();
+        $expiresAt = now()->addDays(3);
+
+        DB::table('reservation')
+            ->where('numreservation', $numreservation)
+            ->update([
+                'resort_validation_token' => $resortToken,
+                'resort_validation_token_expires_at' => $expiresAt,
+                'resort_validation_status' => 'pending',
+            ]);
+
+        // Envoyer l'email au resort
+        $resort = $reservationLoaded->resort;
+        $resortEmail = $resort->emailresort ?? config('mail.from.address');
+        $resortLink = url('/resort/validate/' . $resortToken);
+
+        try {
+            Mail::to($resortEmail)->send(new ResortValidationMail($reservationLoaded, $resort, $resortLink));
+        } catch (\Exception $e) {
+            \Log::error('Envoi email resort échec: ' . $e->getMessage());
+        }
 
         // Stocker les détails de réservation en session
         $reservationDetails = session('reservation_details', []);
@@ -447,25 +408,24 @@ class ReservationController extends Controller
             'resort.pays', 
             'transport', 
             'activites.activite',
-            'participants.transport',
-            'participants.activites.aLaCarte',
+            'participants',
             'paiements'
         ])
         ->where('user_id', $userId)
         ->where('numreservation', $numreservation)
         ->firstOrFail();
 
-        $chambres = DB::table('choisir')
+        $typeChambre = DB::table('choisir')
             ->join('typechambre', 'choisir.numtype', '=', 'typechambre.numtype')
             ->where('choisir.numreservation', $numreservation)
-            ->select('typechambre.*', 'choisir.quantite')
-            ->get();
+            ->select('typechambre.*')
+            ->first();
 
-        return view('reservation.show', compact('reservation', 'chambres'));
+        return view('reservation.show', compact('reservation', 'typeChambre'));
     }
 
-    // Édition complète (page unique) - NOUVEAU
-    public function editReservation($numreservation)
+    // Édition Step 1 : Dates et chambres
+    public function editStep1($numreservation)
     {
         $reservation = DB::table('reservation')
             ->where('numreservation', $numreservation)
@@ -484,6 +444,7 @@ class ReservationController extends Controller
             ->select('typechambre.*')
             ->get();
 
+        // Ajouter les prix pour chaque type de chambre
         foreach ($typeChambres as $type) {
             $type->prix = $this->getPrixChambre($type->numtype, $reservation->datedebut);
         }
@@ -493,27 +454,153 @@ class ReservationController extends Controller
             ->pluck('quantite', 'numtype')
             ->toArray();
 
+        return view('reservation.edit-step1', compact('reservation', 'resort', 'typeChambres', 'chambresSelectionnees'));
+    }
+
+    public function updateStep1(Request $request, $numreservation)
+    {
+        $reservation = DB::table('reservation')
+            ->where('numreservation', $numreservation)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (!$reservation) {
+            return redirect()->route('cart.index')->with('error', 'Réservation non trouvée');
+        }
+
+        $dateDebut = $request->input('dateDebut');
+        $dateFin = $request->input('dateFin');
+        $nbAdultes = (int)$request->input('nbAdultes', 0);
+        $nbEnfants = (int)$request->input('nbEnfants', 0);
+        $nbPersonnes = $nbAdultes + $nbEnfants;
+
+        DB::table('reservation')
+            ->where('numreservation', $numreservation)
+            ->update([
+                'datedebut' => $dateDebut,
+                'datefin' => $dateFin,
+                'nbpersonnes' => $nbPersonnes,
+            ]);
+
+        DB::table('choisir')->where('numreservation', $numreservation)->delete();
+
+        foreach ($request->input('chambres', []) as $numtype => $quantite) {
+            if ($quantite > 0) {
+                DB::table('choisir')->insert([
+                    'numreservation' => $numreservation,
+                    'numtype' => $numtype,
+                    'quantite' => $quantite,
+                ]);
+            }
+        }
+
+        // Gérer les participants : créer ou supprimer selon le nouveau nombre
+        $participantsActuels = DB::table('participant')
+            ->where('numreservation', $numreservation)
+            ->get();
+
+        $nbParticipantsActuels = $participantsActuels->count();
+
+        if ($nbPersonnes > $nbParticipantsActuels) {
+            // Ajouter des participants
+            $aAjouter = $nbPersonnes - $nbParticipantsActuels;
+            for ($i = 0; $i < $aAjouter; $i++) {
+                $index = $nbParticipantsActuels + $i + 1;
+                $nom = ($index <= $nbAdultes) ? "Adulte $index" : "Enfant " . ($index - $nbAdultes);
+                
+                DB::table('participant')->insert([
+                    'numreservation' => $numreservation,
+                    'nomparticipant' => $nom,
+                    'prenomparticipant' => '',
+                    'genreparticipant' => 'N/A',
+                    'datenaissanceparticipant' => null,
+                    'numtransport' => null,
+                ]);
+            }
+        } elseif ($nbPersonnes < $nbParticipantsActuels) {
+            // Supprimer les participants en trop
+            $aSupprimer = $nbParticipantsActuels - $nbPersonnes;
+            $participantsASupprimer = $participantsActuels->sortByDesc('numparticipant')->take($aSupprimer);
+            
+            foreach ($participantsASupprimer as $participant) {
+                // Supprimer les activités associées
+                DB::table('participant_activite')
+                    ->where('numparticipant', $participant->numparticipant)
+                    ->delete();
+                
+                // Supprimer le participant
+                DB::table('participant')
+                    ->where('numparticipant', $participant->numparticipant)
+                    ->delete();
+            }
+        }
+
+        // Recalculer le prix
+        $this->recalculerPrixReservation($numreservation);
+
+        return redirect()->route('panier.show', $numreservation)
+            ->with('success', 'Réservation mise à jour avec succès');
+    }
+
+    // Édition Step 2 : Transport
+    public function editStep2($numreservation)
+    {
+        $reservation = DB::table('reservation')
+            ->where('numreservation', $numreservation)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (!$reservation) {
+            return redirect()->route('cart.index')->with('error', 'Réservation non trouvée');
+        }
+
         $participants = DB::table('participant')
             ->where('numreservation', $numreservation)
             ->get();
 
-        $nbAdultes = $participants->filter(function($p) {
-            if ($p->datenaissanceparticipant) {
-                $age = \Carbon\Carbon::parse($p->datenaissanceparticipant)->age;
-                return $age >= 15;
-            }
-            return str_contains($p->nomparticipant, 'Adulte');
-        })->count();
-        
-        $nbEnfants = $participants->filter(function($p) {
-            if ($p->datenaissanceparticipant) {
-                $age = \Carbon\Carbon::parse($p->datenaissanceparticipant)->age;
-                return $age < 15;
-            }
-            return str_contains($p->nomparticipant, 'Enfant');
-        })->count();
-
         $transports = DB::table('transport')->get();
+
+        return view('reservation.edit-step2', compact('reservation', 'participants', 'transports'));
+    }
+
+    public function updateStep2(Request $request, $numreservation)
+    {
+        $reservation = DB::table('reservation')
+            ->where('numreservation', $numreservation)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (!$reservation) {
+            return redirect()->route('cart.index')->with('error', 'Réservation non trouvée');
+        }
+
+        foreach ($request->input('transport', []) as $numparticipant => $numtransport) {
+            DB::table('participant')
+                ->where('numparticipant', $numparticipant)
+                ->update(['numtransport' => $numtransport]);
+        }
+
+        $this->recalculerPrixReservation($numreservation);
+
+        return redirect()->route('panier.show', $numreservation)
+            ->with('success', 'Transports mis à jour avec succès');
+    }
+
+    // Édition Step 3 : Activités
+    public function editStep3($numreservation)
+    {
+        $reservation = DB::table('reservation')
+            ->where('numreservation', $numreservation)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (!$reservation) {
+            return redirect()->route('cart.index')->with('error', 'Réservation non trouvée');
+        }
+
+        $participants = DB::table('participant')
+            ->where('numreservation', $numreservation)
+            ->get();
 
         $activites = DB::table('activite')
             ->join('activitealacarte', 'activite.numactivite', '=', 'activitealacarte.numactivite')
@@ -525,143 +612,77 @@ class ReservationController extends Controller
             ->get();
 
         // Récupérer les activités déjà sélectionnées
-        $activitesSelectionnees = [];
-        foreach ($participants as $participant) {
-            $activitesParticipant = DB::table('participant_activite')
-                ->where('numparticipant', $participant->numparticipant)
-                ->pluck('numactivite')
-                ->toArray();
-            $activitesSelectionnees[$participant->numparticipant] = $activitesParticipant;
-        }
+        $activitesSelectionnees = DB::table('participant_activite')
+            ->whereIn('numparticipant', $participants->pluck('numparticipant'))
+            ->get()
+            ->groupBy('numparticipant')
+            ->map(function ($items) {
+                return $items->pluck('numactivite')->toArray();
+            })
+            ->toArray();
 
-        return view('reservation.edit-reservation', compact(
-            'reservation', 
-            'resort', 
-            'typeChambres', 
-            'chambresSelectionnees', 
-            'nbAdultes', 
-            'nbEnfants', 
-            'participants', 
-            'transports',
-            'activites',
-            'activitesSelectionnees'
-        ));
+        return view('reservation.edit-step3', compact('reservation', 'participants', 'activites', 'activitesSelectionnees'));
     }
 
-    public function updateReservationComplete(Request $request, $numreservation)
+    public function updateStep3(Request $request, $numreservation)
     {
-        try {
-            $reservation = DB::table('reservation')
-                ->where('numreservation', $numreservation)
-                ->where('user_id', auth()->id())
-                ->first();
+        $reservation = DB::table('reservation')
+            ->where('numreservation', $numreservation)
+            ->where('user_id', auth()->id())
+            ->first();
 
-            if (!$reservation) {
-                return redirect()->route('cart.index')->with('error', 'Réservation non trouvée');
-            }
-
-            $request->validate([
-                'dateDebut' => 'required|date',
-                'dateFin' => 'required|date|after:dateDebut',
-                'nbAdultes' => 'required|integer|min:1',
-                'nbEnfants' => 'required|integer|min:0',
-            ]);
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Erreur validation : ' . $e->getMessage())->withInput();
+        if (!$reservation) {
+            return redirect()->route('cart.index')->with('error', 'Réservation non trouvée');
         }
 
-        try {
-            DB::beginTransaction();
+        $participants = DB::table('participant')
+            ->where('numreservation', $numreservation)
+            ->get();
 
-            $nbAdultes = (int)$request->input('nbAdultes');
-            $nbEnfants = (int)$request->input('nbEnfants');
+        // Supprimer toutes les anciennes activités
+        DB::table('participant_activite')
+            ->whereIn('numparticipant', $participants->pluck('numparticipant'))
+            ->delete();
 
-            // 1. Mettre à jour les informations de base de la réservation
-            DB::table('reservation')->where('numreservation', $numreservation)->update([
-                'datedebut' => $request->input('dateDebut'),
-                'datefin' => $request->input('dateFin'),
-                'nbpersonnes' => $nbAdultes + $nbEnfants,
-            ]);
+        DB::table('reservation_activite')
+            ->where('numreservation', $numreservation)
+            ->delete();
 
-            // 2. Mettre à jour les chambres sélectionnées
-            DB::table('choisir')->where('numreservation', $numreservation)->delete();
-            
-            $chambres = $request->input('chambres', []);
-            foreach ($chambres as $numtype => $quantite) {
-                if ($quantite > 0) {
-                    DB::table('choisir')->insert([
-                        'numreservation' => $numreservation,
-                        'numtype' => $numtype,
-                        'quantite' => $quantite,
-                    ]);
+        // Ajouter les nouvelles activités
+        $activitesParActivite = [];
+
+        foreach ($request->input('activites', []) as $numparticipant => $activites) {
+            foreach ($activites as $numactivite) {
+                // Ajouter à participant_activite
+                DB::table('participant_activite')->insert([
+                    'numparticipant' => $numparticipant,
+                    'numactivite' => $numactivite,
+                ]);
+
+                // Compter pour reservation_activite
+                if (!isset($activitesParActivite[$numactivite])) {
+                    $activitesParActivite[$numactivite] = 0;
                 }
+                $activitesParActivite[$numactivite]++;
             }
-
-            // 3. Supprimer tous les participants existants et leurs activités
-            $oldParticipants = DB::table('participant')
-                ->where('numreservation', $numreservation)
-                ->pluck('numparticipant');
-
-            if ($oldParticipants->isNotEmpty()) {
-                DB::table('participant_activite')->whereIn('numparticipant', $oldParticipants)->delete();
-                DB::table('participant')->whereIn('numparticipant', $oldParticipants)->delete();
-            }
-
-            // 4. Créer les nouveaux participants (nouveau système par person_ID)
-            $participantsData = $request->input('participants', []);
-            $participantIds = []; // Mapper person_ID -> numparticipant
-
-            foreach ($participantsData as $personKey => $info) {
-                // Le personKey est du format "person_123"
-                if (!str_starts_with($personKey, 'person_')) continue;
-                
-                $transportName = "transport_{$personKey}";
-                $transportId = $request->input($transportName);
-                
-                $numparticipant = DB::table('participant')->insertGetId([
-                    'numreservation' => $numreservation,
-                    'nomparticipant' => $info['nom'] ?? '',
-                    'prenomparticipant' => $info['prenom'] ?? '',
-                    'genreparticipant' => $info['genre'] ?? 'N/A',
-                    'datenaissanceparticipant' => $info['datenaissance'] ?? null,
-                    'numtransport' => $transportId,
-                ], 'numparticipant');
-
-                $participantIds[$personKey] = $numparticipant;
-            }
-
-            // 5. Ajouter les activités sélectionnées (nouveau format person_ID)
-            $activites = $request->input('activites', []);
-            foreach ($activites as $numactivite => $participants) {
-                foreach ($participants as $personKey => $selected) {
-                    // personKey est du format "person_123"
-                    if ($selected && isset($participantIds[$personKey])) {
-                        DB::table('participant_activite')->insert([
-                            'numparticipant' => $participantIds[$personKey],
-                            'numactivite' => $numactivite,
-                        ]);
-                    }
-                }
-            }
-
-            // 6. Recalculer le prix total
-            $this->recalculerPrixReservation($numreservation);
-
-            DB::commit();
-
-            return redirect()->route('panier.show', $numreservation)
-                ->with('success', 'Réservation mise à jour avec succès');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()
-                ->with('error', 'Erreur lors de la mise à jour : ' . $e->getMessage())
-                ->withInput();
         }
+
+        // Insérer dans reservation_activite
+        foreach ($activitesParActivite as $numactivite => $nbparticipants) {
+            DB::table('reservation_activite')->insert([
+                'numreservation' => $numreservation,
+                'numactivite' => $numactivite,
+                'nbparticipants' => $nbparticipants,
+            ]);
+        }
+
+        // Recalculer le prix
+        $this->recalculerPrixReservation($numreservation);
+
+        return redirect()->route('panier.show', $numreservation)
+            ->with('success', 'Activités mises à jour avec succès');
     }
 
-    // ================== FONCTIONS UTILITAIRES ==================
-    
     // Méthode pour recalculer le prix total d'une réservation
     private function recalculerPrixReservation($numreservation)
     {
@@ -714,42 +735,5 @@ class ReservationController extends Controller
         DB::table('reservation')
             ->where('numreservation', $numreservation)
             ->update(['prixtotal' => $totalTTC]);
-    }
-
-    // Afficher les activités disponibles pour ajouter à une réservation existante
-    public function showAddActivities($numreservation)
-    {
-        $userId = Auth::id();
-
-        $reservation = \App\Models\Reservation::with([
-            'resort.pays', 
-            'participants',
-        ])
-        ->where('user_id', $userId)
-        ->where('numreservation', $numreservation)
-        ->firstOrFail();
-
-        // Récupérer les activités disponibles pour ce resort
-        $activites = DB::table('activite')
-            ->join('activitealacarte', 'activite.numactivite', '=', 'activitealacarte.numactivite')
-            ->join('typeactivite', 'activite.numtypeactivite', '=', 'typeactivite.numtypeactivite')
-            ->join('partager', 'typeactivite.numtypeactivite', '=', 'partager.numtypeactivite')
-            ->where('partager.numresort', $reservation->numresort)
-            ->select('activite.numactivite', 'activite.nomactivite', 'activite.descriptionactivite', 'activitealacarte.prixmin')
-            ->distinct()
-            ->get();
-
-        // Récupérer les activités déjà réservées par participant
-        $activitesReservees = DB::table('participant_activite')
-            ->join('participant', 'participant_activite.numparticipant', '=', 'participant.numparticipant')
-            ->where('participant.numreservation', $numreservation)
-            ->select('participant_activite.numparticipant', 'participant_activite.numactivite')
-            ->get()
-            ->groupBy('numparticipant')
-            ->map(function($acts) {
-                return $acts->pluck('numactivite')->toArray();
-            });
-
-        return view('reservation.add-activities', compact('reservation', 'activites', 'activitesReservees'));
     }
 }

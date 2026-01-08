@@ -93,5 +93,7 @@
     </div>
 </footer>
 
+@include('layouts.chatbot')
+
 {{-- Bandeau de consentement cookies RGPD --}}
 @include('components.cookie-banner')
