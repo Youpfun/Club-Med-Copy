@@ -37,6 +37,10 @@
                     Comment rechercher un Resort ?
                 </h2>
                 <div class="space-y-4 text-gray-700">
+                    {{-- Image placeholder --}}
+                    <div class="mb-4 rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
+                        <img src="/img/guide/recherche-resort.png" alt="Capture d'écran - Recherche de resort" class="w-full h-auto">
+                    </div>
                     <p>Pour trouver le resort parfait, utilisez les filtres disponibles sur la page de recherche :</p>
                     <ul class="list-disc list-inside space-y-2 ml-4">
                         <li><strong>Type de Club :</strong> Choisissez entre montagne, mer, etc.</li>
@@ -57,6 +61,10 @@
                     Comprendre les Types de Chambres
                 </h2>
                 <div class="space-y-4 text-gray-700">
+                    {{-- Image placeholder --}}
+                    <div class="mb-4 rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
+                        <img src="/img/guide/types-chambres.png" alt="Capture d'écran - Types de chambres" class="w-full h-auto">
+                    </div>
                     <p>Chaque resort propose différents types de chambres adaptés à vos besoins :</p>
                     <div class="grid md:grid-cols-2 gap-4 mt-4">
                         <div class="border border-gray-200 rounded-lg p-4">
@@ -78,6 +86,10 @@
                     Informations Domaine Skiable
                 </h2>
                 <div class="space-y-4 text-gray-700">
+                    {{-- Image placeholder --}}
+                    <div class="mb-4 rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
+                        <img src="/img/guide/domaine-skiable.png" alt="Capture d'écran - Domaine skiable" class="w-full h-auto">
+                    </div>
                     <p>Pour les resorts en montagne, consultez les informations du domaine skiable :</p>
                     <ul class="list-disc list-inside space-y-2 ml-4">
                         <li><strong>Altitude Club :</strong> Hauteur à laquelle se trouve le resort</li>
@@ -96,6 +108,10 @@
                     Restaurants et Bars
                 </h2>
                 <div class="space-y-4 text-gray-700">
+                    {{-- Image placeholder --}}
+                    <div class="mb-4 rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
+                        <img src="/img/guide/restaurants-bars.png" alt="Capture d'écran - Restaurants et bars" class="w-full h-auto">
+                    </div>
                     <p>Chaque resort dispose de plusieurs options de restauration :</p>
                     <div class="grid md:grid-cols-2 gap-4 mt-4">
                         <div class="bg-purple-50 rounded-lg p-4">
@@ -137,6 +153,10 @@
                     Lire et Comprendre les Avis
                 </h2>
                 <div class="space-y-4 text-gray-700">
+                    {{-- Image placeholder --}}
+                    <div class="mb-4 rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
+                        <img src="/img/guide/avis-notes.png" alt="Capture d'écran - Avis et notes" class="w-full h-auto">
+                    </div>
                     <p>Les avis clients vous aident à choisir votre resort :</p>
                     <ul class="list-disc list-inside space-y-2 ml-4">
                         <li><strong>Note :</strong> Évaluation sur 5 étoiles</li>
@@ -152,41 +172,71 @@
 
             {{-- Section 6: Réservation --}}
             <div class="bg-white rounded-xl shadow-md p-6 guide-section" data-keywords="réserver réservation paiement panier commander">
-                <h2 class="text-2xl font-bold text-[#113559] mb-4 flex items-center gap-2">
+                <h2 class="text-2xl font-bold text-[#113559] mb-6 flex items-center gap-2">
                     <span class="text-3xl">📅</span>
-                    Effectuer une Réservation
+                    Gérer vos Réservations
                 </h2>
-                <div class="space-y-4 text-gray-700">
-                    <p>Pour réserver un resort, suivez ces étapes :</p>
-                    <ol class="list-decimal list-inside space-y-3 ml-4">
-                        <li>Trouvez le resort qui vous convient</li>
-                        <li>Consultez les détails (chambres, domaine skiable, restaurants)</li>
-                        <li>Cliquez sur "Réserver ce resort"</li>
-                        <li>Connectez-vous ou créez un compte</li>
-                        <li>Remplissez les informations de réservation</li>
-                        <li>Validez et payez</li>
-                    </ol>
+                <div class="space-y-8 text-gray-700">
+                    
+                    {{-- Image du bouton d'accès au menu réservations --}}
+                    <div class="rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
+                        <img src="/img/guide/reservation.png" alt="Bouton d'accès au menu réservations" class="w-full h-auto">
+                    </div>
+                    
+                    {{-- Sous-section: Prochain départ --}}
+                    <div>
+                        <h3 class="text-xl font-bold text-[#113559] mb-3">🛫 Prochain départ</h3>
+                        <div class="rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
+                            <img src="/img/guide/reservation-prochain-depart.png" alt="Prochains départs" class="w-full h-auto">
+                        </div>
+                    </div>
+
+                    {{-- Sous-section: Séjour actuel --}}
+                    <div>
+                        <h3 class="text-xl font-bold text-[#113559] mb-3">🏖️ Séjour actuel</h3>
+                        <div class="rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
+                            <img src="/img/guide/reservation-sejour-actuel.png" alt="Séjour en cours" class="w-full h-auto">
+                        </div>
+                    </div>
+
+                    {{-- Sous-section: Anciens voyages --}}
+                    <div>
+                        <h3 class="text-xl font-bold text-[#113559] mb-3">🗓️ Anciens voyages</h3>
+                        <div class="rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
+                            <img src="/img/guide/reservation-anciens-voyages.png" alt="Historique des voyages" class="w-full h-auto">
+                        </div>
+                    </div>
+
                     <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mt-4">
                         <p class="font-semibold text-amber-900">⚠️ Important :</p>
-                        <p class="text-amber-800">Vérifiez bien les dates et le nombre de personnes avant de valider.</p>
+                        <p class="text-amber-800">Vous pouvez modifier ou annuler vos réservations depuis ce menu selon les conditions applicables.</p>
                     </div>
                 </div>
             </div>
 
             {{-- Section 7: Compte Utilisateur --}}
             <div class="bg-white rounded-xl shadow-md p-6 guide-section" data-keywords="compte profil connexion inscription mot de passe">
-                <h2 class="text-2xl font-bold text-[#113559] mb-4 flex items-center gap-2">
+                <h2 class="text-2xl font-bold text-[#113559] mb-6 flex items-center gap-2">
                     <span class="text-3xl">👤</span>
                     Gérer votre Compte
                 </h2>
-                <div class="space-y-4 text-gray-700">
-                    <p>Créez un compte pour bénéficier d'avantages :</p>
-                    <ul class="list-disc list-inside space-y-2 ml-4">
-                        <li>Sauvegarde de vos informations personnelles</li>
-                        <li>Historique de vos réservations</li>
-                        <li>Réservation rapide avec vos compagnons enregistrés</li>
-                        <li>Accès à vos avis et commentaires</li>
-                    </ul>
+                <div class="space-y-8 text-gray-700">
+                    
+                    {{-- Image du menu de connexion/inscription --}}
+                    <div>
+                        <h3 class="text-xl font-bold text-[#113559] mb-3">🤵 Connexion / Inscription</h3>
+                        <div class="rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
+                            <img src="/img/guide/compte-utilisateur.png" alt="Bouton d'accès au menu de connexion/inscription" class="w-full h-auto">
+                        </div>
+                    </div>
+                    
+                    {{-- Sous-section: Informations personnelles --}}
+                    <div>
+                        <h3 class="text-xl font-bold text-[#113559] mb-3">💾 Sauvegarde de vos informations personnelles</h3>
+                        <div class="rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
+                            <img src="/img/guide/compte-infos-personnelles.png" alt="Informations personnelles" class="w-full h-auto">
+                        </div>
+                    </div>
                 </div>
             </div>
 
