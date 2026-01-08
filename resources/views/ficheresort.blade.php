@@ -336,6 +336,168 @@
 
             </div>
         </div>
+
+        {{-- Section "Vous aimerez aussi" - Resorts similaires --}}
+        @if(isset($similarResorts) && $similarResorts->count() > 0)
+            <div class="mt-12">
+                <h2 class="font-serif text-3xl font-bold text-gray-900 mb-8">Vous aimerez aussi</h2>
+                
+                <div class="relative">
+                    {{-- Carousel container --}}
+                    <div id="similar-resorts-carousel" class="flex gap-6 overflow-x-auto pb-4 scrollbar-hide scroll-smooth" style="scrollbar-width: none; -ms-overflow-style: none;">
+                        @foreach($similarResorts as $similarResort)
+                            <a href="{{ route('resort.show', $similarResort->numresort) }}" 
+                               class="group flex-shrink-0 w-80 block">
+                                <div class="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
+                                    @php
+                                        $photo = $similarResort->photos->first();
+                                        $hasImage = $photo && $photo->urlphoto;
+                                        $isLuxe = $similarResort->regroupements->contains(fn($r) => stripos($r->nomregroupement ?? '', 'luxe') !== false);
+                                    @endphp
+                                    
+                                    @if($hasImage)
+                                        <img src="{{ asset('img/ressort/' . $photo->urlphoto) }}" 
+                                             alt="{{ $similarResort->nomresort }}" 
+                                             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                                    @else
+                                        <div class="w-full h-full bg-gradient-to-br from-clubmed-blue to-clubmed-blue-dark flex items-center justify-center">
+                                            <span class="text-white/50 text-4xl">🏖️</span>
+                                        </div>
+                                    @endif
+                                    
+                                    {{-- Overlay gradient --}}
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                                    
+                                    {{-- Badge Gamme Luxe --}}
+                                    @if($isLuxe)
+                                        <div class="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-md">
+                                            <span class="text-clubmed-gold">◆</span>
+                                            <span class="text-sm font-semibold text-gray-800">Gamme Luxe</span>
+                                        </div>
+                                    @endif
+                                    
+                                    {{-- Nom et pays --}}
+                                    <div class="absolute bottom-4 left-4 right-4 text-white">
+                                        <h3 class="font-serif text-xl font-bold mb-1">{{ $similarResort->nomresort }}</h3>
+                                        <p class="text-sm text-white/80 italic">{{ $similarResort->pays->nompays ?? '' }}</p>
+                                    </div>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                    
+                    {{-- Navigation arrows (visible if more than 3 resorts) --}}
+                    @if($similarResorts->count() > 3)
+                        <button onclick="scrollCarousel('similar-resorts-carousel', -1)" 
+                                class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors z-10 hidden md:flex">
+                            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
+                        <button onclick="scrollCarousel('similar-resorts-carousel', 1)" 
+                                class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-12 h-12 bg-clubmed-gold rounded-full shadow-lg flex items-center justify-center hover:bg-yellow-400 transition-colors z-10 hidden md:flex">
+                            <svg class="w-6 h-6 text-clubmed-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    @endif
+                </div>
+                
+                {{-- Progress bar indicator --}}
+                @if($similarResorts->count() > 3)
+                    <div class="mt-6 flex justify-center">
+                        <div class="w-48 h-1 bg-gray-200 rounded-full overflow-hidden">
+                            <div id="similar-carousel-progress" class="h-full bg-clubmed-gold rounded-full transition-all duration-300" style="width: 33%"></div>
+                        </div>
+                    </div>
+                @endif
+                
+                {{-- Button Voir plus --}}
+                <div class="mt-8 flex justify-center">
+                    <a href="{{ route('resorts.index') }}" 
+                       class="inline-flex items-center px-8 py-3 border-2 border-gray-800 text-gray-800 rounded-full font-semibold text-sm hover:bg-gray-800 hover:text-white transition-all">
+                        Voir plus
+                    </a>
+                </div>
+            </div>
+        @endif
+
+        {{-- Section "Précédemment vu" - Resorts récemment consultés --}}
+        @if(isset($recentlyViewedResorts) && $recentlyViewedResorts->count() > 0)
+            <div class="mt-12">
+                <h2 class="font-serif text-3xl font-bold text-gray-900 mb-8">Précédemment vu</h2>
+                
+                <div class="relative">
+                    {{-- Carousel container --}}
+                    <div id="recently-viewed-carousel" class="flex gap-6 overflow-x-auto pb-4 scrollbar-hide scroll-smooth" style="scrollbar-width: none; -ms-overflow-style: none;">
+                        @foreach($recentlyViewedResorts as $viewedResort)
+                            <a href="{{ route('resort.show', $viewedResort->numresort) }}" 
+                               class="group flex-shrink-0 w-80 block">
+                                <div class="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
+                                    @php
+                                        $photo = $viewedResort->photos->first();
+                                        $hasImage = $photo && $photo->urlphoto;
+                                        $isLuxe = $viewedResort->regroupements->contains(fn($r) => stripos($r->nomregroupement ?? '', 'luxe') !== false);
+                                    @endphp
+                                    
+                                    @if($hasImage)
+                                        <img src="{{ asset('img/ressort/' . $photo->urlphoto) }}" 
+                                             alt="{{ $viewedResort->nomresort }}" 
+                                             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                                    @else
+                                        <div class="w-full h-full bg-gradient-to-br from-clubmed-blue to-clubmed-blue-dark flex items-center justify-center">
+                                            <span class="text-white/50 text-4xl">🏖️</span>
+                                        </div>
+                                    @endif
+                                    
+                                    {{-- Overlay gradient --}}
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                                    
+                                    {{-- Badge Gamme Luxe --}}
+                                    @if($isLuxe)
+                                        <div class="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-md">
+                                            <span class="text-clubmed-gold">◆</span>
+                                            <span class="text-sm font-semibold text-gray-800">Gamme Luxe</span>
+                                        </div>
+                                    @endif
+                                    
+                                    {{-- Nom et pays --}}
+                                    <div class="absolute bottom-4 left-4 right-4 text-white">
+                                        <h3 class="font-serif text-xl font-bold mb-1">{{ $viewedResort->nomresort }}</h3>
+                                        <p class="text-sm text-white/80 italic">{{ $viewedResort->pays->nompays ?? '' }}</p>
+                                    </div>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                    
+                    {{-- Navigation arrows (visible if more than 3 resorts) --}}
+                    @if($recentlyViewedResorts->count() > 3)
+                        <button onclick="scrollCarousel('recently-viewed-carousel', -1)" 
+                                class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors z-10 hidden md:flex">
+                            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
+                        <button onclick="scrollCarousel('recently-viewed-carousel', 1)" 
+                                class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-12 h-12 bg-clubmed-gold rounded-full shadow-lg flex items-center justify-center hover:bg-yellow-400 transition-colors z-10 hidden md:flex">
+                            <svg class="w-6 h-6 text-clubmed-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    @endif
+                </div>
+                
+                {{-- Progress bar indicator --}}
+                @if($recentlyViewedResorts->count() > 3)
+                    <div class="mt-6 flex justify-center">
+                        <div class="w-48 h-1 bg-gray-200 rounded-full overflow-hidden">
+                            <div id="recently-carousel-progress" class="h-full bg-clubmed-gold rounded-full transition-all duration-300" style="width: 33%"></div>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        @endif
     </div>
 
     {{-- MODAL IMAGE (LIGHTBOX) --}}
@@ -425,6 +587,35 @@
             document.getElementById('report-form').reset();
         }
 
+        // Carousel navigation générique
+        function scrollCarousel(carouselId, direction) {
+            const carousel = document.getElementById(carouselId);
+            if (!carousel) return;
+            
+            const scrollAmount = 344; // 320px card width + 24px gap
+            carousel.scrollBy({
+                left: direction * scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+
+        // Update progress bar on scroll pour un carousel spécifique
+        function updateCarouselProgress(carouselId, progressBarId) {
+            const carousel = document.getElementById(carouselId);
+            const progressBar = document.getElementById(progressBarId);
+            if (!carousel || !progressBar) return;
+            
+            const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+            if (maxScroll <= 0) {
+                progressBar.style.width = '100%';
+                return;
+            }
+            
+            const scrollPercent = (carousel.scrollLeft / maxScroll) * 100;
+            const progressWidth = Math.max(33, Math.min(100, 33 + (scrollPercent * 0.67)));
+            progressBar.style.width = progressWidth + '%';
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             // Gestion du modal de signalement
             const reportCloseBtn = document.getElementById('close-report-modal');
@@ -435,6 +626,17 @@
                 reportOverlay.addEventListener('click', (e) => { 
                     if (e.target === reportOverlay) closeReportModal(); 
                 });
+            }
+
+            // Carousel scroll listeners
+            const similarCarousel = document.getElementById('similar-resorts-carousel');
+            if (similarCarousel) {
+                similarCarousel.addEventListener('scroll', () => updateCarouselProgress('similar-resorts-carousel', 'similar-carousel-progress'));
+            }
+
+            const recentlyCarousel = document.getElementById('recently-viewed-carousel');
+            if (recentlyCarousel) {
+                recentlyCarousel.addEventListener('scroll', () => updateCarouselProgress('recently-viewed-carousel', 'recently-carousel-progress'));
             }
         });
     </script>
