@@ -12,10 +12,13 @@
 
     <main class="min-h-screen">
         {{-- Hero Section --}}
-        <section class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-16 px-4">
+        <section class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-20 px-4">
             <div class="max-w-4xl mx-auto text-center">
                 <h1 class="text-4xl md:text-5xl font-bold mb-4">Guide Utilisateur</h1>
-                <p class="text-xl text-blue-100">Tout ce que vous devez savoir pour profiter pleinement de votre expérience Club Med</p>
+                <p class="text-xl text-blue-100 mb-6">Tout ce que vous devez savoir pour profiter pleinement de votre expérience Club Med</p>
+                <p class="text-base text-blue-200 max-w-2xl mx-auto">
+                    Bienvenue sur votre guide utilisateur Club Med ! Découvrez comment naviguer sur notre plateforme, rechercher le resort idéal, gérer vos réservations et profiter au maximum de votre séjour. Ce guide interactif vous accompagne pas à pas dans toutes vos démarches.
+                </p>
             </div>
         </section>
 
@@ -41,15 +44,16 @@
                     <div class="mb-4 rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
                         <img src="/img/guide/recherche-resort.png" alt="Capture d'écran - Recherche de resort" class="w-full h-auto">
                     </div>
-                    <p>Pour trouver le resort parfait, utilisez les filtres disponibles sur la page de recherche :</p>
+                    <p>Pour trouver le resort parfait, utilisez les filtres disponibles sur la page de recherche. Notre système de filtrage avancé vous permet de personnaliser votre recherche selon vos préférences :</p>
                     <ul class="list-disc list-inside space-y-2 ml-4">
-                        <li><strong>Type de Club :</strong> Choisissez entre montagne, mer, etc.</li>
-                        <li><strong>Localisation :</strong> Sélectionnez une région (Alpes, Méditerranée...)</li>
-                        <li><strong>Pays :</strong> Filtrez par pays de destination</li>
+                        <li><strong>Type de Club :</strong> Choisissez entre montagne, mer, campagne ou ville selon vos envies</li>
+                        <li><strong>Localisation :</strong> Sélectionnez une région spécifique (Alpes, Méditerranée, Antilles...)</li>
+                        <li><strong>Pays :</strong> Filtrez par pays de destination pour cibler votre recherche</li>
+                        <li><strong>Activités :</strong> Recherchez par type d'activités proposées (ski, sports nautiques, spa...)</li>
                     </ul>
                     <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mt-4">
                         <p class="font-semibold text-blue-900">💡 Astuce :</p>
-                        <p class="text-blue-800">Vous pouvez combiner plusieurs filtres pour affiner votre recherche.</p>
+                        <p class="text-blue-800">Vous pouvez combiner plusieurs filtres simultanément pour affiner votre recherche et trouver exactement le resort qui correspond à vos attentes.</p>
                     </div>
                 </div>
             </div>
@@ -65,15 +69,23 @@
                     <div class="mb-4 rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
                         <img src="/img/guide/types-chambres.png" alt="Capture d'écran - Types de chambres" class="w-full h-auto">
                     </div>
-                    <p>Chaque resort propose différents types de chambres adaptés à vos besoins :</p>
+                    <p>Chaque resort propose différents types de chambres adaptés à vos besoins et à la composition de votre groupe. Consultez les caractéristiques détaillées de chaque type de chambre pour faire le meilleur choix :</p>
                     <div class="grid md:grid-cols-2 gap-4 mt-4">
                         <div class="border border-gray-200 rounded-lg p-4">
                             <h3 class="font-bold text-lg mb-2">🛏️ Surface</h3>
-                            <p class="text-sm">Indique la superficie de la chambre en m²</p>
+                            <p class="text-sm">Indique la superficie de la chambre en m². Choisissez une chambre spacieuse pour plus de confort.</p>
                         </div>
                         <div class="border border-gray-200 rounded-lg p-4">
                             <h3 class="font-bold text-lg mb-2">👥 Capacité</h3>
-                            <p class="text-sm">Nombre maximum de personnes pouvant séjourner</p>
+                            <p class="text-sm">Nombre maximum de personnes pouvant séjourner confortablement dans la chambre.</p>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h3 class="font-bold text-lg mb-2">🏆 Équipements</h3>
+                            <p class="text-sm">Vérifiez les équipements inclus : balcon, vue mer, climatisation, etc.</p>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h3 class="font-bold text-lg mb-2">💰 Tarifs</h3>
+                            <p class="text-sm">Les prix varient selon le type de chambre et la saison de réservation.</p>
                         </div>
                     </div>
                 </div>
@@ -90,14 +102,19 @@
                     <div class="mb-4 rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
                         <img src="/img/guide/domaine-skiable.png" alt="Capture d'écran - Domaine skiable" class="w-full h-auto">
                     </div>
-                    <p>Pour les resorts en montagne, consultez les informations du domaine skiable :</p>
+                    <p>Pour les resorts en montagne, consultez les informations détaillées du domaine skiable. Ces données vous permettent d'évaluer si le resort correspond à votre niveau et vos attentes en matière de ski :</p>
                     <ul class="list-disc list-inside space-y-2 ml-4">
-                        <li><strong>Altitude Club :</strong> Hauteur à laquelle se trouve le resort</li>
-                        <li><strong>Altitude Station :</strong> Point culminant du domaine</li>
-                        <li><strong>Longueur des pistes :</strong> Total en kilomètres</li>
-                        <li><strong>Nombre de pistes :</strong> Diversité du domaine</li>
-                        <li><strong>Ski au pied :</strong> Accès direct aux pistes depuis le resort</li>
+                        <li><strong>Altitude Club :</strong> Hauteur à laquelle se trouve le resort (garantit l'enneigement)</li>
+                        <li><strong>Altitude Station :</strong> Point culminant du domaine skiable</li>
+                        <li><strong>Longueur des pistes :</strong> Total en kilomètres de pistes disponibles</li>
+                        <li><strong>Nombre de pistes :</strong> Diversité du domaine avec répartition par niveau (vertes, bleues, rouges, noires)</li>
+                        <li><strong>Ski au pied :</strong> Accès direct aux pistes depuis le resort, sans navette</li>
+                        <li><strong>Remontées mécaniques :</strong> Nombre et types de remontées disponibles</li>
                     </ul>
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mt-4">
+                        <p class="font-semibold text-blue-900">💡 Bon à savoir :</p>
+                        <p class="text-blue-800">Les forfaits de ski peuvent être inclus dans certaines formules Club Med. Renseignez-vous lors de la réservation.</p>
+                    </div>
                 </div>
             </div>
 
@@ -112,7 +129,7 @@
                     <div class="mb-4 rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
                         <img src="/img/guide/restaurants-bars.png" alt="Capture d'écran - Restaurants et bars" class="w-full h-auto">
                     </div>
-                    <p>Chaque resort dispose de plusieurs options de restauration :</p>
+                    <p>Chaque resort dispose de plusieurs options de restauration pour satisfaire tous les goûts. La formule Club Med inclut généralement les repas et boissons :</p>
                     <div class="grid md:grid-cols-2 gap-4 mt-4">
                         <div class="bg-purple-50 rounded-lg p-4">
                             <div class="flex items-center gap-2 mb-2">
@@ -283,7 +300,27 @@
                             <span class="transform group-open:rotate-180 transition-transform">▼</span>
                         </summary>
                         <div class="p-4 pt-0 text-gray-700">
-                            Vous pouvez nous contacter via le formulaire de contact ou par téléphone au numéro indiqué dans le pied de page.
+                            Vous pouvez nous contacter via le formulaire de contact ou par téléphone au numéro indiqué dans le pied de page. Notre service client est disponible pour répondre à toutes vos questions.
+                        </div>
+                    </details>
+
+                    <details class="group border border-gray-200 rounded-lg">
+                        <summary class="cursor-pointer p-4 font-semibold hover:bg-gray-50 flex justify-between items-center">
+                            <span>Puis-je ajouter des compagnons à ma réservation ?</span>
+                            <span class="transform group-open:rotate-180 transition-transform">▼</span>
+                        </summary>
+                        <div class="p-4 pt-0 text-gray-700">
+                            Oui, lors de la réservation vous pouvez enregistrer les informations de vos compagnons de voyage. Cela facilite les futures réservations en gardant leurs coordonnées en mémoire.
+                        </div>
+                    </details>
+
+                    <details class="group border border-gray-200 rounded-lg">
+                        <summary class="cursor-pointer p-4 font-semibold hover:bg-gray-50 flex justify-between items-center">
+                            <span>Comment utiliser la barre de recherche du guide ?</span>
+                            <span class="transform group-open:rotate-180 transition-transform">▼</span>
+                        </summary>
+                        <div class="p-4 pt-0 text-gray-700">
+                            Tapez simplement un mot-clé dans la barre de recherche en haut de cette page. Le guide filtrera automatiquement les sections correspondantes pour vous montrer uniquement les informations pertinentes.
                         </div>
                     </details>
                 </div>
