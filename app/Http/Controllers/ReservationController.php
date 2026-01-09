@@ -106,13 +106,14 @@ class ReservationController extends Controller
         $numtransport = $request->query('numtransport');
         $nbAdultes = $request->query('nbAdultes', 1);
         $nbEnfants = $request->query('nbEnfants', 0);
+        $participants = $request->query('participants', []);
 
         // Si anciennes données (numtype unique), convertir en format chambres
         if ($numtype && empty($chambres)) {
             $chambres = [$numtype => 1];
         }
 
-        return view('reservation.step2', compact('resort', 'transports', 'dateDebut', 'dateFin', 'chambres', 'numtransport', 'nbAdultes', 'nbEnfants'));
+        return view('reservation.step2', compact('resort', 'transports', 'dateDebut', 'dateFin', 'chambres', 'numtransport', 'nbAdultes', 'nbEnfants', 'participants'));
     }
 
     public function step3(Request $request, $numresort)
