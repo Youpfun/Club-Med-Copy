@@ -105,42 +105,74 @@
     // Déterminer si l'utilisateur est connecté (passé depuis le serveur)
     const isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
 
+    // Fonction pour lire un cookie par son nom
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) {
+            return decodeURIComponent(parts.pop().split(';').shift());
+        }
+        return null;
+    }
+
+    // Fonction pour définir un cookie
+    function setCookie(name, value, days) {
+        const expires = new Date();
+        expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+        document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+    }
+
     // Vérifier le consentement au chargement
     document.addEventListener('DOMContentLoaded', function() {
         checkCookieConsent();
     });
 
     function checkCookieConsent() {
-        // Si l'utilisateur n'est PAS connecté (visiteur), toujours afficher le popup
-        if (!isAuthenticated) {
-            showCookieBanner();
+        // Vérifier d'abord le cookie local (fonctionne pour visiteurs et utilisateurs connectés)
+        const localConsent = getCookie('cookie_consent');
+        
+        if (localConsent) {
+            // Le consentement existe déjà, ne pas afficher le pop-up
+            try {
+                const preferences = JSON.parse(localConsent);
+                document.getElementById('cookie-settings-btn').classList.remove('hidden');
+                document.getElementById('cookie-settings-btn').classList.add('flex');
+                applyCookiePreferences(preferences);
+            } catch (e) {
+                // Cookie corrompu, afficher le pop-up
+                showCookieBanner();
+            }
             return;
         }
 
-        // Si l'utilisateur est connecté, vérifier s'il a déjà donné son consentement
-        fetch('/api/cookies/consent', {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            credentials: 'same-origin'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (!data.hasConsent) {
+        // Si l'utilisateur est connecté, vérifier aussi via l'API (au cas où le cookie serveur existe)
+        if (isAuthenticated) {
+            fetch('/api/cookies/consent', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.hasConsent) {
+                    showCookieBanner();
+                } else {
+                    document.getElementById('cookie-settings-btn').classList.remove('hidden');
+                    document.getElementById('cookie-settings-btn').classList.add('flex');
+                    applyCookiePreferences(data.preferences);
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la vérification du consentement:', error);
                 showCookieBanner();
-            } else {
-                document.getElementById('cookie-settings-btn').classList.remove('hidden');
-                document.getElementById('cookie-settings-btn').classList.add('flex');
-                // Appliquer les préférences
-                applyCookiePreferences(data.preferences);
-            }
-        })
-        .catch(error => {
-            console.error('Erreur lors de la vérification du consentement:', error);
+            });
+        } else {
+            // Visiteur sans cookie de consentement, afficher le pop-up
             showCookieBanner();
-        });
+        }
     }
 
     function showCookieBanner() {
@@ -169,6 +201,20 @@
     }
 
     function acceptAllCookies() {
+        const preferences = {
+            essential: true,
+            analytics: true,
+            marketing: true,
+            functional: true,
+            timestamp: new Date().toISOString()
+        };
+
+        // Sauvegarder le cookie côté client immédiatement
+        setCookie('cookie_consent', JSON.stringify(preferences), 365);
+        hideCookieBanner();
+        applyCookiePreferences(preferences);
+
+        // Aussi envoyer à l'API pour synchroniser avec le serveur
         fetch('/api/cookies/accept-all', {
             method: 'POST',
             headers: {
@@ -178,18 +224,24 @@
                 'X-Requested-With': 'XMLHttpRequest'
             },
             credentials: 'same-origin'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                hideCookieBanner();
-                applyCookiePreferences(data.preferences);
-            }
-        })
-        .catch(error => console.error('Erreur:', error));
+        }).catch(error => console.error('Erreur sync serveur:', error));
     }
 
     function rejectAllCookies() {
+        const preferences = {
+            essential: true,
+            analytics: false,
+            marketing: false,
+            functional: false,
+            timestamp: new Date().toISOString()
+        };
+
+        // Sauvegarder le cookie côté client immédiatement
+        setCookie('cookie_consent', JSON.stringify(preferences), 365);
+        hideCookieBanner();
+        applyCookiePreferences(preferences);
+
+        // Aussi envoyer à l'API pour synchroniser avec le serveur
         fetch('/api/cookies/reject-all', {
             method: 'POST',
             headers: {
@@ -199,15 +251,7 @@
                 'X-Requested-With': 'XMLHttpRequest'
             },
             credentials: 'same-origin'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                hideCookieBanner();
-                applyCookiePreferences(data.preferences);
-            }
-        })
-        .catch(error => console.error('Erreur:', error));
+        }).catch(error => console.error('Erreur sync serveur:', error));
     }
 
     function saveCustomCookies() {
@@ -215,9 +259,16 @@
             essential: true,
             functional: document.getElementById('cookie-functional').checked,
             analytics: document.getElementById('cookie-analytics').checked,
-            marketing: document.getElementById('cookie-marketing').checked
+            marketing: document.getElementById('cookie-marketing').checked,
+            timestamp: new Date().toISOString()
         };
 
+        // Sauvegarder le cookie côté client immédiatement
+        setCookie('cookie_consent', JSON.stringify(preferences), 365);
+        hideCookieBanner();
+        applyCookiePreferences(preferences);
+
+        // Aussi envoyer à l'API pour synchroniser avec le serveur
         fetch('/api/cookies/consent', {
             method: 'POST',
             headers: {
@@ -228,15 +279,7 @@
             },
             credentials: 'same-origin',
             body: JSON.stringify(preferences)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                hideCookieBanner();
-                applyCookiePreferences(data.preferences);
-            }
-        })
-        .catch(error => console.error('Erreur:', error));
+        }).catch(error => console.error('Erreur sync serveur:', error));
     }
 
     function applyCookiePreferences(preferences) {
