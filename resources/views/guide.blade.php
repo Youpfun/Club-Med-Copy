@@ -300,7 +300,7 @@
                             <span class="transform group-open:rotate-180 transition-transform">▼</span>
                         </summary>
                         <div class="p-4 pt-0 text-gray-700">
-                            Vous pouvez nous contacter via le formulaire de contact ou par téléphone au numéro indiqué dans le pied de page. Notre service client est disponible pour répondre à toutes vos questions.
+                            Vous pouvez nous contacter via le téléphone au numéro indiqué dans le pied de page. Notre service client est disponible pour répondre à toutes vos questions.
                         </div>
                     </details>
 
