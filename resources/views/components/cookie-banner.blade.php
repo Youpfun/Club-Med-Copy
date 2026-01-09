@@ -102,12 +102,22 @@
 </button>
 
 <script>
+    // Déterminer si l'utilisateur est connecté (passé depuis le serveur)
+    const isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
+
     // Vérifier le consentement au chargement
     document.addEventListener('DOMContentLoaded', function() {
         checkCookieConsent();
     });
 
     function checkCookieConsent() {
+        // Si l'utilisateur n'est PAS connecté (visiteur), toujours afficher le popup
+        if (!isAuthenticated) {
+            showCookieBanner();
+            return;
+        }
+
+        // Si l'utilisateur est connecté, vérifier s'il a déjà donné son consentement
         fetch('/api/cookies/consent', {
             method: 'GET',
             headers: {
