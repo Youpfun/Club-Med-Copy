@@ -21,7 +21,15 @@
                    ($reservation->statut === 'Annulée' ? 'bg-red-100 text-red-700 border-red-200' : 'bg-gray-100 text-gray-700 border-gray-200')) }}">
                 {{ $reservation->statut }}
             </span>
-            <x-tooltip text="@if($reservation->statut === 'Confirmée')Réservation confirmée. Documents par email.@elseif($reservation->statut === 'En attente')En cours de traitement. Confirmation prochaine.@elseif($reservation->statut === 'Annulée')Réservation annulée. Contactez-nous.@elseStatut de votre réservation.@endif" position="left" />
+            @php
+                $tooltipText = match($reservation->statut) {
+                    'Confirmée' => 'Réservation confirmée. Documents par email.',
+                    'En attente' => 'En cours de traitement. Confirmation prochaine.',
+                    'Annulée' => 'Réservation annulée. Contactez-nous.',
+                    default => 'Statut de votre réservation.'
+                };
+            @endphp
+            <x-tooltip :text="$tooltipText" position="left" />
             <button onclick="window.print()" class="bg-white border border-gray-300 text-gray-700 p-2 rounded-lg hover:bg-gray-50 print:hidden" title="Imprimer">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
             </button>

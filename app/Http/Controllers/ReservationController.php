@@ -125,6 +125,7 @@ class ReservationController extends Controller
         $chambres = $request->query('chambres', []);
         $nbAdultes = $request->query('nbAdultes', 1);
         $nbEnfants = $request->query('nbEnfants', 0);
+        $participants = $request->query('participants', []);
         
         // Récupérer les transports sélectionnés
         $transportsParticipants = [];
@@ -170,7 +171,7 @@ class ReservationController extends Controller
 
         return view('reservation.step3', compact(
             'resort', 'activites', 'dateDebut', 'dateFin', 'chambres', 'transportsParticipants',
-            'nbAdultes', 'nbEnfants', 'nbNuits', 'prixChambre', 'prixTransport'
+            'nbAdultes', 'nbEnfants', 'nbNuits', 'prixChambre', 'prixTransport', 'participants'
         ));
     }
 
@@ -422,7 +423,14 @@ class ReservationController extends Controller
             ->select('typechambre.*')
             ->first();
 
-        return view('reservation.show', compact('reservation', 'typeChambre'));
+        // Récupérer toutes les chambres réservées
+        $chambres = DB::table('choisir')
+            ->join('typechambre', 'choisir.numtype', '=', 'typechambre.numtype')
+            ->where('choisir.numreservation', $numreservation)
+            ->select('typechambre.*', 'choisir.quantite')
+            ->get();
+
+        return view('reservation.show', compact('reservation', 'typeChambre', 'chambres'));
     }
 
     // Édition Step 1 : Dates et chambres
