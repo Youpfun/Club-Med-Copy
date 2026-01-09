@@ -326,15 +326,6 @@
                 </div>
             </div>
 
-            {{-- Besoin d'aide supplémentaire --}}
-            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl shadow-lg p-8 text-center">
-                <h2 class="text-2xl font-bold mb-4">Vous ne trouvez pas votre réponse ?</h2>
-                <p class="mb-6 text-blue-100">Notre équipe est là pour vous aider</p>
-                <a href="/contact" class="inline-block px-8 py-3 bg-white text-blue-600 font-bold rounded-full hover:bg-blue-50 transition-colors shadow-lg">
-                    Contactez-nous
-                </a>
-            </div>
-
         </section>
     </main>
 
