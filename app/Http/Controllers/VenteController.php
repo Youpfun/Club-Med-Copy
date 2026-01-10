@@ -37,11 +37,44 @@ class VenteController extends Controller
                 ->select(
                     'partenaire.nompartenaire',
                     'reservation_activite.partenaire_validation_status',
-                    'reservation_activite.partenaire_validated_at'
+                    'reservation_activite.partenaire_validated_at',
+                    'reservation_activite.numactivite'
                 )
                 ->get();
             
             $reservation->partenaires_status = $partenairesStatus;
+            
+            // Compter les activites en attente de reponse partenaire
+            $reservation->activites_pending_count = $partenairesStatus->where('partenaire_validation_status', 'pending')->count();
+        }
+
+        // Recuperer les reservations avec activites en attente de reponse partenaire (plus de 48h)
+        $reservationsActivitiesPending = Reservation::with(['resort', 'user', 'activites.activite'])
+            ->whereIn('statut', ['en_attente', 'payee', 'Confirmée'])
+            ->whereHas('activites', function($q) {
+                $q->whereNotNull('numpartenaire')
+                  ->where('partenaire_validation_status', 'pending')
+                  ->where('created_at', '<', now()->subHours(48));
+            })
+            ->orderBy('datedebut', 'asc')
+            ->get();
+
+        foreach ($reservationsActivitiesPending as $reservation) {
+            $activitesPending = DB::table('reservation_activite')
+                ->join('activite', 'reservation_activite.numactivite', '=', 'activite.numactivite')
+                ->leftJoin('partenaire', 'reservation_activite.numpartenaire', '=', 'partenaire.numpartenaire')
+                ->where('reservation_activite.numreservation', $reservation->numreservation)
+                ->whereNotNull('reservation_activite.numpartenaire')
+                ->where('reservation_activite.partenaire_validation_status', 'pending')
+                ->where('reservation_activite.created_at', '<', now()->subHours(48))
+                ->select(
+                    'reservation_activite.*',
+                    'activite.nomactivite',
+                    'partenaire.nompartenaire'
+                )
+                ->get();
+            
+            $reservation->activites_pending = $activitesPending;
         }
 
         // Récupérer les réservations dont le resort a refusé (nécessite proposition alternative)
@@ -77,12 +110,14 @@ class VenteController extends Controller
                 ->where('datedebut', '>=', now())
                 ->count(),
             'total_resort_refused' => $reservationsResortRefused->count(),
+            'total_activities_pending' => $reservationsActivitiesPending->sum(fn($r) => $r->activites_pending->count()),
         ];
 
         return view('vente.dashboard', compact(
             'reservationsPendingConfirmation',
             'confirmedReservations',
             'reservationsResortRefused',
+            'reservationsActivitiesPending',
             'stats'
         ));
     }
@@ -495,5 +530,122 @@ class VenteController extends Controller
             \Log::error('Erreur annulation toutes activités: ' . $e->getMessage());
             return back()->with('error', 'Erreur lors de l\'annulation des activités: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Annule les activités en attente de validation partenaire (sans réponse)
+     */
+    public function cancelPendingPartnerActivities(Request $request, $numreservation)
+    {
+        if (!Auth::user() || (strpos(strtolower(Auth::user()->role ?? ''), 'vente') === false)) {
+            abort(403, 'Accès réservé au service vente');
+        }
+
+        $reservation = Reservation::with(['user', 'resort'])->findOrFail($numreservation);
+
+        $pendingActivities = DB::table('reservation_activite')
+            ->join('activite', 'reservation_activite.numactivite', '=', 'activite.numactivite')
+            ->leftJoin('partenaire', 'reservation_activite.numpartenaire', '=', 'partenaire.numpartenaire')
+            ->where('reservation_activite.numreservation', $numreservation)
+            ->whereNotNull('reservation_activite.numpartenaire')
+            ->where('reservation_activite.partenaire_validation_status', 'pending')
+            ->select(
+                'reservation_activite.*',
+                'activite.nomactivite',
+                'partenaire.nompartenaire'
+            )
+            ->get();
+
+        if ($pendingActivities->isEmpty()) {
+            return back()->with('error', 'Aucune activité en attente de validation partenaire à annuler.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $cancelledActivities = [];
+            $totalRefund = 0;
+
+            foreach ($pendingActivities as $activity) {
+                $activityTotal = $activity->prix_unitaire * $activity->quantite;
+                $totalRefund += $activityTotal;
+
+                $cancelledActivities[] = [
+                    'nom' => $activity->nomactivite ?? 'Activité',
+                    'quantite' => $activity->quantite,
+                    'prix_unitaire' => $activity->prix_unitaire,
+                    'total' => $activityTotal,
+                    'partenaire' => $activity->nompartenaire ?? 'Partenaire non spécifié',
+                    'raison' => 'Partenaire n\'a pas répondu dans les délais',
+                ];
+
+                DB::table('reservation_activite')
+                    ->where('numreservation', $numreservation)
+                    ->where('numactivite', $activity->numactivite)
+                    ->delete();
+            }
+
+            $newTotal = $reservation->prixtotal - $totalRefund;
+            $reservation->update(['prixtotal' => max(0, $newTotal)]);
+
+            DB::commit();
+
+            if ($reservation->user && $reservation->user->email) {
+                try {
+                    Mail::to($reservation->user->email)->send(
+                        new ActivityCancelledMail($reservation, $cancelledActivities, $totalRefund, false, 'partner_no_response')
+                    );
+                    \Log::info('Email annulation activités partenaire sans réponse envoyé', [
+                        'numreservation' => $numreservation,
+                        'client_email' => $reservation->user->email,
+                        'nb_activites' => count($cancelledActivities),
+                        'montant_rembourse' => $totalRefund,
+                    ]);
+                } catch (\Exception $e) {
+                    \Log::error('Erreur envoi email annulation activités partenaire: ' . $e->getMessage());
+                }
+            }
+
+            \Log::info('Activités partenaire sans réponse annulées', [
+                'numreservation' => $numreservation,
+                'nb_activites' => count($cancelledActivities),
+                'montant_rembourse' => $totalRefund,
+                'user_id' => Auth::id(),
+            ]);
+
+            return redirect()->route('vente.dashboard')->with('success', 
+                count($cancelledActivities) . " activité(s) annulée(s) (partenaire sans réponse). Montant remboursé : " . number_format($totalRefund, 2, ',', ' ') . " €"
+            );
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Erreur annulation activités partenaire sans réponse: ' . $e->getMessage());
+            return back()->with('error', 'Erreur lors de l\'annulation: ' . $e->getMessage());
+        }
+    }
+
+    public function avisIndex()
+    {
+        if (!Auth::user() || (strpos(strtolower(Auth::user()->role ?? ''), 'vente') === false)) {
+            abort(403, 'Acces reserve au service vente');
+        }
+
+        $avis = \App\Models\Avis::with(['user', 'resort', 'repondeur'])
+            ->orderByRaw('CASE WHEN reponse IS NULL THEN 0 ELSE 1 END')
+            ->orderBy('datepublication', 'desc')
+            ->paginate(20);
+
+        return view('vente.avis-index', compact('avis'));
+    }
+
+    public function avisShow($numavis)
+    {
+        if (!Auth::user() || (strpos(strtolower(Auth::user()->role ?? ''), 'vente') === false)) {
+            abort(403, 'Acces reserve au service vente');
+        }
+
+        $avis = \App\Models\Avis::with(['user', 'resort', 'photos', 'repondeur'])
+            ->findOrFail($numavis);
+
+        return view('vente.avis-show', compact('avis'));
     }
 }

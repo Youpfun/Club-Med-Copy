@@ -114,6 +114,20 @@
                                         {{ $unAvis->commentaire }}
                                     </p>
 
+                                    @if($unAvis->reponse)
+                                        <div class="mt-3 p-4 bg-blue-50 border-l-4 border-clubmed-blue rounded-r-lg">
+                                            <div class="flex items-center gap-2 mb-2">
+                                                <span class="text-clubmed-blue font-bold text-sm">Reponse Club Med</span>
+                                                @if($unAvis->date_reponse)
+                                                    <span class="text-xs text-gray-500">
+                                                        - {{ $unAvis->date_reponse->format('d/m/Y') }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            <p class="text-gray-700 text-sm">{{ $unAvis->reponse }}</p>
+                                        </div>
+                                    @endif
+
                                     {{-- ZONE PHOTOS --}}
                                     @if($unAvis->photos->isNotEmpty())
                                         <div class="mt-2 pt-3 border-t border-gray-200">

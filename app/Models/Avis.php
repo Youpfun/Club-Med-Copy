@@ -18,7 +18,14 @@ class Avis extends Model
         'numresort',
         'noteavis',
         'commentaire',
-        'datepublication'
+        'datepublication',
+        'reponse',
+        'reponse_user_id',
+        'date_reponse'
+    ];
+
+    protected $casts = [
+        'date_reponse' => 'datetime',
     ];
 
     public function user() {
@@ -31,5 +38,13 @@ class Avis extends Model
 
     public function photos() {
         return $this->hasMany(Photo::class, 'numavis', 'numavis');
+    }
+
+    public function repondeur() {
+        return $this->belongsTo(User::class, 'reponse_user_id');
+    }
+
+    public function hasReponse() {
+        return !empty($this->reponse);
     }
 }

@@ -25,7 +25,7 @@ class AvisController extends Controller
 
         if (!$reservation) {
             return redirect()->route('reservations.index')
-                ->with('error', 'Réservation introuvable ou accès non autorisé.');
+                ->with('error', 'Reservation introuvable ou acces non autorise.');
         }
 
         return view('avis', ['reservation' => $reservation]);
@@ -64,12 +64,9 @@ class AvisController extends Controller
         }
 
         return redirect()->route('reservations.index')
-            ->with('success', 'Merci ! Votre avis a été publié avec succès.');
+            ->with('success', 'Merci ! Votre avis a ete publie avec succes.');
     }
 
-    /**
-     * Signaler un avis sur un resort
-     */
     public function report(Request $request, $numavis)
     {
         $avis = Avis::find($numavis);
@@ -92,6 +89,24 @@ class AvisController extends Controller
         ]);
 
         return redirect()->back()
-            ->with('success', 'Merci ! Votre signalement a été enregistré. Nous allons examiner cet avis.');
+            ->with('success', 'Merci ! Votre signalement a ete enregistre. Nous allons examiner cet avis.');
+    }
+
+    public function repondre(Request $request, $numavis)
+    {
+        $avis = Avis::findOrFail($numavis);
+
+        $request->validate([
+            'reponse' => 'required|string|max:2000',
+        ]);
+
+        $avis->update([
+            'reponse' => $request->reponse,
+            'reponse_user_id' => Auth::id(),
+            'date_reponse' => Carbon::now(),
+        ]);
+
+        return redirect()->back()
+            ->with('success', 'Votre reponse a ete publiee avec succes.');
     }
 }

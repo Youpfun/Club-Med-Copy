@@ -201,6 +201,11 @@ Route::middleware([
         Route::get('/reservation/{numreservation}/activities', [VenteController::class, 'showActivities'])->name('vente.activities');
         Route::delete('/reservation/{numreservation}/activity/{numactivite}', [VenteController::class, 'cancelActivity'])->name('vente.cancel-activity');
         Route::delete('/reservation/{numreservation}/activities', [VenteController::class, 'cancelAllActivities'])->name('vente.cancel-all-activities');
+        Route::delete('/reservation/{numreservation}/pending-partner-activities', [VenteController::class, 'cancelPendingPartnerActivities'])->name('vente.cancel-pending-partner-activities');
+        
+        Route::get('/avis', [VenteController::class, 'avisIndex'])->name('vente.avis');
+        Route::get('/avis/{numavis}', [VenteController::class, 'avisShow'])->name('vente.avis.show');
+        Route::post('/avis/{numavis}/repondre', [AvisController::class, 'repondre'])->name('vente.avis.repondre');
         
         Route::get('/test-reject/{numreservation}', function ($numreservation) {
             $reservation = \App\Models\Reservation::findOrFail($numreservation);

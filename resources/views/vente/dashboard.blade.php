@@ -3,10 +3,21 @@
 @section('content')
 <div class="container mx-auto py-12">
     <div class="max-w-7xl mx-auto">
-        {{-- En-tête --}}
+        {{-- En-tete --}}
         <div class="mb-12">
-            <h1 class="text-4xl font-bold font-serif text-clubmed-blue mb-2">Tableau de Bord Service Vente</h1>
-            <p class="text-gray-600">Gérez les confirmations de séjours et les validations des partenaires</p>
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-4xl font-bold font-serif text-clubmed-blue mb-2">Tableau de Bord Service Vente</h1>
+                    <p class="text-gray-600">Gerez les confirmations de sejours et les validations des partenaires</p>
+                </div>
+                <a href="{{ route('vente.avis') }}" 
+                   class="px-6 py-3 bg-clubmed-blue text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                    </svg>
+                    Gerer les Avis
+                </a>
+            </div>
                {{-- Messages de session --}}
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
@@ -21,7 +32,7 @@
         @endif
 
         {{-- Statistiques --}}
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-12">
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center">
                     <div class="flex-1">
@@ -42,6 +53,18 @@
                     </div>
                     <div class="text-4xl text-red-200">
                         <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-1">
+                        <p class="text-gray-600 text-sm">Activités sans réponse</p>
+                        <p class="text-3xl font-bold text-purple-600">{{ $stats['total_activities_pending'] ?? 0 }}</p>
+                    </div>
+                    <div class="text-4xl text-purple-200">
+                        <i class="fas fa-user-clock"></i>
                     </div>
                 </div>
             </div>
@@ -143,6 +166,90 @@
                                        class="inline-block px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded font-bold transition mt-2">
                                         Annuler
                                     </a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
+
+        {{-- Activités en attente de réponse partenaire (plus de 48h) --}}
+        @if(isset($reservationsActivitiesPending) && $reservationsActivitiesPending->isNotEmpty())
+        <div class="bg-white rounded-lg shadow mb-12 border-l-4 border-purple-500">
+            <div class="border-b p-6 bg-purple-50">
+                <h2 class="text-2xl font-bold font-serif text-purple-800">Activités Sans Réponse Partenaire (+48h)</h2>
+                <p class="text-purple-600 text-sm mt-1">Ces activités n'ont pas reçu de confirmation du partenaire depuis plus de 48 heures. Vous pouvez les annuler et rembourser le client.</p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-purple-50 border-b">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Réservation</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Client</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Resort</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Activités en attente</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Montant</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        @foreach($reservationsActivitiesPending as $reservation)
+                            @php
+                                $totalPendingAmount = $reservation->activites_pending->sum(function($a) {
+                                    return $a->prix_unitaire * $a->quantite;
+                                });
+                            @endphp
+                            <tr class="hover:bg-purple-50">
+                                <td class="px-6 py-4">
+                                    <span class="font-bold text-purple-600">#{{ $reservation->numreservation }}</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div>
+                                        <p class="font-medium">{{ $reservation->user->name ?? 'N/A' }}</p>
+                                        <p class="text-xs text-gray-500">{{ $reservation->user->email ?? 'N/A' }}</p>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    {{ $reservation->resort->nomresort ?? 'N/A' }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="space-y-2">
+                                        @foreach($reservation->activites_pending as $activity)
+                                            <div class="text-sm bg-purple-100 rounded p-2">
+                                                <p class="font-medium">{{ $activity->nomactivite }}</p>
+                                                <p class="text-xs text-gray-600">
+                                                    Partenaire: {{ $activity->nompartenaire ?? 'N/A' }}
+                                                </p>
+                                                <p class="text-xs text-gray-500">
+                                                    {{ $activity->quantite }}x {{ number_format($activity->prix_unitaire, 2, ',', ' ') }} €
+                                                </p>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="font-bold text-purple-700">
+                                        {{ number_format($totalPendingAmount, 2, ',', ' ') }} €
+                                    </span>
+                                    <p class="text-xs text-gray-500">à rembourser</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <form action="{{ route('vente.cancel-pending-partner-activities', $reservation->numreservation) }}" 
+                                          method="POST" 
+                                          onsubmit="return confirm('Êtes-vous sûr de vouloir annuler {{ $reservation->activites_pending->count() }} activité(s) et procéder au remboursement de {{ number_format($totalPendingAmount, 2, ',', ' ') }} € ?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" 
+                                                class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded font-bold transition flex items-center gap-2">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                            Annuler et Rembourser
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         @endforeach
