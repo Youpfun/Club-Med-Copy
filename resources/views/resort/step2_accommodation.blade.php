@@ -41,16 +41,32 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200">
                             @foreach($typesChambre as $type)
+                                {{-- Pré-remplissage des valeurs --}}
+                                @php
+                                    $data = $existingData[$type->numtype] ?? [];
+                                    $isActive = !empty($data['active']);
+                                    $qty = $data['quantite'] ?? '';
+                                    $price = $data['prix'] ?? '';
+                                @endphp
+
                                 <tr class="hover:bg-blue-50 transition">
                                     <td class="px-4 py-4 text-center">
-                                        <input type="checkbox" name="chambres[{{ $type->numtype }}][active]" value="1" class="w-5 h-5 text-blue-600 rounded">
+                                        <input type="checkbox" name="chambres[{{ $type->numtype }}][active]" value="1" 
+                                               class="w-5 h-5 text-blue-600 rounded"
+                                               {{ $isActive ? 'checked' : '' }}>
                                     </td>
-                                    <td class="px-4 py-4 font-medium text-gray-900">{{ $type->nomtype }}</td>
-                                    <td class="px-4 py-4">
-                                        <input type="number" name="chambres[{{ $type->numtype }}][quantite]" class="w-24 rounded border-gray-300" placeholder="0">
+                                    <td class="px-4 py-4 font-medium text-gray-900">
+                                        {{ $type->nomtype }}
                                     </td>
                                     <td class="px-4 py-4">
-                                        <input type="number" name="chambres[{{ $type->numtype }}][prix]" class="w-32 rounded border-gray-300" placeholder="0.00" step="0.01">
+                                        <input type="number" name="chambres[{{ $type->numtype }}][quantite]" 
+                                               value="{{ $qty }}" 
+                                               class="w-24 rounded border-gray-300" placeholder="0">
+                                    </td>
+                                    <td class="px-4 py-4">
+                                        <input type="number" name="chambres[{{ $type->numtype }}][prix]" 
+                                               value="{{ $price }}" 
+                                               class="w-32 rounded border-gray-300" placeholder="0.00" step="0.01">
                                     </td>
                                 </tr>
                             @endforeach
@@ -58,10 +74,17 @@
                     </table>
                 </div>
 
-                <div class="pt-6 mt-6 border-t flex justify-between">
-                    <a href="{{ route('marketing.dashboard') }}" class="text-gray-500 hover:text-gray-700 underline">Sauvegarder et quitter</a>
-                    <button type="submit" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full shadow-lg">
-                        Suivant : Configurer les Activités →
+                <div class="pt-6 mt-6 border-t flex justify-between items-center">
+                    
+                    {{-- BOUTON 1 : SAUVEGARDER ET QUITTER --}}
+                    <button type="submit" name="action" value="save_exit" class="text-gray-500 hover:text-gray-800 font-bold underline transition">
+                        Sauvegarder et quitter
+                    </button>
+
+                    {{-- BOUTON 2 : SUIVANT --}}
+                    <button type="submit" name="action" value="next" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full shadow-lg flex items-center gap-2">
+                        <span>Suivant : Configurer les Activités</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                     </button>
                 </div>
             </form>

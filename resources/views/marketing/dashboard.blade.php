@@ -163,24 +163,37 @@
                                     <span class="text-sm text-gray-900">{{ $resortItem->pays->nompays ?? 'N/A' }}</span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    @if($resortItem->typechambres_count > 0)
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            ✅ Configuré
+                                    {{-- AFFICHAGE DE L'ÉTAT --}}
+                                    @if($resortItem->est_valide ?? false)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800 border border-green-200">
+                                            🌍 En Ligne
+                                        </span>
+                                    @elseif($resortItem->typechambres_count > 0)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                            Configuré
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                            ⚠️ Incomplet
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                            Incomplet
                                         </span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <div class="flex justify-end gap-2">
+                                    <div class="flex justify-end items-center gap-2">
+                                        {{-- NOUVEAU BOUTON : MODIFIER STRUCTURE (ETAPE 1) --}}
+                                        <a href="{{ route('resort.editStructure', $resortItem->numresort) }}" class="text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded border border-gray-300 transition text-xs" title="Modifier identité, photos...">
+                                            📝 Modifier
+                                        </a>
                                         {{-- Tout le monde peut configurer les chambres et activités --}}
                                         <a href="{{ route('resort.step2', $resortItem->numresort) }}" class="text-clubmed-blue hover:text-clubmed-blue/80 bg-clubmed-blue/10 hover:bg-clubmed-blue/20 px-3 py-1 rounded border border-clubmed-blue/20 transition text-xs" title="Configurer les chambres">
                                             🛏️ Hébergement
                                         </a>
                                         <a href="{{ route('resort.step3', $resortItem->numresort) }}" class="text-purple-600 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 px-3 py-1 rounded border border-purple-200 transition text-xs" title="Configurer les activités">
                                             ⛷️ Activités
+                                        </a>
+                                        {{-- NOUVEAU BOUTON : ÉTAPE 4 (PRIX) --}}
+                                        <a href="{{ route('resort.step4', $resortItem->numresort) }}" class="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 px-3 py-1 rounded border border-green-200 transition text-xs" title="Configurer les tarifs">
+                                            💰 Prix
                                         </a>
                                     </div>
                                 </td>

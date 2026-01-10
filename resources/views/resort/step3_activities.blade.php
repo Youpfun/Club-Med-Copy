@@ -11,101 +11,159 @@
 
     <main class="py-12 px-4 lg:px-8">
         <div class="max-w-6xl mx-auto">
-            
-            {{-- Message d'erreur visible si la validation échoue --}}
-            @if($errors->any())
-                <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded">
-                    <div class="flex">
-                        <div class="flex-shrink-0 text-red-500">⚠️</div>
-                        <div class="ml-3">
-                            <h3 class="text-sm font-bold text-red-800">Il y a des erreurs dans le formulaire :</h3>
-                            <ul class="mt-1 text-sm text-red-700 list-disc pl-5">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    </div>
+            <div class="mb-8">
+                <div class="flex items-center justify-between text-sm font-medium text-gray-500">
+                    <span class="text-green-600">1. Structure (Fait)</span>
+                    <span class="text-green-600">2. Hébergement (Fait)</span>
+                    <span class="text-blue-600 font-bold">3. Activités & Services</span>
                 </div>
-            @endif
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                    <div class="bg-green-500 h-2.5 rounded-full" style="width: 90%"></div>
+                </div>
+            </div>
 
             <div class="mb-6">
                 <h1 class="text-3xl font-serif font-bold text-gray-900">Étape 3 : Activités</h1>
-                <p class="text-gray-600">Configurez les activités pour <strong>{{ $resort->nomresort }}</strong>.</p>
+                <p class="text-gray-600">Gérez les activités pour <strong>{{ $resort->nomresort }}</strong>.</p>
             </div>
 
-            <form action="{{ route('resort.storeStep3', $resort->numresort) }}" method="POST" x-data="{ tab: 'existing' }">
+            @if(session('success'))
+                <div class="mb-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4">{{ session('success') }}</div>
+            @endif
+
+            <form action="{{ route('resort.storeStep3', $resort->numresort) }}" method="POST">
                 @csrf
 
-                <div class="flex gap-4 mb-6 border-b border-gray-200">
-                    <button type="button" @click="tab = 'existing'" 
-                            :class="tab === 'existing' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'"
-                            class="pb-2 font-bold px-4 transition">
-                        📚 Sélectionner existantes
-                    </button>
-                    <button type="button" @click="tab = 'new'" 
-                            :class="tab === 'new' ? 'border-b-2 border-green-600 text-green-600' : 'text-gray-500 hover:text-gray-700'"
-                            class="pb-2 font-bold px-4 transition">
-                        ✨ Créer nouvelles
-                    </button>
-                </div>
-
-                <div x-show="tab === 'existing'" class="bg-white p-6 rounded-xl shadow border border-gray-200 mb-6">
-                    <div class="mb-4">
-                        <input type="text" id="searchActivity" placeholder="Filtrer les activités..." class="w-full rounded border-gray-300 shadow-sm" onkeyup="filterActivities()">
-                    </div>
+                {{-- SECTION 1 : LISTE DES ACTIVITÉS DÉJÀ PRÉSENTES --}}
+                <div class="bg-white p-6 rounded-xl shadow border border-gray-200 mb-8">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        ✅ Activités actuelles du Resort
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">{{ $resortActivities->count() }}</span>
+                    </h3>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto" id="activitiesList">
-                        @foreach($allActivities as $act)
-                            <label class="activity-item flex items-center p-3 border rounded hover:bg-gray-50 cursor-pointer transition">
-                                {{-- ATTENTION : Le nom est bien selected_activities[] --}}
-                                <input type="checkbox" name="selected_activities[]" value="{{ $act->numactivite }}" 
-                                       class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                                       {{ in_array($act->numtypeactivite, $currentTypeIds) ? 'checked' : '' }}>
-                                <div class="ml-3">
-                                    <span class="block font-medium text-gray-900">{{ $act->nomactivite }}</span>
-                                    <span class="block text-xs text-gray-500">{{ $act->typeActivite->nomtypeactivite ?? 'Type inconnu' }}</span>
-                                </div>
-                            </label>
-                        @endforeach
-                    </div>
+                    @if($resortActivities->isEmpty())
+                        <p class="text-gray-400 italic text-sm">Aucune activité configurée pour ce resort.</p>
+                    @else
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-sm">
+                                <thead class="bg-gray-50 text-gray-500">
+                                    <tr>
+                                        <th class="py-2 px-3 text-left">Nom</th>
+                                        <th class="py-2 px-3 text-left">Type</th>
+                                        <th class="py-2 px-3 text-center">Formule</th>
+                                        <th class="py-2 px-3 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100">
+                                    @foreach($resortActivities as $act)
+                                        <tr>
+                                            <td class="py-2 px-3 font-medium text-gray-900">{{ $act->nomactivite }}</td>
+                                            <td class="py-2 px-3 text-gray-600">{{ $act->typeActivite->nomtypeactivite ?? '-' }}</td>
+                                            <td class="py-2 px-3 text-center">
+                                                @if($act->estincluse)
+                                                    <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs">Inclus</span>
+                                                @else
+                                                    <span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded text-xs">À la carte (€)</span>
+                                                @endif
+                                            </td>
+                                            <td class="py-2 px-3 text-right">
+                                                <button type="submit" form="delete-form-{{ $act->numactivite }}" class="text-red-500 hover:text-red-700 font-bold bg-red-50 hover:bg-red-100 rounded px-3 py-1 transition text-xs flex items-center gap-1 ml-auto">
+                                                    <span>🗑️</span> Supprimer
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
                 </div>
 
-                <div x-show="tab === 'new'" class="bg-white p-6 rounded-xl shadow border border-gray-200 mb-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-gray-700">Ajouter des activités spécifiques</h3>
-                        <button type="button" onclick="addNewRow()" class="text-sm bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold hover:bg-green-200">+ Ajouter une ligne</button>
+                {{-- ONGLETS POUR AJOUTER --}}
+                <div x-data="{ tab: 'existing' }">
+                    <div class="flex gap-4 mb-4 border-b border-gray-200">
+                        <button type="button" @click="tab = 'existing'" 
+                                :class="tab === 'existing' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+                                class="pb-2 font-bold px-4 transition">
+                            📚 Ajouter depuis le Catalogue
+                        </button>
+                        <button type="button" @click="tab = 'new'" 
+                                :class="tab === 'new' ? 'border-b-2 border-green-600 text-green-600' : 'text-gray-500 hover:text-gray-700'"
+                                class="pb-2 font-bold px-4 transition">
+                            ✨ Créer sur mesure
+                        </button>
                     </div>
 
-                    <table class="w-full">
-                        <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
-                            <tr>
-                                <th class="text-left py-2 px-2">Type *</th>
-                                <th class="text-left py-2 px-2">Nom *</th>
-                                <th class="text-left py-2 px-2">Description</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody id="newActivitiesBody">
+                    {{-- ONGLET CATALOGUE --}}
+                    <div x-show="tab === 'existing'" class="bg-white p-6 rounded-xl shadow border border-gray-200 mb-6">
+                        <div class="mb-4">
+                            <input type="text" id="searchActivity" placeholder="Rechercher une activité (ex: Yoga, Tennis)..." class="w-full rounded border-gray-300 shadow-sm" onkeyup="filterActivities()">
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-60 overflow-y-auto" id="activitiesList">
+                            @foreach($globalActivities as $act)
+                                <label class="activity-item flex items-center p-3 border rounded hover:bg-gray-50 cursor-pointer transition group">
+                                    <input type="checkbox" name="selected_activities[]" value="{{ $act->numactivite }}" 
+                                           class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                                    <div class="ml-3">
+                                        <span class="block font-medium text-gray-900 group-hover:text-blue-600">{{ $act->nomactivite }}</span>
+                                        <span class="block text-xs text-gray-500">{{ $act->typeActivite->nomtypeactivite ?? 'Type inconnu' }}</span>
+                                    </div>
+                                </label>
+                            @endforeach
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2 italic">* Ces activités seront copiées et incluses dans votre formule.</p>
+                    </div>
+
+                    {{-- ONGLET CRÉATION --}}
+                    <div x-show="tab === 'new'" class="bg-white p-6 rounded-xl shadow border border-gray-200 mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-gray-700">Créer une activité spécifique</h3>
+                            <button type="button" onclick="addNewRow()" class="text-sm bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold hover:bg-green-200">+ Ajouter une ligne</button>
+                        </div>
+
+                        <table class="w-full">
+                            <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
+                                <tr>
+                                    <th class="text-left py-2 px-2 w-1/4">Type *</th>
+                                    <th class="text-left py-2 px-2 w-1/4">Nom *</th>
+                                    <th class="text-left py-2 px-2 w-1/4">Formule *</th>
+                                    <th class="text-left py-2 px-2">Description</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="newActivitiesBody">
+                                {{-- JS inserts rows here --}}
                             </tbody>
-                    </table>
-                    <div id="emptyState" class="text-center text-gray-400 py-8 italic">
-                        Cliquez sur "+ Ajouter une ligne" si vous ne trouvez pas votre bonheur dans le catalogue.
+                        </table>
+                        <div id="emptyState" class="text-center text-gray-400 py-8 italic">
+                            Cliquez sur "+ Ajouter une ligne" pour créer une activité manuellement.
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
-                    <a href="{{ route('marketing.dashboard') }}" class="text-gray-500 hover:text-gray-700 underline">Passer cette étape</a>
-                    <button type="submit" class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-full shadow-lg transform transition hover:scale-105">
-                        Valider et Terminer
+                <div class="pt-8 mt-4 border-t flex justify-between items-center">
+                    <a href="{{ route('marketing.dashboard') }}" class="text-gray-500 hover:text-gray-700 underline font-medium">Sauvegarder et quitter</a>
+                    
+                    <button type="submit" class="px-8 py-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2">
+                        <span>Enregistrer les ajouts et Terminer</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                     </button>
                 </div>
             </form>
+
+            {{-- FORMULAIRES DE SUPPRESSION (INVISIBLES) --}}
+            @foreach($resortActivities as $act)
+                <form id="delete-form-{{ $act->numactivite }}" action="{{ route('resort.activity.destroy', ['id' => $resort->numresort, 'activityId' => $act->numactivite]) }}" method="POST" class="hidden">
+                    @csrf
+                    @method('DELETE')
+                </form>
+            @endforeach
+
         </div>
     </main>
 
     <script>
-        // FILTRE JS
         function filterActivities() {
             const input = document.getElementById('searchActivity');
             const filter = input.value.toLowerCase();
@@ -117,14 +175,12 @@
             }
         }
 
-        // GESTION AJOUT LIGNES
         let newCount = 0;
         function addNewRow() {
             document.getElementById('emptyState').style.display = 'none';
             const container = document.getElementById('newActivitiesBody');
             
-            // On prépare les options du select TYPE
-            let typeOptions = '<option value="">-- Choisir --</option>';
+            let typeOptions = '<option value="">-- Type --</option>';
             @foreach($typesActivites as $t)
                 typeOptions += `<option value="{{ $t->numtypeactivite }}">{{ $t->nomtypeactivite }}</option>`;
             @endforeach
@@ -137,7 +193,13 @@
                         </select>
                     </td>
                     <td class="p-2">
-                        <input type="text" name="new_activities[${newCount}][nom]" class="w-full rounded border-gray-300 text-sm" placeholder="Ex: Yoga Plage" required>
+                        <input type="text" name="new_activities[${newCount}][nom]" class="w-full rounded border-gray-300 text-sm" placeholder="Ex: Cours de Salsa" required>
+                    </td>
+                    <td class="p-2">
+                        <select name="new_activities[${newCount}][inclus]" class="w-full rounded border-gray-300 text-sm font-bold text-gray-700">
+                            <option value="1" selected>✅ Inclus</option>
+                            <option value="0">💰 À la carte</option>
+                        </select>
                     </td>
                     <td class="p-2">
                         <input type="text" name="new_activities[${newCount}][description]" class="w-full rounded border-gray-300 text-sm" placeholder="Optionnel">

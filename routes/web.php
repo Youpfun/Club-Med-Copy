@@ -64,17 +64,30 @@ Route::middleware(['auth', 'marketing'])->prefix('marketing')->group(function ()
     Route::get('/dashboard', [MarketingController::class, 'index'])->name('marketing.dashboard');
     
     // --- ÉTAPES CRÉATION SÉJOUR ---
-    // Étape 1 : Structure (Resort, Photos, Restos)
+    
+    // Étape 1 : Structure (Création)
     Route::get('/resorts/create', [ResortController::class, 'create'])->name('resort.create');
     Route::post('/resorts', [ResortController::class, 'store'])->name('resort.store');
 
-    // Étape 2 : Hébergements (Chambres, Prix)
+    // Étape 1 : Modification (Revenir sur la structure existante)
+    Route::get('/resort/{id}/edit-structure', [ResortController::class, 'editStructure'])->name('resort.editStructure');
+    Route::put('/resort/{id}/structure', [ResortController::class, 'updateStructure'])->name('resort.updateStructure');
+
+    // Étape 2 : Hébergements (Chambres, Capacités)
     Route::get('/resort/{id}/accommodation', [ResortController::class, 'createAccommodation'])->name('resort.step2');
     Route::post('/resort/{id}/accommodation', [ResortController::class, 'storeAccommodation'])->name('resort.storeStep2');
 
     // Étape 3 : Activités
     Route::get('/resort/{id}/activities', [ResortController::class, 'createActivities'])->name('resort.step3');
     Route::post('/resort/{id}/activities', [ResortController::class, 'storeActivities'])->name('resort.storeStep3');
+    Route::delete('/resort/{id}/activity/{activityId}', [ResortController::class, 'destroyActivity'])->name('resort.activity.destroy');
+
+    // Étape 4 : Tarification Saisonnière (NOUVEAU)
+    Route::get('/resort/{id}/pricing', [ResortController::class, 'createPricing'])->name('resort.step4');
+    Route::post('/resort/{id}/pricing', [ResortController::class, 'storePricing'])->name('resort.storeStep4');
+
+    // Validation Finale (Directeur)
+    Route::post('/resort/{id}/validate', [MarketingController::class, 'validateResort'])->name('marketing.resort.validate');
 
     // --- AUTRES ROUTES MARKETING ---
     Route::post('/update-price', [MarketingController::class, 'updatePrice'])->name('marketing.update_price');
