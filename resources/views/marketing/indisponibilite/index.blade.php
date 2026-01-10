@@ -94,5 +94,8 @@
             </div>
         </div>
     </main>
+
+    {{-- Chatbot BotMan --}}
+    @include('layouts.chatbot')
 </body>
 </html>

@@ -68,5 +68,7 @@
     </div>
 </div>
 
+{{-- Chatbot BotMan --}}
+@include('layouts.chatbot')
 </body>
 </html>

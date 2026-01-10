@@ -141,5 +141,7 @@
         <span style="margin-left: 10px;">Total : <strong>{{ count($users) }}</strong> enregistrements.</span>
     </div>
 
+    {{-- Chatbot BotMan --}}
+    @include('layouts.chatbot')
 </body>
 </html>

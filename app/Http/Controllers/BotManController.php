@@ -8,91 +8,317 @@ use BotMan\BotMan\Messages\Outgoing\Question;
 use BotMan\BotMan\Messages\Outgoing\Actions\Button;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Reservation;
 
 class BotManController extends Controller
 {
+    private function makeLinks($links) {
+        $html = '<div style="margin-top:10px;">';
+        foreach ($links as $text => $url) {
+            $html .= '<a href="'.$url.'" target="_top" style="display:inline-block;margin:4px;padding:8px 14px;background:#00457C;color:white;border-radius:20px;text-decoration:none;font-size:13px;">'.$text.'</a>';
+        }
+        $html .= '</div>';
+        return $html;
+    }
+
+    private function getUser() {
+        return Auth::user();
+    }
+
+    private function isLoggedIn(): bool {
+        return Auth::check();
+    }
+
+    private function getGreeting(): string {
+        $user = $this->getUser();
+        if ($user) {
+            return "Bonjour {$user->name} !";
+        }
+        return "Bonjour !";
+    }
+
     public function handle()
     {
         $botman = app('botman');
 
-        // Salutations
         $botman->hears('(bonjour|salut|hello|hey|coucou|bonsoir)', function (BotMan $bot) {
-            $bot->reply("Bonjour et bienvenue au Club Med ! 🌴 Je suis votre assistant virtuel. Comment puis-je vous aider ? Vous pouvez me poser des questions sur nos resorts, les activités, les réservations ou les formules tout compris.");
+            if ($this->isLoggedIn()) {
+                $links = $this->makeLinks([
+                    'Voir les resorts' => '/resorts',
+                    'Mes reservations' => '/mes-reservations',
+                    'Mon profil' => '/user/profile',
+                ]);
+                $bot->reply($this->getGreeting() . " Comment puis-je vous aider ?\n\nTapez : <b>aide</b>, resorts, reserver, probleme..." . $links);
+            } else {
+                $links = $this->makeLinks([
+                    'Voir les resorts' => '/resorts',
+                    'Se connecter' => '/login',
+                    'S\'inscrire' => '/inscription',
+                ]);
+                $bot->reply($this->getGreeting() . " Comment puis-je vous aider ?\n\nTapez : <b>aide</b>, resorts, reserver, probleme..." . $links);
+            }
         });
 
-        // Questions sur le concept Club Med / All Inclusive
-        $botman->hears('(tout compris|all inclusive|formule|inclus|comprend)', function (BotMan $bot) {
-            $bot->reply("La formule tout compris Club Med, c'est la liberté absolue ! ✨ Elle inclut :\n• L'hébergement en chambre confortable\n• La pension complète (petit-déjeuner, déjeuner, dîner + snacks)\n• Open bar (boissons à volonté)\n• Plus de 60 activités sportives et loisirs\n• Clubs enfants (de 4 mois à 17 ans)\n• Soirées et spectacles\n\nLe tout sans supplément !");
+        $botman->hears('(menu|aide|help|assistance)', function (BotMan $bot) {
+            if ($this->isLoggedIn()) {
+                $links = $this->makeLinks([
+                    'Resorts' => '/resorts',
+                    'Mes reservations' => '/mes-reservations',
+                    'Mon panier' => '/panier',
+                    'Mon profil' => '/user/profile',
+                ]);
+                $bot->reply($this->getGreeting() . " Je peux vous aider avec :\n- <b>resorts</b> - Decouvrir les destinations\n- <b>reserver</b> - Faire une reservation\n- <b>probleme</b> - Support technique\n- <b>mon compte</b> - Gerer votre profil" . $links);
+            } else {
+                $links = $this->makeLinks([
+                    'Resorts' => '/resorts',
+                    'Se connecter' => '/login',
+                    'S\'inscrire' => '/inscription',
+                ]);
+                $bot->reply("Bonjour ! Je peux vous aider avec :\n- <b>resorts</b> - Decouvrir les destinations\n- <b>reserver</b> - Faire une reservation\n- <b>probleme</b> - Support technique\n- <b>connexion</b> - Se connecter" . $links);
+            }
         });
 
-        // Questions sur les resorts / destinations
+        $botman->hears('(problème|probleme|souci|bug|erreur|marche pas|fonctionne pas|ça marche pas|ca marche pas)', function (BotMan $bot) {
+            $bot->reply("<b>Support technique</b>\n\nQuel type de probleme rencontrez-vous ?\n\nTapez :\n- <b>connexion</b> - Probleme de connexion/mot de passe\n- <b>paiement</b> - Erreur de paiement\n- <b>reservation</b> - Probleme avec une reservation\n- <b>site</b> - Probleme d'affichage/navigation\n\nOu decrivez votre probleme en detail.");
+        });
+
+        $botman->hears('(mot de passe|password|mdp|oublié mot|connexion impossible|pas connecter|login impossible|identifiant|authentification|me connecter)', function (BotMan $bot) {
+            if ($this->isLoggedIn()) {
+                $user = $this->getUser();
+                $links = $this->makeLinks([
+                    'Mon profil' => '/user/profile',
+                ]);
+                $bot->reply("Vous etes connecte(e) en tant que <b>{$user->name}</b> !\n\nPour modifier votre mot de passe, accedez a votre profil." . $links);
+            } else {
+                $links = $this->makeLinks([
+                    'Se connecter' => '/login',
+                    'Creer un compte' => '/inscription',
+                ]);
+                $bot->reply("<b>Probleme de connexion ?</b>\n\n1. Allez sur 'Se connecter'\n2. Cliquez sur 'Mot de passe oublie'\n3. Entrez votre email\n4. Verifiez vos spams\n\nSi vous n'avez pas de compte, creez-en un !" . $links);
+            }
+        });
+
+        $botman->hears('(paiement|payment|carte|bancaire|refusé|refusee|transaction|stripe|payer impossible|erreur paiement|carte refusée)', function (BotMan $bot) {
+            $links = $this->makeLinks([
+                'Mon panier' => '/panier',
+                'Resorts' => '/resorts',
+            ]);
+            $bot->reply("<b>Probleme de paiement ?</b>\n\nVerifiez :\n- Numero de carte correct (16 chiffres)\n- Date d'expiration valide\n- Code CVV (3 chiffres au dos)\n- Fonds suffisants\n\nEssayez une autre carte si le probleme persiste." . $links);
+        });
+
+        $botman->hears('(problème réservation|reservation probleme|annuler réservation|modifier réservation|reservation impossible|pas réservé)', function (BotMan $bot) {
+            if ($this->isLoggedIn()) {
+                $user = $this->getUser();
+                $count = Reservation::where('user_id', $user->id)->count();
+                $links = $this->makeLinks([
+                    'Mes reservations' => '/mes-reservations',
+                    'Nouvelle reservation' => '/resorts',
+                ]);
+                $bot->reply("<b>Vos reservations</b>\n\nVous avez <b>{$count}</b> reservation(s).\n\nConsultez 'Mes reservations' pour :\n- Voir les details\n- Modifier\n- Annuler" . $links);
+            } else {
+                $links = $this->makeLinks([
+                    'Se connecter' => '/login',
+                ]);
+                $bot->reply("Pour gerer vos reservations, vous devez etre connecte(e)." . $links);
+            }
+        });
+
+        $botman->hears('(site|affichage|page|chargement|lent|bloque|bloqué)', function (BotMan $bot) {
+            $links = $this->makeLinks([
+                'Accueil' => '/',
+                'Resorts' => '/resorts',
+            ]);
+            $bot->reply("<b>Probleme d'affichage ?</b>\n\n1. Actualisez la page (F5)\n2. Videz le cache du navigateur\n3. Essayez un autre navigateur\n4. Desactivez les bloqueurs de pub" . $links);
+        });
+
+        $botman->hears('(mon compte|profil|mes infos|modifier email|mes données|mon profil)', function (BotMan $bot) {
+            if ($this->isLoggedIn()) {
+                $user = $this->getUser();
+                $links = $this->makeLinks([
+                    'Mon profil' => '/user/profile',
+                    'Mes reservations' => '/mes-reservations',
+                    'Mon panier' => '/panier',
+                ]);
+                $bot->reply("<b>Votre compte</b>\n\n- Nom : {$user->name}\n- Email : {$user->email}\n\nAccedez a votre profil pour modifier vos informations." . $links);
+            } else {
+                $links = $this->makeLinks([
+                    'Se connecter' => '/login',
+                    'Creer un compte' => '/inscription',
+                ]);
+                $bot->reply("Vous n'etes pas connecte(e).\n\nConnectez-vous pour acceder a votre compte et vos reservations." . $links);
+            }
+        });
+
+        $botman->hears('(mes réservations|mes reservations|ma réservation|suivi|historique réservation)', function (BotMan $bot) {
+            if ($this->isLoggedIn()) {
+                $user = $this->getUser();
+                $reservations = Reservation::where('user_id', $user->id)->latest()->take(3)->get();
+                $count = Reservation::where('user_id', $user->id)->count();
+                
+                $links = $this->makeLinks([
+                    'Voir tout' => '/mes-reservations',
+                    'Nouvelle reservation' => '/resorts',
+                ]);
+                
+                if ($count > 0) {
+                    $bot->reply("<b>Vos reservations</b>\n\nVous avez <b>{$count}</b> reservation(s).\nConsultez la page pour les details." . $links);
+                } else {
+                    $bot->reply("Vous n'avez aucune reservation.\n\nDecouvrez nos resorts et reservez votre prochain sejour !" . $links);
+                }
+            } else {
+                $links = $this->makeLinks([
+                    'Se connecter' => '/login',
+                ]);
+                $bot->reply("Connectez-vous pour voir vos reservations." . $links);
+            }
+        });
+
         $botman->hears('(resort|resorts|destination|destinations|village|villages|où partir|ou partir)', function (BotMan $bot) {
-            $bot->reply("Club Med vous propose près de 80 resorts d'exception dans le monde entier ! 🌍\n• Soleil & Plage : Caraïbes, Maldives, Méditerranée...\n• Montagne & Ski : Alpes françaises, Suisse, Japon...\n• Exclusive Collection : nos resorts 5 Tridents de luxe\n\n👉 <a href='/resorts'>Découvrez tous nos resorts</a>");
+            $links = $this->makeLinks([
+                'Voir tous les resorts' => '/resorts',
+            ]);
+            $bot->reply("<b>Nos resorts</b>\n\n80 destinations dans le monde : plage, montagne, luxe..." . $links);
         });
 
-        // Questions sur les réservations
-        $botman->hears('(réserver|réservation|réservations|booking|comment réserver)', function (BotMan $bot) {
-            $bot->reply("Réserver votre séjour Club Med est simple ! 🎯\n\n1️⃣ Choisissez votre resort sur notre site\n2️⃣ Sélectionnez vos dates et votre type de chambre\n3️⃣ Indiquez le nombre de participants (adultes/enfants)\n4️⃣ Personnalisez avec des activités optionnelles\n5️⃣ Procédez au paiement sécurisé\n\n👉 <a href='/resorts'>Commencer ma réservation</a>");
+        $botman->hears('(réserver|réservation|booking|comment réserver|reserver)', function (BotMan $bot) {
+            if ($this->isLoggedIn()) {
+                $links = $this->makeLinks([
+                    'Choisir un resort' => '/resorts',
+                    'Mon panier' => '/panier',
+                ]);
+                $bot->reply("<b>Reserver un sejour</b>\n\n1. Choisissez un resort\n2. Selectionnez vos dates\n3. Ajoutez au panier\n4. Payez en ligne" . $links);
+            } else {
+                $links = $this->makeLinks([
+                    'Voir les resorts' => '/resorts',
+                    'Se connecter' => '/login',
+                ]);
+                $bot->reply("<b>Reserver un sejour</b>\n\nConnectez-vous d'abord, puis :\n1. Choisissez un resort\n2. Selectionnez vos dates\n3. Payez en ligne" . $links);
+            }
         });
 
-        // Questions sur les activités
-        $botman->hears('(activité|activités|sport|sports|loisir|loisirs|faire)', function (BotMan $bot) {
-            $bot->reply("Au Club Med, les activités sont incluses et encadrées par nos G.O® ! 🏄‍♂️\n\n• Sports nautiques : voile, plongée, ski nautique, paddle...\n• Fitness & Bien-être : yoga, aquagym, spa...\n• Sports terrestres : tennis, golf, tir à l'arc...\n• En montagne : ski, snowboard, cours collectifs...\n• Pour les enfants : clubs par âge, cirque, activités créatives...\n\nChaque resort a ses spécialités !");
+        $botman->hears('(activité|activités|sport|sports|loisir|loisirs|faire|activites)', function (BotMan $bot) {
+            $links = $this->makeLinks([
+                'Voir les resorts' => '/resorts',
+            ]);
+            $bot->reply("<b>60+ activites incluses !</b>\n\nSports nautiques, tennis, ski, yoga, spa, golf..." . $links);
         });
 
-        // Questions sur les enfants / famille
         $botman->hears('(enfant|enfants|famille|bébé|kids|club enfant|mini club|ado)', function (BotMan $bot) {
-            $bot->reply("Club Med est le paradis des familles ! 👨‍👩‍👧‍👦\n\nNos clubs par âge (inclus dans le séjour) :\n• Petit Club Med® : 2-3 ans\n• Mini Club Med® : 4-10 ans\n• Club Med Passworld® : 11-17 ans\n\n🍼 Baby Club Med® (4-23 mois) disponible en supplément dans certains resorts.\n\nActivités adaptées, repas équilibrés et G.O® qualifiés pour des vacances sereines !");
+            $links = $this->makeLinks([
+                'Resorts famille' => '/resorts',
+            ]);
+            $bot->reply("<b>Clubs enfants inclus</b>\n\n- 2-3 ans : Petit Club\n- 4-10 ans : Mini Club\n- 11-17 ans : Passworld" . $links);
         });
 
-        // Questions sur les prix / tarifs
-        $botman->hears('(prix|tarif|tarifs|coût|combien|cher|budget|payer)', function (BotMan $bot) {
-            $bot->reply("Nos tarifs varient selon le resort, la saison et le type de chambre. 💰\n\nCe qui est TOUJOURS inclus :\n✅ Hébergement + Pension complète\n✅ Open bar\n✅ 60+ activités\n✅ Clubs enfants (2-17 ans)\n✅ Spectacles & soirées\n\n💡 Astuce : réservez tôt pour bénéficier des meilleurs tarifs !\n\n👉 Consultez les prix sur la fiche de chaque resort.");
+        $botman->hears('(prix|tarif|tarifs|coût|combien|cher|budget)', function (BotMan $bot) {
+            $links = $this->makeLinks([
+                'Voir les tarifs' => '/resorts',
+            ]);
+            $bot->reply("<b>Formule tout inclus</b>\n\nHebergement + repas + open bar + 60 activites !" . $links);
         });
 
-        // Questions sur l'annulation / modification
-        $botman->hears('(annuler|annulation|modifier|modification|rembours|flexible)', function (BotMan $bot) {
-            $bot->reply("Nous comprenons que vos plans peuvent changer. 📋\n\nConditions générales :\n• Modification possible selon disponibilité\n• Annulation avec remboursement partiel selon délai\n• Assurance annulation recommandée à la réservation\n\n💡 Consultez nos conditions de vente ou contactez notre service client pour votre situation spécifique.");
+        $botman->hears('(tout compris|all inclusive|formule|inclus|comprend)', function (BotMan $bot) {
+            $links = $this->makeLinks([
+                'Reserver' => '/resorts',
+                'Guide' => '/guide',
+            ]);
+            $bot->reply("<b>Tout est compris !</b>\n\n- Hebergement\n- Repas & open bar\n- 60+ activites\n- Clubs enfants" . $links);
         });
 
-        // Questions sur le ski / montagne
         $botman->hears('(ski|montagne|neige|alpes|hiver|snowboard|piste)', function (BotMan $bot) {
-            $bot->reply("Vivez la montagne version Club Med ! ⛷️🏔️\n\nInclus dans votre séjour ski :\n• Forfait remontées mécaniques\n• Cours collectifs de ski/snowboard (tous niveaux)\n• Matériel de ski (dans la plupart des resorts)\n• Après-ski festif !\n\nNos resorts : Val Thorens, Tignes, La Rosière, Valmorel, Arcs Extrême...\n\n👉 <a href='/resorts'>Voir nos resorts de montagne</a>");
+            $links = $this->makeLinks([
+                'Resorts montagne' => '/resorts',
+            ]);
+            $bot->reply("<b>Ski tout inclus</b>\n\nForfait + cours + materiel inclus !" . $links);
         });
 
-        // Questions sur la plage / mer / soleil
-        $botman->hears('(plage|mer|soleil|tropical|caraïbes|maldives|île|océan|bronzer)', function (BotMan $bot) {
-            $bot->reply("Cap sur le soleil avec Club Med ! ☀️🏝️\n\nNos destinations soleil :\n• Caraïbes : Punta Cana, Martinique, Guadeloupe...\n• Océan Indien : Maldives, Maurice, Seychelles...\n• Méditerranée : Grèce, Turquie, Sicile...\n• Asie : Bali, Thaïlande...\n\nPlages de rêve, eaux turquoise et cocotiers vous attendent !\n\n👉 <a href='/resorts'>Explorer nos resorts balnéaires</a>");
+        $botman->hears('(plage|mer|soleil|tropical|caraïbes|maldives|île|océan)', function (BotMan $bot) {
+            $links = $this->makeLinks([
+                'Resorts soleil' => '/resorts',
+            ]);
+            $bot->reply("<b>Destinations soleil</b>\n\nCaraibes, Maldives, Mediterranee..." . $links);
         });
 
-        // Questions sur les G.O / personnel
+        $botman->hears('(connexion|connecter|inscription|inscrire|login|register|créer compte)', function (BotMan $bot) {
+            if ($this->isLoggedIn()) {
+                $user = $this->getUser();
+                $links = $this->makeLinks([
+                    'Mon profil' => '/user/profile',
+                    'Se deconnecter' => '/logout',
+                ]);
+                $bot->reply("Vous etes connecte(e) en tant que <b>{$user->name}</b>" . $links);
+            } else {
+                $links = $this->makeLinks([
+                    'Se connecter' => '/login',
+                    'Creer un compte' => '/inscription',
+                ]);
+                $bot->reply("<b>Accedez a votre espace</b>\n\nConnectez-vous ou creez un compte pour reserver." . $links);
+            }
+        });
+
+        $botman->hears('(panier|cart|commande|achats)', function (BotMan $bot) {
+            $links = $this->makeLinks([
+                'Voir mon panier' => '/panier',
+                'Ajouter un sejour' => '/resorts',
+            ]);
+            $bot->reply("<b>Votre panier</b>\n\nConsultez votre panier pour finaliser votre commande." . $links);
+        });
+
+        $botman->hears('(contact|contacter|téléphone|appeler|email|humain|conseiller)', function (BotMan $bot) {
+            $links = $this->makeLinks([
+                'Guide' => '/guide',
+                'Accueil' => '/',
+            ]);
+            $bot->reply("<b>Nous contacter</b>\n\n0810 810 810 (lun-sam 9h-19h)\nOu utilisez ce chatbot pour une aide rapide !" . $links);
+        });
+
         $botman->hears('(G\\.?O|gentil organisateur|animateur|staff|équipe)', function (BotMan $bot) {
-            $bot->reply("Les G.O® (Gentils Organisateurs) sont l'âme du Club Med ! 💫\n\nVenus du monde entier, ils sont :\n• Moniteurs sportifs diplômés\n• Animateurs des clubs enfants\n• Artistes des spectacles du soir\n• Toujours disponibles et souriants\n\nIls partagent leurs repas avec vous et créent cette ambiance unique Club Med !");
+            $bot->reply("<b>Les G.O</b>\n\nGentils Organisateurs : moniteurs et animateurs Club Med qui font vivre l'esprit Club Med !");
         });
 
-        // Contact / aide
-        $botman->hears('(contact|contacter|téléphone|appeler|email|aide|humain|conseiller)', function (BotMan $bot) {
-            $bot->reply("Notre équipe est à votre écoute ! 📞\n\n☎️ 0810 810 810 (service 0,05€/min + prix appel)\n📅 Du lundi au samedi : 9h-19h\n\nOu posez-moi directement vos questions, je ferai de mon mieux pour vous aider !");
-        });
-
-        // Remerciements
-        $botman->hears('(merci|thanks|parfait|super|génial|top)', function (BotMan $bot) {
-            $bot->reply("Avec plaisir ! 😊 N'hésitez pas si vous avez d'autres questions. Je vous souhaite de merveilleuses vacances Club Med ! 🌴✨");
-        });
-
-        // Au revoir
-        $botman->hears('(au revoir|bye|à bientôt|ciao)', function (BotMan $bot) {
-            $bot->reply("Au revoir et à très bientôt au Club Med ! 👋🌴 Bonnes vacances !");
-        });
-
-        // Great Members / fidélité
         $botman->hears('(great members|fidélité|membre|avantage|points|statut)', function (BotMan $bot) {
-            $bot->reply("Découvrez Great Members, notre programme de fidélité ! 🌟\n\nPlus vous voyagez, plus vous gagnez :\n• Turquoise → Argent → Or → Platine\n• Réductions exclusives\n• Surclassements selon disponibilité\n• Cadeaux de bienvenue\n• Accès prioritaire aux nouveautés\n\nChaque séjour vous rapproche du niveau supérieur !");
+            $links = $this->makeLinks([
+                'Mon compte' => '/user/profile',
+            ]);
+            $bot->reply("<b>Great Members</b>\n\nProgramme de fidelite avec avantages exclusifs !" . $links);
         });
 
-        // Réponse par défaut - utilise l'IA Mistral
-        $botman->fallback(function (BotMan $bot, $message) {
+        $botman->hears('(annuler|annulation|modifier|modification|rembours|flexible)', function (BotMan $bot) {
+            if ($this->isLoggedIn()) {
+                $links = $this->makeLinks([
+                    'Mes reservations' => '/mes-reservations',
+                ]);
+                $bot->reply("<b>Modifier/Annuler</b>\n\nAccedez a vos reservations pour modifier ou annuler selon les conditions." . $links);
+            } else {
+                $links = $this->makeLinks([
+                    'Se connecter' => '/login',
+                ]);
+                $bot->reply("Connectez-vous pour gerer vos reservations." . $links);
+            }
+        });
+
+        $botman->hears('(merci|thanks|parfait|super|génial|top|excellent)', function (BotMan $bot) {
+            $links = $this->makeLinks([
+                'Accueil' => '/',
+                'Resorts' => '/resorts',
+            ]);
+            $bot->reply("Avec plaisir ! Bonnes vacances au Club Med !" . $links);
+        });
+
+        $botman->hears('(au revoir|bye|à bientôt|ciao|adieu)', function (BotMan $bot) {
+            $bot->reply("A bientot au Club Med !");
+        });
+
+        $botman->fallback(function (BotMan $bot) {
+            $message = $bot->getMessage()->getText();
+            $user = $this->getUser();
+            
             $bot->typesAndWaits(1);
+
+            $userContext = $user 
+                ? "L'utilisateur s'appelle {$user->name} et est connecte." 
+                : "L'utilisateur n'est pas connecte.";
 
             try {
                 $response = Http::withoutVerifying()
@@ -104,27 +330,59 @@ class BotManController extends Controller
                         "messages" => [
                             [
                                 "role" => "system",
-                                "content" => "Tu es l'assistant virtuel du Club Med, le pionnier des vacances tout compris depuis 1950. Tu dois répondre de manière chaleureuse, professionnelle et concise aux questions des clients. Tu connais les resorts Club Med dans le monde entier, les formules tout inclus (hébergement, pension complète, open bar, activités, clubs enfants), les G.O® (Gentils Organisateurs), et le programme de fidélité Great Members. Réponds toujours en français et de façon positive."
+                                "content" => "Tu es l'assistant support du site Club Med (projet etudiant). {$userContext} 
+                                Reponds en 1-2 phrases courtes MAX. 
+                                N'invente JAMAIS de numero de telephone, email ou site web.
+                                Si c'est un probleme technique, guide l'utilisateur avec des mots-cles : connexion, paiement, reservation, aide.
+                                Sinon, suggere des mots-cles : resorts, reserver, activites, prix, enfants, ski, plage."
                             ],
                             [
                                 "role" => "user", 
                                 "content" => $message
                             ]
-                        ]
+                        ],
+                        "max_tokens" => 80
                     ]);
 
                 if ($response->successful()) {
                     $texteIA = $response->json()['choices'][0]['message']['content'];
-                    $bot->reply($texteIA);
+                    
+                    if ($this->isLoggedIn()) {
+                        $links = $this->makeLinks([
+                            'Resorts' => '/resorts',
+                            'Mes reservations' => '/mes-reservations',
+                        ]);
+                    } else {
+                        $links = $this->makeLinks([
+                            'Resorts' => '/resorts',
+                            'Connexion' => '/login',
+                        ]);
+                    }
+                    $bot->reply($texteIA . $links);
                 } else {
-                    $bot->reply("Je n'ai pas bien compris votre demande. 🤔\n\nVoici ce que je peux faire pour vous :\n• Infos sur nos **resorts** et destinations\n• Détails sur la formule **tout compris**\n• Questions sur les **activités**\n• Aide pour votre **réservation**\n• Infos sur les **clubs enfants**\n\nEssayez avec des mots-clés comme : resort, activités, prix, ski, plage, enfants...");
+                    $this->sendFallbackMessage($bot);
                 }
 
             } catch (\Exception $e) {
-                $bot->reply("Je n'ai pas bien compris votre demande. 🤔\n\nVoici ce que je peux faire pour vous :\n• Infos sur nos **resorts** et destinations\n• Détails sur la formule **tout compris**\n• Questions sur les **activités**\n• Aide pour votre **réservation**\n• Infos sur les **clubs enfants**\n\nEssayez avec des mots-clés comme : resort, activités, prix, ski, plage, enfants...");
+                $this->sendFallbackMessage($bot);
             }
         });
 
         $botman->listen();
+    }
+
+    private function sendFallbackMessage(BotMan $bot) {
+        if ($this->isLoggedIn()) {
+            $links = $this->makeLinks([
+                'Resorts' => '/resorts',
+                'Mes reservations' => '/mes-reservations',
+            ]);
+        } else {
+            $links = $this->makeLinks([
+                'Resorts' => '/resorts',
+                'Connexion' => '/login',
+            ]);
+        }
+        $bot->reply("Je peux vous aider avec : <b>aide</b>, resorts, reserver, probleme, mon compte..." . $links);
     }
 }

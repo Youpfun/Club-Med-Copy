@@ -20,5 +20,8 @@
         <p>Votre réponse a été enregistrée.</p>
     @endif
 </div>
+
+{{-- Chatbot BotMan --}}
+@include('layouts.chatbot')
 </body>
 </html>

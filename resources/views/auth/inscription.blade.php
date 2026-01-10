@@ -208,5 +208,7 @@
     });
 </script>
 
+{{-- Chatbot BotMan --}}
+@include('layouts.chatbot')
 </body>
 </html>

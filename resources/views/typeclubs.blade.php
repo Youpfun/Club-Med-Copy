@@ -19,5 +19,8 @@
                     }}</strong></td>
                 </tr> @endforeach </tbody> </table> <br> <a href="{{ url('/') }}">Retour à 
     l'accueil</a>
+
+{{-- Chatbot BotMan --}}
+@include('layouts.chatbot')
 </body>
 </html>

@@ -45,5 +45,8 @@
         </div>
     </form>
 </div>
+
+{{-- Chatbot BotMan --}}
+@include('layouts.chatbot')
 </body>
 </html>
