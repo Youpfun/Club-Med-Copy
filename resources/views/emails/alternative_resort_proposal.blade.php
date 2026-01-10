@@ -39,10 +39,10 @@
                 </p>
             </div>
 
-            @if($message)
+            @if($customMessage)
                 <div class="info-box">
                     <h3 style="margin-top: 0;">💬 Message de notre équipe</h3>
-                    <p style="margin-bottom: 0;">{!! nl2br(e($message)) !!}</p>
+                    <p style="margin-bottom: 0;">{!! nl2br(e($customMessage)) !!}</p>
                 </div>
             @endif
 

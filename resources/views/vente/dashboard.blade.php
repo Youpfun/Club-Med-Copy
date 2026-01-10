@@ -175,12 +175,12 @@
         </div>
         @endif
 
-        {{-- Activités en attente de réponse partenaire (plus de 48h) --}}
+        {{-- Activités en attente de réponse partenaire --}}
         @if(isset($reservationsActivitiesPending) && $reservationsActivitiesPending->isNotEmpty())
         <div class="bg-white rounded-lg shadow mb-12 border-l-4 border-purple-500">
             <div class="border-b p-6 bg-purple-50">
-                <h2 class="text-2xl font-bold font-serif text-purple-800">Activités Sans Réponse Partenaire (+48h)</h2>
-                <p class="text-purple-600 text-sm mt-1">Ces activités n'ont pas reçu de confirmation du partenaire depuis plus de 48 heures. Vous pouvez les annuler et rembourser le client.</p>
+                <h2 class="text-2xl font-bold font-serif text-purple-800">Activités Sans Réponse Partenaire</h2>
+                <p class="text-purple-600 text-sm mt-1">Ces activités n'ont pas reçu de confirmation du partenaire. Vous pouvez les annuler et rembourser le client.</p>
             </div>
 
             <div class="overflow-x-auto">

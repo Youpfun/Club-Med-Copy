@@ -16,15 +16,15 @@ class AlternativeResortProposalMail extends Mailable
     public $originalResort;
     public $alternativeResort;
     public $tokenLink;
-    public $message;
+    public $customMessage;
 
-    public function __construct(Reservation $reservation, Resort $originalResort, Resort $alternativeResort, $tokenLink, $message = null)
+    public function __construct(Reservation $reservation, Resort $originalResort, Resort $alternativeResort, $tokenLink, $customMessage = null)
     {
         $this->reservation = $reservation;
         $this->originalResort = $originalResort;
         $this->alternativeResort = $alternativeResort;
         $this->tokenLink = $tokenLink;
-        $this->message = $message;
+        $this->customMessage = $customMessage;
     }
 
     public function build()
@@ -36,7 +36,7 @@ class AlternativeResortProposalMail extends Mailable
                 'originalResort' => $this->originalResort,
                 'alternativeResort' => $this->alternativeResort,
                 'tokenLink' => $this->tokenLink,
-                'message' => $this->message,
+                'customMessage' => $this->customMessage,
             ]);
     }
 }

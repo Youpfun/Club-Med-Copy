@@ -48,13 +48,12 @@ class VenteController extends Controller
             $reservation->activites_pending_count = $partenairesStatus->where('partenaire_validation_status', 'pending')->count();
         }
 
-        // Recuperer les reservations avec activites en attente de reponse partenaire (plus de 48h)
+        // Recuperer les reservations avec activites en attente de reponse partenaire
         $reservationsActivitiesPending = Reservation::with(['resort', 'user', 'activites.activite'])
             ->whereIn('statut', ['en_attente', 'payee', 'Confirmée'])
             ->whereHas('activites', function($q) {
                 $q->whereNotNull('numpartenaire')
-                  ->where('partenaire_validation_status', 'pending')
-                  ->where('created_at', '<', now()->subHours(48));
+                  ->where('partenaire_validation_status', 'pending');
             })
             ->orderBy('datedebut', 'asc')
             ->get();
@@ -66,7 +65,6 @@ class VenteController extends Controller
                 ->where('reservation_activite.numreservation', $reservation->numreservation)
                 ->whereNotNull('reservation_activite.numpartenaire')
                 ->where('reservation_activite.partenaire_validation_status', 'pending')
-                ->where('reservation_activite.created_at', '<', now()->subHours(48))
                 ->select(
                     'reservation_activite.*',
                     'activite.nomactivite',
@@ -420,6 +418,19 @@ class VenteController extends Controller
             $newTotal = $reservation->prixtotal - $activityTotal;
             $reservation->update(['prixtotal' => max(0, $newTotal)]);
 
+            // Enregistrer le remboursement dans la table remboursement
+            \App\Models\Remboursement::create([
+                'numreservation' => $numreservation,
+                'user_id' => Auth::id(),
+                'montant' => $activityTotal,
+                'statut' => 'rembourse',
+                'raison' => 'Activité annulée par le service vente',
+                'notes' => "Activité annulée : " . ($activiteInfo->nomactivite ?? 'N/A'),
+                'methode_remboursement' => 'deduction_facture',
+                'date_demande' => now(),
+                'date_traitement' => now(),
+            ]);
+
             DB::commit();
 
             // Envoyer l'email au client
@@ -496,6 +507,20 @@ class VenteController extends Controller
             // Mettre à jour le prix total de la réservation
             $newTotal = $reservation->prixtotal - $totalActivities;
             $reservation->update(['prixtotal' => max(0, $newTotal)]);
+
+            // Enregistrer le remboursement dans la table remboursement
+            $activitesNames = collect($cancelledActivities)->pluck('nom')->implode(', ');
+            \App\Models\Remboursement::create([
+                'numreservation' => $numreservation,
+                'user_id' => Auth::id(),
+                'montant' => $totalActivities,
+                'statut' => 'rembourse',
+                'raison' => 'Toutes les activités annulées par le service vente',
+                'notes' => "Activités annulées : {$activitesNames}",
+                'methode_remboursement' => 'deduction_facture',
+                'date_demande' => now(),
+                'date_traitement' => now(),
+            ]);
 
             DB::commit();
 
@@ -587,6 +612,20 @@ class VenteController extends Controller
 
             $newTotal = $reservation->prixtotal - $totalRefund;
             $reservation->update(['prixtotal' => max(0, $newTotal)]);
+
+            // Enregistrer le remboursement dans la table remboursement
+            $activitesNames = collect($cancelledActivities)->pluck('nom')->implode(', ');
+            $remboursement = \App\Models\Remboursement::create([
+                'numreservation' => $numreservation,
+                'user_id' => Auth::id(),
+                'montant' => $totalRefund,
+                'statut' => 'rembourse',
+                'raison' => 'Activité(s) annulée(s) - Partenaire sans réponse',
+                'notes' => "Activités annulées : {$activitesNames}",
+                'methode_remboursement' => 'deduction_facture',
+                'date_demande' => now(),
+                'date_traitement' => now(),
+            ]);
 
             DB::commit();
 
