@@ -42,7 +42,8 @@ class BotManController extends Controller
     {
         $botman = app('botman');
 
-        $botman->hears('(bonjour|salut|hello|hey|coucou|bonsoir)', function (BotMan $bot) {
+        $botman->hears('(bonjour|bjr|salut|slt|hello|hey|hi|coucou|bonsoir|yo|wesh)', function (BotMan $bot) {
+            $bot->typesAndWaits(1);
             if ($this->isLoggedIn()) {
                 $links = $this->makeLinks([
                     'Voir les resorts' => '/resorts',
@@ -60,7 +61,8 @@ class BotManController extends Controller
             }
         });
 
-        $botman->hears('(menu|aide|help|assistance)', function (BotMan $bot) {
+        $botman->hears('(menu|aide|help|assistance|aidez|aider|besoin aide|soutien)', function (BotMan $bot) {
+            $bot->typesAndWaits(1);
             if ($this->isLoggedIn()) {
                 $links = $this->makeLinks([
                     'Resorts' => '/resorts',
@@ -79,11 +81,13 @@ class BotManController extends Controller
             }
         });
 
-        $botman->hears('(problème|probleme|souci|bug|erreur|marche pas|fonctionne pas|ça marche pas|ca marche pas)', function (BotMan $bot) {
+        $botman->hears('(problème|probleme|pb|souci|soucis|bug|erreur|marche pas|fonctionne pas|ça marche pas|ca marche pas|bloqué|bloque|planté)', function (BotMan $bot) {
+            $bot->typesAndWaits(1);
             $bot->reply("<b>Support technique</b>\n\nQuel type de probleme rencontrez-vous ?\n\nTapez :\n- <b>connexion</b> - Probleme de connexion/mot de passe\n- <b>paiement</b> - Erreur de paiement\n- <b>reservation</b> - Probleme avec une reservation\n- <b>site</b> - Probleme d'affichage/navigation\n\nOu decrivez votre probleme en detail.");
         });
 
-        $botman->hears('(mot de passe|password|mdp|oublié mot|connexion impossible|pas connecter|login impossible|identifiant|authentification|me connecter)', function (BotMan $bot) {
+        $botman->hears('(mot de passe|password|mdp|oublié mot|oublie mot|connexion impossible|pas connecter|login impossible|identifiant|authentification|me connecter|reset password|reinitialiser)', function (BotMan $bot) {
+            $bot->typesAndWaits(1);
             if ($this->isLoggedIn()) {
                 $user = $this->getUser();
                 $links = $this->makeLinks([
@@ -99,7 +103,7 @@ class BotManController extends Controller
             }
         });
 
-        $botman->hears('(paiement|payment|carte|bancaire|refusé|refusee|transaction|stripe|payer impossible|erreur paiement|carte refusée)', function (BotMan $bot) {
+        $botman->hears('(paiement|payment|carte|bancaire|refusé|refusee|refuse|transaction|stripe|payer impossible|erreur paiement|carte refusée|cb|visa|mastercard|paypal)', function (BotMan $bot) {
             $links = $this->makeLinks([
                 'Mon panier' => '/panier',
                 'Resorts' => '/resorts',
@@ -151,6 +155,7 @@ class BotManController extends Controller
         });
 
         $botman->hears('(mes réservations|mes reservations|ma réservation|suivi|historique réservation)', function (BotMan $bot) {
+            $bot->typesAndWaits(1);
             if ($this->isLoggedIn()) {
                 $user = $this->getUser();
                 $reservations = Reservation::where('user_id', $user->id)->latest()->take(3)->get();
@@ -174,14 +179,14 @@ class BotManController extends Controller
             }
         });
 
-        $botman->hears('(resort|resorts|destination|destinations|village|villages|où partir|ou partir)', function (BotMan $bot) {
+        $botman->hears('(resort|resorts|destination|destinations|village|villages|où partir|ou partir|vacances|sejour|séjour|voyage)', function (BotMan $bot) {
             $links = $this->makeLinks([
                 'Voir tous les resorts' => '/resorts',
             ]);
             $bot->reply("<b>Nos resorts</b>\n\n80 destinations dans le monde : plage, montagne, luxe..." . $links);
         });
 
-        $botman->hears('(réserver|réservation|booking|comment réserver|reserver)', function (BotMan $bot) {
+        $botman->hears('(réserver|réservation|reservation|booking|comment réserver|reserver|booker|book|dispo|disponibilité|disponibilite)', function (BotMan $bot) {
             if ($this->isLoggedIn()) {
                 $links = $this->makeLinks([
                     'Choisir un resort' => '/resorts',
@@ -197,25 +202,25 @@ class BotManController extends Controller
             }
         });
 
-        $botman->hears('(activité|activités|sport|sports|loisir|loisirs|faire|activites)', function (BotMan $bot) {
+        $botman->hears('(activité|activités|activite|sport|sports|loisir|loisirs|faire|activites|animation|animations|divertissement)', function (BotMan $bot) {
             $links = $this->makeLinks([
                 'Voir les resorts' => '/resorts',
             ]);
-            $bot->reply("<b>60+ activites incluses !</b>\n\nSports nautiques, tennis, ski, yoga, spa, golf..." . $links);
+            $bot->reply("<b>60+ activites incluses !</b>\n\n<b>Nautiques :</b> Voile, paddle, plongee, ski nautique\n<b>Terre :</b> Tennis, golf, tir a l'arc, VTT\n<b>Fitness :</b> Yoga, aquagym, musculation\n<b>Montagne :</b> Ski, snowboard, raquettes\n\nTous niveaux, cours collectifs inclus !" . $links);
         });
 
-        $botman->hears('(enfant|enfants|famille|bébé|kids|club enfant|mini club|ado)', function (BotMan $bot) {
+        $botman->hears('(enfant|enfants|famille|familial|bébé|bebe|baby|kids|club enfant|mini club|ado|adolescent|teen|garderie|creche)', function (BotMan $bot) {
             $links = $this->makeLinks([
                 'Resorts famille' => '/resorts',
             ]);
-            $bot->reply("<b>Clubs enfants inclus</b>\n\n- 2-3 ans : Petit Club\n- 4-10 ans : Mini Club\n- 11-17 ans : Passworld" . $links);
+            $bot->reply("<b>Clubs enfants inclus</b>\n\n- <b>4 mois-2 ans :</b> Baby Club (supplement)\n- <b>2-3 ans :</b> Petit Club Med\n- <b>4-10 ans :</b> Mini Club Med\n- <b>11-17 ans :</b> Club Med Passworld\n\nEncadrement professionnel toute la journee !" . $links);
         });
 
-        $botman->hears('(prix|tarif|tarifs|coût|combien|cher|budget)', function (BotMan $bot) {
+        $botman->hears('(prix|tarif|tarifs|coût|cout|combien|cher|budget|pas cher|promo|promotion|reduction|solde)', function (BotMan $bot) {
             $links = $this->makeLinks([
                 'Voir les tarifs' => '/resorts',
             ]);
-            $bot->reply("<b>Formule tout inclus</b>\n\nHebergement + repas + open bar + 60 activites !" . $links);
+            $bot->reply("<b>Formule tout inclus</b>\n\nA partir de <b>~800EUR/semaine</b> selon destination et saison.\n\n<b>Inclus :</b> Hebergement + repas + open bar + 60 activites + clubs enfants\n\nConsultez les resorts pour les tarifs exacts." . $links);
         });
 
         $botman->hears('(tout compris|all inclusive|formule|inclus|comprend)', function (BotMan $bot) {
@@ -298,7 +303,69 @@ class BotManController extends Controller
             }
         });
 
-        $botman->hears('(merci|thanks|parfait|super|génial|top|excellent)', function (BotMan $bot) {
+        // === NOUVEAUX SUJETS FAQ ===
+
+        $botman->hears('(assurance|assurances|garantie|annulation voyage|couverture|protege|protection)', function (BotMan $bot) {
+            $links = $this->makeLinks([
+                'Resorts' => '/resorts',
+            ]);
+            $bot->reply("<b>Assurance voyage</b>\n\nUne assurance annulation est proposee lors de la reservation.\n\nElle couvre : maladie, accident, deces d'un proche, licenciement.\n\nConsultez les conditions lors du paiement." . $links);
+        });
+
+        $botman->hears('(transfert|navette|aeroport|transport|arrivee|depart|avion|vol)', function (BotMan $bot) {
+            $links = $this->makeLinks([
+                'Resorts' => '/resorts',
+            ]);
+            $bot->reply("<b>Transferts aeroport</b>\n\nSelon le resort, les transferts peuvent etre :\n- Inclus (ex: Maldives)\n- En option\n- A organiser vous-meme\n\nVerifiez sur la fiche du resort choisi." . $links);
+        });
+
+        $botman->hears('(wifi|internet|connexion internet|4g|reseau|connecte)', function (BotMan $bot) {
+            $bot->reply("<b>Wifi dans les resorts</b>\n\nLe wifi est disponible dans tous nos resorts !\n\n- Gratuit dans les espaces communs\n- Souvent gratuit en chambre\n- Debit variable selon destination");
+        });
+
+        $botman->hears('(animal|animaux|chien|chat|pet|compagnie)', function (BotMan $bot) {
+            $bot->reply("<b>Animaux de compagnie</b>\n\nLes animaux ne sont malheureusement <b>pas acceptes</b> dans nos resorts.\n\nPensez a les faire garder pendant votre sejour !");
+        });
+
+        $botman->hears('(valise|bagages|emporter|emmener|vetement|dress code|tenue|quoi prendre|quoi emmener)', function (BotMan $bot) {
+            $links = $this->makeLinks([
+                'Resorts' => '/resorts',
+            ]);
+            $bot->reply("<b>Que mettre dans sa valise ?</b>\n\n<b>Basiques :</b> Maillot, creme solaire, chapeau\n<b>Soirees :</b> Tenue decontractee elegante\n<b>Sports :</b> Chaussures adaptees\n\nAmbiance decontractee, pas de dress code strict !" . $links);
+        });
+
+        $botman->hears('(pourboire|tips|tip|argent liquide|cash|especes)', function (BotMan $bot) {
+            $bot->reply("<b>Pourboires</b>\n\nLes pourboires ne sont <b>pas obligatoires</b> car tout est inclus !\n\nSi vous souhaitez en laisser, c'est apprecie mais jamais attendu.");
+        });
+
+        $botman->hears('(restaurant|repas|manger|nourriture|cuisine|buffet|bar|boisson|alcool|open bar)', function (BotMan $bot) {
+            $links = $this->makeLinks([
+                'Resorts' => '/resorts',
+            ]);
+            $bot->reply("<b>Restauration tout inclus</b>\n\n- <b>Petit-dejeuner :</b> Buffet copieux\n- <b>Dejeuner :</b> Buffet ou restaurant\n- <b>Diner :</b> Buffet + restos de specialites\n- <b>Open bar :</b> Cocktails, vins, softs\n\nRestaurants gastronomiques en supplement dans certains resorts." . $links);
+        });
+
+        $botman->hears('(spa|massage|bien-etre|bienetre|detente|relaxation|soins)', function (BotMan $bot) {
+            $links = $this->makeLinks([
+                'Resorts' => '/resorts',
+            ]);
+            $bot->reply("<b>Spa & Bien-etre</b>\n\nLa plupart de nos resorts disposent d'un spa.\n\n- Acces espace detente souvent inclus\n- Soins et massages en supplement\n- Reservation sur place recommandee" . $links);
+        });
+
+        $botman->hears('(covid|sanitaire|vaccin|test|pcr|masque|protocole)', function (BotMan $bot) {
+            $links = $this->makeLinks([
+                'Resorts' => '/resorts',
+            ]);
+            $bot->reply("<b>Conditions sanitaires</b>\n\nLes conditions evoluent selon les pays.\n\nVerifiez les exigences de votre destination avant le depart sur les sites officiels." . $links);
+        });
+
+        $botman->hears('(horaire|heure|check.?in|check.?out|arriver|partir|depart chambre)', function (BotMan $bot) {
+            $bot->reply("<b>Horaires</b>\n\n- <b>Check-in :</b> A partir de 15h\n- <b>Check-out :</b> Avant 10h\n\nPossibilite d'early check-in ou late check-out selon disponibilite (supplement eventuel).");
+        });
+
+        // === FIN NOUVEAUX SUJETS ===
+
+        $botman->hears('(merci|thanks|parfait|super|génial|genial|top|excellent|cool|nickel)', function (BotMan $bot) {
             $links = $this->makeLinks([
                 'Accueil' => '/',
                 'Resorts' => '/resorts',
@@ -306,7 +373,7 @@ class BotManController extends Controller
             $bot->reply("Avec plaisir ! Bonnes vacances au Club Med !" . $links);
         });
 
-        $botman->hears('(au revoir|bye|à bientôt|ciao|adieu)', function (BotMan $bot) {
+        $botman->hears('(au revoir|bye|à bientôt|a bientot|ciao|adieu|salut bye)', function (BotMan $bot) {
             $bot->reply("A bientot au Club Med !");
         });
 
@@ -323,7 +390,7 @@ class BotManController extends Controller
             try {
                 $response = Http::withoutVerifying()
                     ->withHeaders([
-                        'Authorization' => 'Bearer xIqtgRu4xODr2bKRjUsz9MbLJvAOartV',
+                        'Authorization' => 'Bearer ' . env('MISTRAL_API_KEY'),
                         'Content-Type' => 'application/json',
                     ])->post('https://api.mistral.ai/v1/chat/completions', [
                         "model" => "mistral-tiny",
@@ -334,14 +401,14 @@ class BotManController extends Controller
                                 Reponds en 1-2 phrases courtes MAX. 
                                 N'invente JAMAIS de numero de telephone, email ou site web.
                                 Si c'est un probleme technique, guide l'utilisateur avec des mots-cles : connexion, paiement, reservation, aide.
-                                Sinon, suggere des mots-cles : resorts, reserver, activites, prix, enfants, ski, plage."
+                                Sinon, suggere des mots-cles : resorts, reserver, activites, prix, enfants, ski, plage, spa, restaurant, wifi, transfert, assurance."
                             ],
                             [
                                 "role" => "user", 
                                 "content" => $message
                             ]
                         ],
-                        "max_tokens" => 80
+                        "max_tokens" => 100
                     ]);
 
                 if ($response->successful()) {
