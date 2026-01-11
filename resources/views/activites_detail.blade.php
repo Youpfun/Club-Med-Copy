@@ -44,7 +44,7 @@
 
         @if($activites->isEmpty())
             <div class="bg-white rounded-xl shadow-sm p-10 text-center border border-gray-100">
-                <p class="text-gray-500 text-lg">Aucune activité n'est listée dans cette catégorie pour le moment.</p>
+                <p class="text-gray-500 text-lg">Aucune activité n'est listée dans cette catégorie pour ce resort.</p>
             </div>
         @else
             <ul class="space-y-6">
@@ -53,7 +53,8 @@
                         
                         <div class="absolute left-0 top-0 bottom-0 w-2 bg-clubmed"></div>
 
-                        <div class="p-6 pl-8"> <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                        <div class="p-6 pl-8"> 
+                            <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
                                 
                                 <div class="flex-grow">
                                     <h2 class="text-xl font-bold text-clubmed mb-2">
@@ -72,7 +73,8 @@
                                 </div>
 
                                 <div class="flex-shrink-0">
-                                    @if($activite->estincluse)
+                                    {{-- Utilisation des variables spécifiques au resort (est_incluse_resort) --}}
+                                    @if(isset($activite->est_incluse_resort) && $activite->est_incluse_resort)
                                         <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-800 border border-green-200">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
                                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
@@ -85,7 +87,11 @@
                                                 <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
                                                 <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
                                             </svg>
-                                            À la carte (Supplément)
+                                            @if(isset($activite->prix_resort) && $activite->prix_resort > 0)
+                                                {{ number_format($activite->prix_resort, 2) }} € / pers.
+                                            @else
+                                                À la carte (Supplément)
+                                            @endif
                                         </span>
                                     @endif
                                 </div>

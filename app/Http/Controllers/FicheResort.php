@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Resort;
+use Illuminate\Support\Facades\Schema;
 
 class FicheResort extends Controller
 {
     public function fiche(Request $request, $numresort)
     {
-        $resort = Resort::with([
+        // 1. On prépare la requête pour le resort principal
+        $query = Resort::with([
             'pays', 
             'domaineskiable', 
             'typechambres', 
@@ -22,16 +24,28 @@ class FicheResort extends Controller
             'avis.user',
             'avis.photos'
         ])
-        ->where('numresort', $numresort)
-        ->firstOrFail();
+        ->where('numresort', $numresort);
+
+        // 2. IMPORTANT : Si la colonne existe, on ne montre le resort que s'il est validé
+        if (Schema::hasColumn('resort', 'est_valide')) {
+            $query->where('est_valide', true);
+        }
+
+        $resort = $query->firstOrFail();
 
         // Récupérer les resorts similaires (même pays, mêmes regroupements ou localisations)
         $regroupementIds = $resort->regroupements->pluck('numregroupement')->toArray();
         $localisationIds = $resort->localisations->pluck('numlocalisation')->toArray();
 
-        $similarResorts = Resort::with(['pays', 'photos', 'regroupements'])
-            ->where('numresort', '!=', $numresort)
-            ->where(function($query) use ($resort, $numresort, $regroupementIds, $localisationIds) {
+        // 3. On filtre aussi les suggestions pour ne pas montrer de brouillons
+        $similarQuery = Resort::with(['pays', 'photos', 'regroupements'])
+            ->where('numresort', '!=', $numresort);
+
+        if (Schema::hasColumn('resort', 'est_valide')) {
+            $similarQuery->where('est_valide', true);
+        }
+
+        $similarResorts = $similarQuery->where(function($query) use ($resort, $numresort, $regroupementIds, $localisationIds) {
                 // Même pays
                 $query->where('codepays', $resort->codepays);
                 
@@ -66,10 +80,17 @@ class FicheResort extends Controller
         $recentlyViewedResorts = collect();
         if (!empty($recentlyViewedIds)) {
             $filteredIds = array_filter($recentlyViewedIds, fn($id) => $id != $numresort);
+            
             if (!empty($filteredIds)) {
-                $recentlyViewedResorts = Resort::with(['pays', 'photos', 'regroupements'])
-                    ->whereIn('numresort', $filteredIds)
-                    ->get()
+                $recentQuery = Resort::with(['pays', 'photos', 'regroupements'])
+                    ->whereIn('numresort', $filteredIds);
+
+                // 4. On filtre aussi l'historique
+                if (Schema::hasColumn('resort', 'est_valide')) {
+                    $recentQuery->where('est_valide', true);
+                }
+
+                $recentlyViewedResorts = $recentQuery->get()
                     ->sortBy(function($resort) use ($filteredIds) {
                         return array_search($resort->numresort, $filteredIds);
                     });

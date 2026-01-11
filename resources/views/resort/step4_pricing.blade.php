@@ -24,7 +24,7 @@
 
             <div class="text-center mb-8">
                 <h1 class="text-3xl font-serif font-bold text-gray-900">Grille Tarifaire : {{ $resort->nomresort }}</h1>
-                <p class="text-gray-600">Renseignez le prix par nuit pour chaque type de chambre et chaque période.</p>
+                <p class="text-gray-600">Renseignez le prix par nuit pour chaque type de chambre.</p>
             </div>
 
             <form action="{{ route('resort.storeStep4', $resort->numresort) }}" method="POST">
@@ -52,14 +52,12 @@
                                         {{ $tc->nomtype }}
                                     </td>
                                     @foreach($periodes as $p)
-                                        @php 
-                                            $val = $existingPrices[$tc->numtype][$p->numperiode] ?? ''; 
-                                        @endphp
+                                        @php $val = $existingPrices[$tc->numtype][$p->numperiode] ?? ''; @endphp
                                         <td class="px-2 py-2 border-l text-center">
                                             <div class="relative">
                                                 <input type="number" name="prix[{{ $tc->numtype }}][{{ $p->numperiode }}]" 
                                                        value="{{ $val }}" 
-                                                       class="w-24 text-sm border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 text-right pr-6" 
+                                                       class="w-24 text-sm border-gray-200 rounded focus:ring-blue-500 text-right pr-6" 
                                                        placeholder="-">
                                                 <span class="absolute right-2 top-2 text-gray-400 text-xs">€</span>
                                             </div>
@@ -73,17 +71,15 @@
 
                 <div class="pt-8 mt-4 flex justify-between items-center border-t">
                     <button type="submit" name="action" value="save_exit" class="text-gray-500 hover:text-gray-800 font-bold underline transition">
-                        Sauvegarder et quitter
+                        Sauvegarder en brouillon
                     </button>
+                    {{-- BOUTON FINAL --}}
                     <button type="submit" name="action" value="finish" class="px-8 py-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2">
-                        <span>💾 Enregistrer la Grille et Terminer</span>
+                        <span>🚀 Publier le séjour</span>
                     </button>
                 </div>
             </form>
         </div>
     </main>
-
-    {{-- Chatbot BotMan --}}
-    @include('layouts.chatbot')
 </body>
 </html>

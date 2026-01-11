@@ -63,26 +63,21 @@ Route::post('verify/resend', [TwoFactorController::class, 'resend'])->name('2fa.
 Route::middleware(['auth', 'marketing'])->prefix('marketing')->group(function () {
     Route::get('/dashboard', [MarketingController::class, 'index'])->name('marketing.dashboard');
     
-    // --- ÉTAPES CRÉATION SÉJOUR ---
-    
-    // Étape 1 : Structure (Création)
     Route::get('/resorts/create', [ResortController::class, 'create'])->name('resort.create');
     Route::post('/resorts', [ResortController::class, 'store'])->name('resort.store');
-
-    // Étape 1 : Modification (Revenir sur la structure existante)
     Route::get('/resort/{id}/edit-structure', [ResortController::class, 'editStructure'])->name('resort.editStructure');
     Route::put('/resort/{id}/structure', [ResortController::class, 'updateStructure'])->name('resort.updateStructure');
 
-    // Étape 2 : Hébergements (Chambres, Capacités)
+    // Étape 2
     Route::get('/resort/{id}/accommodation', [ResortController::class, 'createAccommodation'])->name('resort.step2');
     Route::post('/resort/{id}/accommodation', [ResortController::class, 'storeAccommodation'])->name('resort.storeStep2');
 
-    // Étape 3 : Activités
+    // Étape 3
     Route::get('/resort/{id}/activities', [ResortController::class, 'createActivities'])->name('resort.step3');
     Route::post('/resort/{id}/activities', [ResortController::class, 'storeActivities'])->name('resort.storeStep3');
     Route::delete('/resort/{id}/activity/{activityId}', [ResortController::class, 'destroyActivity'])->name('resort.activity.destroy');
 
-    // Étape 4 : Tarification Saisonnière (NOUVEAU)
+    // Étape 4 (Celle qui manquait peut-être)
     Route::get('/resort/{id}/pricing', [ResortController::class, 'createPricing'])->name('resort.step4');
     Route::post('/resort/{id}/pricing', [ResortController::class, 'storePricing'])->name('resort.storeStep4');
 
@@ -90,6 +85,9 @@ Route::middleware(['auth', 'marketing'])->prefix('marketing')->group(function ()
     Route::post('/resort/{id}/validate', [MarketingController::class, 'validateResort'])->name('marketing.resort.validate');
 
     // --- AUTRES ROUTES MARKETING ---
+    Route::put('/resort/{id}/status', [MarketingController::class, 'updateStatus'])->name('marketing.resort.status');
+    Route::delete('/resort/{id}', [MarketingController::class, 'destroy'])->name('marketing.resort.destroy');
+    
     Route::post('/update-price', [MarketingController::class, 'updatePrice'])->name('marketing.update_price');
     Route::post('/periodes', [MarketingController::class, 'storePeriode'])->name('marketing.store_periode');
     Route::post('/bulk-promo', [MarketingController::class, 'applyBulkPromo'])->name('marketing.bulk_promo');

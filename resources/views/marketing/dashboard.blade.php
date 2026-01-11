@@ -30,7 +30,7 @@
              ============================== --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
             
-            {{-- 1. NOUVEAU SÉJOUR (Accessible à tous les membres marketing selon ta demande) --}}
+            {{-- 1. NOUVEAU SÉJOUR --}}
             <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-clubmed-blue hover:shadow-lg transition">
                 <div class="flex items-center mb-4">
                     <span class="text-3xl mr-3 bg-clubmed-blue/10 p-2 rounded-lg">🏨</span>
@@ -170,7 +170,7 @@
                                         </span>
                                     @elseif($resortItem->typechambres_count > 0)
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                                            Configuré
+                                            Hors ligne / Prêt
                                         </span>
                                     @else
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
@@ -179,22 +179,55 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <div class="flex justify-end items-center gap-2">
-                                        {{-- NOUVEAU BOUTON : MODIFIER STRUCTURE (ETAPE 1) --}}
-                                        <a href="{{ route('resort.editStructure', $resortItem->numresort) }}" class="text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded border border-gray-300 transition text-xs" title="Modifier identité, photos...">
-                                            📝 Modifier
+                                    <div class="flex justify-end items-center gap-3">
+                                        
+                                        {{-- GESTION ÉTAT (En Ligne / Hors Ligne) --}}
+                                        @if($isDirecteur)
+                                            <form action="{{ route('marketing.resort.status', $resortItem->numresort) }}" method="POST">
+                                                @csrf
+                                                @method('PUT')
+                                                @if($resortItem->est_valide ?? false)
+                                                    <input type="hidden" name="est_valide" value="0">
+                                                    <button type="submit" class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-green-700 hover:bg-red-100 hover:text-red-700 border border-green-200 transition group" title="Cliquez pour mettre hors ligne">
+                                                        <span class="group-hover:hidden">🟢</span>
+                                                        <span class="hidden group-hover:inline">🛑</span>
+                                                    </button>
+                                                @else
+                                                    <input type="hidden" name="est_valide" value="1">
+                                                    <button type="submit" class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 text-gray-500 hover:bg-green-100 hover:text-green-700 border border-gray-300 transition group" title="Cliquez pour publier">
+                                                        <span class="group-hover:hidden">🛑</span>
+                                                        <span class="hidden group-hover:inline">🟢</span>
+                                                    </button>
+                                                @endif
+                                            </form>
+                                        @endif
+
+                                        <div class="h-6 w-px bg-slate-200 mx-1"></div>
+
+                                        {{-- ACTIONS MODIFICATION --}}
+                                        <a href="{{ route('resort.editStructure', $resortItem->numresort) }}" class="text-gray-500 hover:text-blue-600 transition" title="Modifier Structure">
+                                            Modifier
                                         </a>
-                                        {{-- Tout le monde peut configurer les chambres et activités --}}
-                                        <a href="{{ route('resort.step2', $resortItem->numresort) }}" class="text-clubmed-blue hover:text-clubmed-blue/80 bg-clubmed-blue/10 hover:bg-clubmed-blue/20 px-3 py-1 rounded border border-clubmed-blue/20 transition text-xs" title="Configurer les chambres">
-                                            🛏️ Hébergement
+                                        <a href="{{ route('resort.step2', $resortItem->numresort) }}" class="text-gray-500 hover:text-blue-600 transition" title="Hébergement">
+                                            Chambres.
                                         </a>
-                                        <a href="{{ route('resort.step3', $resortItem->numresort) }}" class="text-purple-600 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 px-3 py-1 rounded border border-purple-200 transition text-xs" title="Configurer les activités">
-                                            ⛷️ Activités
+                                        <a href="{{ route('resort.step3', $resortItem->numresort) }}" class="text-gray-500 hover:text-purple-600 transition" title="Activités">
+                                            Activités.
                                         </a>
-                                        {{-- NOUVEAU BOUTON : ÉTAPE 4 (PRIX) --}}
-                                        <a href="{{ route('resort.step4', $resortItem->numresort) }}" class="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 px-3 py-1 rounded border border-green-200 transition text-xs" title="Configurer les tarifs">
-                                            💰 Prix
+                                        <a href="{{ route('resort.step4', $resortItem->numresort) }}" class="text-gray-500 hover:text-green-600 transition" title="Prix">
+                                            €
                                         </a>
+
+                                        {{-- BOUTON SUPPRIMER --}}
+                                        @if($isDirecteur)
+                                            <form action="{{ route('marketing.resort.destroy', $resortItem->numresort) }}" method="POST" onsubmit="return confirm('⚠️ ATTENTION : Cette action est IRRÉVERSIBLE !\n\nCela supprimera :\n- Le resort {{ $resortItem->nomresort }}\n- Toutes les réservations associées\n- Les photos, avis et tarifs\n\nÊtes-vous sûr de vouloir continuer ?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-400 hover:text-red-600 transition p-1 rounded hover:bg-red-50" title="Supprimer définitivement">
+                                                    Suppr.
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

@@ -18,9 +18,14 @@ use App\Models\RegroupementClub;
 use App\Models\TypeActivite;
 use App\Models\Activite;
 use App\Models\Partenaire;
+use Illuminate\Support\Facades\Schema;
 
 class ResortController extends Controller
 {
+    // =========================================================================
+    // PARTIE PUBLIQUE (Listing & API Prix)
+    // =========================================================================
+
     public function index(Request $request)
     {
         $typeclub = $request->input('typeclub');
@@ -39,8 +44,7 @@ class ResortController extends Controller
         $query = Resort::query();
         $query->select('resort.*');
 
-        // Si la colonne est_valide existe, on filtre pour le public
-        if (\Schema::hasColumn('resort', 'est_valide')) {
+        if (Schema::hasColumn('resort', 'est_valide')) {
             $query->where('est_valide', true);
         }
 
@@ -129,12 +133,16 @@ class ResortController extends Controller
         ]);
     }
 
+    // =========================================================================
+    // PARTIE ADMINISTRATION : ÉTAPE 1 (STRUCTURE)
+    // =========================================================================
+
     public function create()
     {
-        $paysList = \App\Models\Pays::orderBy('nompays')->get();
-        $domainesList = \App\Models\DomaineSkiable::orderBy('nomdomaine')->get();
-        $docsList = \App\Models\Documentation::all();
-        $groupesList = \App\Models\RegroupementClub::orderBy('nomregroupement')->get();
+        $paysList = Pays::orderBy('nompays')->get();
+        $domainesList = DomaineSkiable::orderBy('nomdomaine')->get();
+        $docsList = Documentation::all();
+        $groupesList = RegroupementClub::orderBy('nomregroupement')->get();
 
         return view('resort.create', compact('paysList', 'domainesList', 'docsList', 'groupesList'));
     }
@@ -161,7 +169,7 @@ class ResortController extends Controller
             $resort->numdocumentation = $request->numdocumentation;
             $resort->nbchambrestotal = 0; 
             
-            if (\Schema::hasColumn('resort', 'est_valide')) {
+            if (Schema::hasColumn('resort', 'est_valide')) {
                 $resort->est_valide = false;
             }
 
@@ -178,17 +186,10 @@ class ResortController extends Controller
             }
 
             if ($request->hasFile('photos')) {
-                // Slug sans séparateur, ex: "Afrique du Sex" -> "afriquedusex"
                 $slugResort = Str::slug($resort->nomresort, ''); 
-                
                 foreach ($request->file('photos') as $index => $file) {
-                    $filename = $slugResort;
-                    // Si plusieurs photos, on indexe à partir de la 2ème (index 1)
-                    if ($index > 0) {
-                        $filename .= $index;
-                    }
-                    $filename .= '.webp';
-
+                    $filename = $slugResort . ($index > 0 ? $index : '') . '.webp';
+                    
                     $image = @imagecreatefromstring(file_get_contents($file));
                     if ($image !== false) {
                         imagewebp($image, public_path('img/ressort/' . $filename), 80);
@@ -226,11 +227,11 @@ class ResortController extends Controller
 
             if ($request->input('action') === 'save_exit') {
                 return redirect()->route('marketing.dashboard')
-                                 ->with('success', "Le brouillon pour '{$resort->nomresort}' a été sauvegardé.");
+                                 ->with('success', "Le brouillon pour '{$resort->nomresort}' a été sauvegardé (Statut : Incomplet).");
             }
 
             return redirect()->route('resort.step2', $resort->numresort)
-                             ->with('success', "Structure créée ! Passons maintenant aux hébergements.");
+                             ->with('success', "Structure créée ! Passons aux hébergements.");
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -241,26 +242,18 @@ class ResortController extends Controller
     public function editStructure($id)
     {
         $resort = Resort::with(['regroupements', 'restaurants'])->findOrFail($id);
-        
-        $paysList = \App\Models\Pays::orderBy('nompays')->get();
-        $domainesList = \App\Models\DomaineSkiable::orderBy('nomdomaine')->get();
-        $docsList = \App\Models\Documentation::all();
-        $groupesList = \App\Models\RegroupementClub::orderBy('nomregroupement')->get();
+        $paysList = Pays::orderBy('nompays')->get();
+        $domainesList = DomaineSkiable::orderBy('nomdomaine')->get();
+        $docsList = Documentation::all();
+        $groupesList = RegroupementClub::orderBy('nomregroupement')->get();
 
-        return view('resort.edit_structure', compact(
-            'resort', 'paysList', 'domainesList', 'docsList', 'groupesList'
-        ));
+        return view('resort.edit_structure', compact('resort', 'paysList', 'domainesList', 'docsList', 'groupesList'));
     }
 
     public function updateStructure(Request $request, $id)
     {
         $resort = Resort::findOrFail($id);
-
-        $request->validate([
-            'nomresort' => 'required|string|max:255',
-            'codepays' => 'required|exists:pays,codepays',
-            'photos.*' => 'image|mimes:jpeg,png,jpg,webp|max:4096',
-        ]);
+        $request->validate(['nomresort' => 'required|string|max:255']);
 
         try {
             DB::beginTransaction();
@@ -287,27 +280,15 @@ class ResortController extends Controller
             }
 
             if ($request->hasFile('photos')) {
-                // Slug sans séparateur
                 $slugResort = Str::slug($resort->nomresort, ''); 
-                
                 foreach ($request->file('photos') as $index => $file) {
-                    $filename = $slugResort;
-                    
-                    if ($index > 0) {
-                        $filename .= $index;
-                    }
-                    $filename .= '.webp';
-
+                    $filename = $slugResort . ($index > 0 ? $index : '') . '.webp';
                     $image = @imagecreatefromstring(file_get_contents($file));
                     if ($image !== false) {
                         imagewebp($image, public_path('img/ressort/' . $filename), 80);
                         imagedestroy($image);
                         
-                        $exists = Photo::where('numresort', $resort->numresort)
-                                       ->where('nomfichierphoto', $filename)
-                                       ->exists();
-                        
-                        if (!$exists) {
+                        if (!Photo::where('numresort', $resort->numresort)->where('nomfichierphoto', $filename)->exists()) {
                             Photo::create([
                                 'numresort' => $resort->numresort, 
                                 'nomfichierphoto' => $filename,
@@ -353,6 +334,10 @@ class ResortController extends Controller
             return back()->withInput()->withErrors(['error' => "Erreur : " . $e->getMessage()]);
         }
     }
+
+    // =========================================================================
+    // PARTIE ADMINISTRATION : ÉTAPE 2 (HÉBERGEMENT)
+    // =========================================================================
 
     public function createAccommodation($id)
     {
@@ -420,6 +405,10 @@ class ResortController extends Controller
         }
     }
 
+    // =========================================================================
+    // PARTIE ADMINISTRATION : ÉTAPE 3 (ACTIVITÉS - CORRIGÉ)
+    // =========================================================================
+
     public function createActivities($id)
     {
         $resort = Resort::findOrFail($id);
@@ -429,19 +418,18 @@ class ResortController extends Controller
         $partnerName = 'Service ' . $resort->nomresort;
         $partner = Partenaire::where('nompartenaire', $partnerName)->first();
 
+        // On récupère précisément ce qui est lié au partenaire, avec l'info Inclus/Prix
         $resortActivities = collect();
         if ($partner) {
             $resortActivities = DB::table('activite')
                 ->join('fourni', 'activite.numactivite', '=', 'fourni.numactivite')
-                ->leftJoin('activitealacarte', 'activite.numactivite', '=', 'activitealacarte.numactivite')
                 ->join('typeactivite', 'activite.numtypeactivite', '=', 'typeactivite.numtypeactivite')
                 ->where('fourni.numpartenaire', $partner->numpartenaire)
                 ->select(
-                    'activite.numactivite',
-                    'activite.nomactivite',
-                    'activite.estincluse', 
+                    'activite.*', 
                     'typeactivite.nomtypeactivite',
-                    'activitealacarte.prixmin as prix_carte' 
+                    'fourni.est_incluse as pivot_inclus',
+                    'fourni.prix as pivot_prix'
                 )
                 ->get();
         }
@@ -455,11 +443,8 @@ class ResortController extends Controller
 
         $request->validate([
             'selected_activities' => 'nullable|array',
-            'selected_activities.*' => 'exists:activite,numactivite',
             'new_activities' => 'nullable|array',
-            'new_activities.*.nom' => 'required_with:new_activities|string|max:255',
-            'new_activities.*.type' => 'required_with:new_activities|exists:typeactivite,numtypeactivite',
-            'new_activities.*.inclus' => 'required_with:new_activities|in:1,0',
+            'activities_config' => 'nullable|array',
         ]);
 
         try {
@@ -467,18 +452,24 @@ class ResortController extends Controller
 
             $partner = Partenaire::firstOrCreate(
                 ['nompartenaire' => 'Service ' . $resort->nomresort],
-                ['emailpartenaire' => 'contact@' . Str::slug($resort->nomresort) . '.com']
+                ['emailpartenaire' => 'contact@' . Str::slug($resort->nomresort) . '.clubmed.com']
             );
 
             $typesToSync = [];
 
+            // 1. AJOUT DEPUIS CATALOGUE (SELECTED)
             if ($request->filled('selected_activities')) {
                 foreach ($request->selected_activities as $actId) {
                     $exists = DB::table('fourni')->where('numpartenaire', $partner->numpartenaire)->where('numactivite', $actId)->exists();
                     if (!$exists) {
+                        $original = Activite::find($actId);
+                        $estIncluse = $original ? $original->estincluse : true;
+
                         DB::table('fourni')->insert([
                             'numpartenaire' => $partner->numpartenaire,
-                            'numactivite' => $actId
+                            'numactivite' => $actId,
+                            'est_incluse' => $estIncluse ? true : false, // Forçage booléen
+                            'prix' => $estIncluse ? null : 20.00
                         ]);
                     }
                     $act = Activite::find($actId);
@@ -486,10 +477,12 @@ class ResortController extends Controller
                 }
             }
 
+            // 2. CRÉATION NOUVELLES ACTIVITÉS (MANUELLES)
             if ($request->filled('new_activities')) {
                 foreach ($request->new_activities as $newAct) {
                     if (!empty($newAct['nom']) && !empty($newAct['type'])) {
                         
+                        // FIX POSTGRES : Ajout de 'numactivite'
                         $idAct = DB::table('activite')->insertGetId([
                             'numtypeactivite' => $newAct['type'],
                             'nomactivite' => $newAct['nom'],
@@ -497,25 +490,44 @@ class ResortController extends Controller
                             'dureeactivite' => 60,
                             'agemin' => 0,
                             'estincluse' => ($newAct['inclus'] == '1')
-                        ], 'numactivite');
+                        ], 'numactivite'); 
 
                         DB::table('fourni')->insert([
                             'numpartenaire' => $partner->numpartenaire,
-                            'numactivite' => $idAct
+                            'numactivite' => $idAct,
+                            'est_incluse' => ($newAct['inclus'] == '1') ? true : false,
+                            'prix' => ($newAct['inclus'] == '0') ? ($newAct['prix'] ?? 20) : null
                         ]);
-
-                        if ($newAct['inclus'] == '0') {
-                            DB::table('activitealacarte')->insert([
-                                'numactivite' => $idAct,
-                                'prixmin' => 20 
-                            ]);
-                        }
                         
                         $typesToSync[] = $newAct['type'];
                     }
                 }
             }
 
+            // 3. MISE À JOUR (INCLUS / PRIX)
+            // C'est ici que la modification se fait
+            if ($request->filled('activities_config')) {
+                foreach ($request->activities_config as $actId => $config) {
+                    $isInclus = (isset($config['inclus']) && $config['inclus'] == '1');
+                    $prix = $isInclus ? null : ($config['prix'] ?? 20);
+
+                    // Vérification que les colonnes existent (si migration faite)
+                    if (Schema::hasColumn('fourni', 'est_incluse')) {
+                        DB::table('fourni')
+                            ->where('numpartenaire', $partner->numpartenaire)
+                            ->where('numactivite', $actId)
+                            ->update([
+                                'est_incluse' => $isInclus ? true : false, // Forçage booléen strict
+                                'prix' => $prix
+                            ]);
+                    }
+                    
+                    $act = Activite::find($actId);
+                    if($act) $typesToSync[] = $act->numtypeactivite;
+                }
+            }
+
+            // Sync des types pour l'affichage général
             $currentTypes = DB::table('fourni')
                 ->join('activite', 'fourni.numactivite', '=', 'activite.numactivite')
                 ->where('fourni.numpartenaire', $partner->numpartenaire)
@@ -530,6 +542,7 @@ class ResortController extends Controller
                 return redirect()->route('marketing.dashboard')->with('success', "Activités sauvegardées.");
             }
 
+            // Redirection explicite vers l'étape 4
             return redirect()->route('resort.step4', $resort->numresort)
                              ->with('success', "Activités enregistrées ! Configurez maintenant les tarifs.");
 
@@ -551,15 +564,19 @@ class ResortController extends Controller
             ->delete();
 
         $remainingTypes = DB::table('fourni')
-                ->join('activite', 'fourni.numactivite', '=', 'activite.numactivite')
-                ->where('fourni.numpartenaire', $partner->numpartenaire)
-                ->pluck('activite.numtypeactivite')
-                ->toArray();
+            ->join('activite', 'fourni.numactivite', '=', 'activite.numactivite')
+            ->where('fourni.numpartenaire', $partner->numpartenaire)
+            ->pluck('activite.numtypeactivite')
+            ->toArray();
 
         $resort->typesActivites()->sync(array_unique($remainingTypes));
 
-        return back()->with('success', "Activité retirée du resort.");
+        return back()->with('success', "Activité retirée.");
     }
+
+    // =========================================================================
+    // PARTIE ADMINISTRATION : ÉTAPE 4 (TARIFS)
+    // =========================================================================
 
     public function createPricing($id)
     {
@@ -579,7 +596,6 @@ class ResortController extends Controller
     public function storePricing(Request $request, $id)
     {
         $resort = Resort::findOrFail($id);
-        
         $prices = $request->input('prix', []);
 
         try {
@@ -604,14 +620,27 @@ class ResortController extends Controller
                 }
             }
 
+            // Bouton "Publier"
+            if ($request->input('action') === 'finish') {
+                if (Schema::hasColumn('resort', 'est_valide')) {
+                    $resort->est_valide = true;
+                    $resort->save();
+                }
+                
+                DB::commit();
+
+                return redirect()->route('marketing.dashboard')
+                             ->with('success', "Félicitations ! Le séjour au {$resort->nomresort} est maintenant **PUBLIÉ** et visible par les clients.");
+            }
+
             DB::commit();
 
             if ($request->input('action') === 'save_exit') {
-                return redirect()->route('marketing.dashboard')->with('success', "Tarifs sauvegardés.");
+                return redirect()->route('marketing.dashboard')->with('success', "Tarifs sauvegardés (Séjour toujours en brouillon).");
             }
 
             return redirect()->route('marketing.dashboard')
-                             ->with('success', "Félicitations ! Le séjour au {$resort->nomresort} est configuré et prêt à être validé par le Directeur.");
+                             ->with('success', "Modifications enregistrées.");
 
         } catch (\Exception $e) {
             DB::rollBack();
