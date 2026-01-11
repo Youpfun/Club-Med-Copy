@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Schema;
 class ResortController extends Controller
 {
     // =========================================================================
-    // PARTIE PUBLIQUE (Listing & API Prix)
+    // PARTIE 1 : LISTING PUBLIC ET API PRIX
     // =========================================================================
 
     public function index(Request $request)
@@ -44,6 +44,7 @@ class ResortController extends Controller
         $query = Resort::query();
         $query->select('resort.*');
 
+        // Si la colonne est_valide existe, on filtre pour le public
         if (Schema::hasColumn('resort', 'est_valide')) {
             $query->where('est_valide', true);
         }
@@ -134,7 +135,7 @@ class ResortController extends Controller
     }
 
     // =========================================================================
-    // PARTIE ADMINISTRATION : ÉTAPE 1 (STRUCTURE)
+    // PARTIE 2 : WORKFLOW DE CRÉATION (ÉTAPE 1 - STRUCTURE)
     // =========================================================================
 
     public function create()
@@ -185,11 +186,18 @@ class ResortController extends Controller
                 $resort->regroupements()->attach($request->groupes);
             }
 
+            // Gestion Photos : minuscules sans espace
             if ($request->hasFile('photos')) {
-                $slugResort = Str::slug($resort->nomresort, ''); 
+                // EX: "Afrique du Sud" -> "afriquedusud"
+                $slugResort = strtolower(str_replace(' ', '', $resort->nomresort)); 
+                
                 foreach ($request->file('photos') as $index => $file) {
-                    $filename = $slugResort . ($index > 0 ? $index : '') . '.webp';
-                    
+                    $filename = $slugResort;
+                    if ($index > 0) {
+                        $filename .= $index;
+                    }
+                    $filename .= '.webp';
+
                     $image = @imagecreatefromstring(file_get_contents($file));
                     if ($image !== false) {
                         imagewebp($image, public_path('img/ressort/' . $filename), 80);
@@ -258,6 +266,10 @@ class ResortController extends Controller
         try {
             DB::beginTransaction();
 
+            // 1. Capturer l'ancien nom AVANT la modification pour le renommage
+            $oldName = $resort->nomresort; 
+
+            // 2. Mise à jour des infos
             $resort->nomresort = $request->nomresort;
             $resort->codepays = $request->codepays;
             $resort->nbtridents = $request->nbtridents ?? 3;
@@ -273,21 +285,76 @@ class ResortController extends Controller
 
             $resort->save();
 
+            // 3. RENOMMAGE DES PHOTOS ET DU PARTENAIRE
+            if ($oldName !== $request->nomresort) {
+                // On utilise la convention "tout attaché minuscule"
+                $oldSlug = strtolower(str_replace(' ', '', $oldName));       // ex: afriquedusex
+                $newSlug = strtolower(str_replace(' ', '', $request->nomresort)); // ex: afriquetour
+
+                $photos = Photo::where('numresort', $resort->numresort)->get();
+
+                foreach($photos as $photo) {
+                    $oldFilename = $photo->nomfichierphoto; // ex: afriquedusex.webp
+
+                    // Si le nom du fichier contient l'ancien slug, on le remplace par le nouveau
+                    if (strpos($oldFilename, $oldSlug) !== false) {
+                        $newFilename = str_replace($oldSlug, $newSlug, $oldFilename); // ex: afriquetour.webp
+
+                        // Chemins complets vers les fichiers
+                        $oldPath = public_path('img/ressort/' . $oldFilename);
+                        $newPath = public_path('img/ressort/' . $newFilename);
+
+                        // Renommage physique du fichier sur le disque
+                        if (file_exists($oldPath)) {
+                            rename($oldPath, $newPath);
+                        }
+
+                        // Mise à jour du nom dans la base de données
+                        $photo->nomfichierphoto = $newFilename;
+                        $photo->save();
+                    }
+                }
+
+                // Mise à jour du Partenaire pour garder la cohérence "Service [Nom]"
+                $oldPartnerName = 'Service ' . $oldName;
+                $newPartnerName = 'Service ' . $request->nomresort;
+                // Pour l'email, on garde le slug propre de Laravel pour éviter les caractères spéciaux
+                $newEmail = 'activites@' . Str::slug($request->nomresort) . '.clubmed.com'; 
+
+                Partenaire::where('nompartenaire', $oldPartnerName)
+                    ->update([
+                        'nompartenaire' => $newPartnerName,
+                        'emailpartenaire' => $newEmail
+                    ]);
+            }
+            // ========================================================
+
             if ($request->has('groupes')) {
                 $resort->regroupements()->sync($request->groupes);
             } else {
                 $resort->regroupements()->detach();
             }
 
+            // Ajout de nouvelles photos si envoyées
             if ($request->hasFile('photos')) {
-                $slugResort = Str::slug($resort->nomresort, ''); 
+                $slugResort = strtolower(str_replace(' ', '', $resort->nomresort)); 
+                
                 foreach ($request->file('photos') as $index => $file) {
-                    $filename = $slugResort . ($index > 0 ? $index : '') . '.webp';
+                    $filename = $slugResort;
+                    
+                    // On vérifie combien on a déjà de photos pour incrémenter correctement
+                    $existingCount = Photo::where('numresort', $resort->numresort)->count();
+                    $suffix = ($index + $existingCount > 0) ? ($index + $existingCount) : '';
+                    
+                    if ($suffix) $filename .= $suffix;
+                    $filename .= '.webp';
+
                     $image = @imagecreatefromstring(file_get_contents($file));
                     if ($image !== false) {
                         imagewebp($image, public_path('img/ressort/' . $filename), 80);
                         imagedestroy($image);
                         
+                        // On évite les doublons en DB
                         if (!Photo::where('numresort', $resort->numresort)->where('nomfichierphoto', $filename)->exists()) {
                             Photo::create([
                                 'numresort' => $resort->numresort, 
@@ -314,6 +381,7 @@ class ResortController extends Controller
                 }
             }
 
+            // On s'assure que le partenaire existe (ou on le met à jour via le bloc rename ci-dessus)
             $partnerName = 'Service ' . $resort->nomresort;
             Partenaire::firstOrCreate(
                 ['nompartenaire' => $partnerName],
@@ -336,7 +404,7 @@ class ResortController extends Controller
     }
 
     // =========================================================================
-    // PARTIE ADMINISTRATION : ÉTAPE 2 (HÉBERGEMENT)
+    // PARTIE 3 : ÉTAPE 2 - HÉBERGEMENT
     // =========================================================================
 
     public function createAccommodation($id)
@@ -406,7 +474,7 @@ class ResortController extends Controller
     }
 
     // =========================================================================
-    // PARTIE ADMINISTRATION : ÉTAPE 3 (ACTIVITÉS - CORRIGÉ)
+    // PARTIE 4 : ÉTAPE 3 - ACTIVITÉS
     // =========================================================================
 
     public function createActivities($id)
@@ -418,7 +486,6 @@ class ResortController extends Controller
         $partnerName = 'Service ' . $resort->nomresort;
         $partner = Partenaire::where('nompartenaire', $partnerName)->first();
 
-        // On récupère précisément ce qui est lié au partenaire, avec l'info Inclus/Prix
         $resortActivities = collect();
         if ($partner) {
             $resortActivities = DB::table('activite')
@@ -468,7 +535,7 @@ class ResortController extends Controller
                         DB::table('fourni')->insert([
                             'numpartenaire' => $partner->numpartenaire,
                             'numactivite' => $actId,
-                            'est_incluse' => $estIncluse ? true : false, // Forçage booléen
+                            'est_incluse' => $estIncluse ? true : false,
                             'prix' => $estIncluse ? null : 20.00
                         ]);
                     }
@@ -482,7 +549,6 @@ class ResortController extends Controller
                 foreach ($request->new_activities as $newAct) {
                     if (!empty($newAct['nom']) && !empty($newAct['type'])) {
                         
-                        // FIX POSTGRES : Ajout de 'numactivite'
                         $idAct = DB::table('activite')->insertGetId([
                             'numtypeactivite' => $newAct['type'],
                             'nomactivite' => $newAct['nom'],
@@ -504,20 +570,18 @@ class ResortController extends Controller
                 }
             }
 
-            // 3. MISE À JOUR (INCLUS / PRIX)
-            // C'est ici que la modification se fait
+            // 3. MISE À JOUR CONFIGURATION (INCLUS / PRIX)
             if ($request->filled('activities_config')) {
                 foreach ($request->activities_config as $actId => $config) {
-                    $isInclus = (isset($config['inclus']) && $config['inclus'] == '1');
+                    $isInclus = isset($config['inclus']) && $config['inclus'] == '1';
                     $prix = $isInclus ? null : ($config['prix'] ?? 20);
 
-                    // Vérification que les colonnes existent (si migration faite)
                     if (Schema::hasColumn('fourni', 'est_incluse')) {
                         DB::table('fourni')
                             ->where('numpartenaire', $partner->numpartenaire)
                             ->where('numactivite', $actId)
                             ->update([
-                                'est_incluse' => $isInclus ? true : false, // Forçage booléen strict
+                                'est_incluse' => $isInclus ? true : false,
                                 'prix' => $prix
                             ]);
                     }
@@ -527,7 +591,7 @@ class ResortController extends Controller
                 }
             }
 
-            // Sync des types pour l'affichage général
+            // Sync des types
             $currentTypes = DB::table('fourni')
                 ->join('activite', 'fourni.numactivite', '=', 'activite.numactivite')
                 ->where('fourni.numpartenaire', $partner->numpartenaire)
@@ -542,7 +606,6 @@ class ResortController extends Controller
                 return redirect()->route('marketing.dashboard')->with('success', "Activités sauvegardées.");
             }
 
-            // Redirection explicite vers l'étape 4
             return redirect()->route('resort.step4', $resort->numresort)
                              ->with('success', "Activités enregistrées ! Configurez maintenant les tarifs.");
 
@@ -571,11 +634,11 @@ class ResortController extends Controller
 
         $resort->typesActivites()->sync(array_unique($remainingTypes));
 
-        return back()->with('success', "Activité retirée.");
+        return back()->with('success', "Activité retirée du resort.");
     }
 
     // =========================================================================
-    // PARTIE ADMINISTRATION : ÉTAPE 4 (TARIFS)
+    // PARTIE 5 : ÉTAPE 4 - TARIFS ET PUBLICATION
     // =========================================================================
 
     public function createPricing($id)
@@ -620,7 +683,6 @@ class ResortController extends Controller
                 }
             }
 
-            // Bouton "Publier"
             if ($request->input('action') === 'finish') {
                 if (Schema::hasColumn('resort', 'est_valide')) {
                     $resort->est_valide = true;

@@ -9,10 +9,11 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Models\Resort;
-use App\Models\Typechambre;
+use App\Models\TypeChambre;
 use App\Models\Transport;
 use App\Models\Activite;
 use App\Models\Partenaire;
+use App\Models\Reservation;
 use App\Mail\PartnerValidationMail;
 use App\Mail\ResortValidationMail;
 use App\Mail\PartnerConfirmationMail;
@@ -137,14 +138,28 @@ class ReservationController extends Controller
         }
 
         try {
-            $activites = DB::table('activite')
-                ->join('activitealacarte', 'activite.numactivite', '=', 'activitealacarte.numactivite')
-                ->join('typeactivite', 'activite.numtypeactivite', '=', 'typeactivite.numtypeactivite')
-                ->join('partager', 'typeactivite.numtypeactivite', '=', 'partager.numtypeactivite')
-                ->where('partager.numresort', $numresort)
-                ->select('activite.numactivite', 'activite.nomactivite', 'activite.descriptionactivite', 'activitealacarte.prixmin')
-                ->distinct()
-                ->get();
+            // Récupération des activités liées au resort via le partenaire (logique plus robuste)
+            $partnerName = 'Service ' . $resort->nomresort;
+            $partner = Partenaire::where('nompartenaire', $partnerName)->first();
+            
+            $activites = collect();
+            if ($partner) {
+                $activites = DB::table('activite')
+                    ->join('fourni', 'activite.numactivite', '=', 'fourni.numactivite')
+                    ->join('typeactivite', 'activite.numtypeactivite', '=', 'typeactivite.numtypeactivite')
+                    ->where('fourni.numpartenaire', $partner->numpartenaire)
+                    // On peut afficher tout (inclus ou non) ou filtrer selon le besoin. 
+                    // Ici pour le step 3 (récap initial), on affiche souvent les options payantes.
+                    ->where('fourni.est_incluse', false) 
+                    ->select(
+                        'activite.numactivite', 
+                        'activite.nomactivite', 
+                        'activite.descriptionactivite', 
+                        'fourni.prix as prixmin' // On prend le prix spécifique au resort
+                    )
+                    ->distinct()
+                    ->get();
+            }
         } catch (\Exception $e) {
             $activites = collect([]);
         }
@@ -216,10 +231,17 @@ class ReservationController extends Controller
         $prixActivites = 0;
         foreach ($activites as $numactivite => $participants) {
             if (is_array($participants) && count($participants) > 0) {
-                $activite = DB::table('activitealacarte')->where('numactivite', $numactivite)->first();
-                if ($activite) {
-                    $prixActivites += $activite->prixmin * count($participants);
+                // On récupère le prix via la table fourni pour être cohérent
+                $partenaireRecord = DB::table('fourni')->where('numactivite', $numactivite)->first();
+                $prixUnitaire = $partenaireRecord ? $partenaireRecord->prix : 0;
+                
+                // Fallback si pas trouvé dans fourni (ancien système)
+                if (!$partenaireRecord) {
+                     $activiteALaCarte = DB::table('activitealacarte')->where('numactivite', $numactivite)->first();
+                     $prixUnitaire = $activiteALaCarte ? $activiteALaCarte->prixmin : 0;
                 }
+
+                $prixActivites += $prixUnitaire * count($participants);
             }
         }
 
@@ -232,7 +254,7 @@ class ReservationController extends Controller
             'numresort' => $numresort,
             'numjour' => 1,
             'pla_numjour' => 1,
-            'numtransport' => $numtransport,
+            'numtransport' => null, // Sera mis à jour ou géré par participant
             'statut' => 'En attente',
             'nbpersonnes' => $nbPersonnes,
             'prixtotal' => $prixTotal,
@@ -284,31 +306,35 @@ class ReservationController extends Controller
 
         foreach ($activites as $numactivite => $participants) {
             if (is_array($participants) && count($participants) > 0) {
-                $activite = DB::table('activitealacarte')->where('numactivite', $numactivite)->first();
                 $partenaireRecord = DB::table('fourni')->where('numactivite', $numactivite)->first();
+                $prixUnitaire = $partenaireRecord ? $partenaireRecord->prix : 0;
+                
+                // Fallback
+                if (!$partenaireRecord) {
+                     $activiteALaCarte = DB::table('activitealacarte')->where('numactivite', $numactivite)->first();
+                     $prixUnitaire = $activiteALaCarte ? $activiteALaCarte->prixmin : 0;
+                }
 
-                if ($activite) {
-                    if ($partenaireRecord && $partenaireRecord->numpartenaire) {
-                        DB::table('reservation_activite')->insert([
-                            'numreservation' => $numreservation,
+                if ($partenaireRecord && $partenaireRecord->numpartenaire) {
+                    DB::table('reservation_activite')->insert([
+                        'numreservation' => $numreservation,
+                        'numactivite' => $numactivite,
+                        'prix_unitaire' => $prixUnitaire,
+                        'quantite' => count($participants),
+                        'numpartenaire' => $partenaireRecord->numpartenaire,
+                        'partenaire_validation_status' => 'pending',
+                        'created_at' => now(),
+                    ]);
+                }
+
+                foreach ($participants as $participantKey) {
+                    if (isset($participantsMap[$participantKey])) {
+                        DB::table('participant_activite')->insert([
+                            'numparticipant' => $participantsMap[$participantKey],
                             'numactivite' => $numactivite,
-                            'prix_unitaire' => $activite->prixmin,
-                            'quantite' => count($participants),
-                            'numpartenaire' => $partenaireRecord->numpartenaire,
-                            'partenaire_validation_status' => 'pending',
                             'created_at' => now(),
+                            'updated_at' => now(),
                         ]);
-                    }
-
-                    foreach ($participants as $participantKey) {
-                        if (isset($participantsMap[$participantKey])) {
-                            DB::table('participant_activite')->insert([
-                                'numparticipant' => $participantsMap[$participantKey],
-                                'numactivite' => $numactivite,
-                                'created_at' => now(),
-                                'updated_at' => now(),
-                            ]);
-                        }
                     }
                 }
             }
@@ -611,14 +637,26 @@ class ReservationController extends Controller
             ->where('numreservation', $numreservation)
             ->get();
 
-        $activites = DB::table('activite')
-            ->join('activitealacarte', 'activite.numactivite', '=', 'activitealacarte.numactivite')
-            ->join('typeactivite', 'activite.numtypeactivite', '=', 'typeactivite.numtypeactivite')
-            ->join('partager', 'typeactivite.numtypeactivite', '=', 'partager.numtypeactivite')
-            ->where('partager.numresort', $reservation->numresort)
-            ->select('activite.numactivite', 'activite.nomactivite', 'activite.descriptionactivite', 'activitealacarte.prixmin')
-            ->distinct()
-            ->get();
+        // Récupérer les activités via la table fourni (avec gestion prix)
+        $partnerName = 'Service ' . Resort::find($reservation->numresort)->nomresort;
+        $partner = Partenaire::where('nompartenaire', $partnerName)->first();
+
+        $activites = collect();
+        if ($partner) {
+             $activites = DB::table('activite')
+                ->join('fourni', 'activite.numactivite', '=', 'fourni.numactivite')
+                ->join('typeactivite', 'activite.numtypeactivite', '=', 'typeactivite.numtypeactivite')
+                ->where('fourni.numpartenaire', $partner->numpartenaire)
+                ->where('fourni.est_incluse', false)
+                ->select(
+                    'activite.numactivite', 
+                    'activite.nomactivite', 
+                    'activite.descriptionactivite', 
+                    'fourni.prix as prixmin'
+                )
+                ->distinct()
+                ->get();
+        }
 
         // Récupérer les activités déjà sélectionnées
         $activitesSelectionnees = DB::table('participant_activite')
@@ -666,6 +704,8 @@ class ReservationController extends Controller
                 DB::table('participant_activite')->insert([
                     'numparticipant' => $numparticipant,
                     'numactivite' => $numactivite,
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
 
                 // Compter pour reservation_activite
@@ -678,11 +718,20 @@ class ReservationController extends Controller
 
         // Insérer dans reservation_activite
         foreach ($activitesParActivite as $numactivite => $nbparticipants) {
-            DB::table('reservation_activite')->insert([
-                'numreservation' => $numreservation,
-                'numactivite' => $numactivite,
-                'nbparticipants' => $nbparticipants,
-            ]);
+            $partenaireRecord = DB::table('fourni')->where('numactivite', $numactivite)->first();
+            $prixUnitaire = $partenaireRecord ? $partenaireRecord->prix : 0;
+
+            if ($partenaireRecord && $partenaireRecord->numpartenaire) {
+                 DB::table('reservation_activite')->insert([
+                    'numreservation' => $numreservation,
+                    'numactivite' => $numactivite,
+                    'prix_unitaire' => $prixUnitaire,
+                    'quantite' => $nbparticipants,
+                    'numpartenaire' => $partenaireRecord->numpartenaire,
+                    'partenaire_validation_status' => 'pending',
+                    'created_at' => now(),
+                ]);
+            }
         }
 
         // Recalculer le prix
@@ -724,12 +773,15 @@ class ReservationController extends Controller
             ->where('participant.numreservation', $numreservation)
             ->sum('transport.prixtransport');
 
-        // Calcul prix activités
-        $prixActivites = DB::table('participant_activite')
-            ->join('participant', 'participant_activite.numparticipant', '=', 'participant.numparticipant')
-            ->join('activitealacarte', 'participant_activite.numactivite', '=', 'activitealacarte.numactivite')
-            ->where('participant.numreservation', $numreservation)
-            ->sum('activitealacarte.prixmin');
+        // Calcul prix activités (Via la table fourni pour la cohérence)
+        $prixActivites = 0;
+        $activitesReservees = DB::table('reservation_activite')
+            ->where('numreservation', $numreservation)
+            ->get();
+            
+        foreach($activitesReservees as $ar) {
+            $prixActivites += $ar->prix_unitaire * $ar->quantite;
+        }
 
         // Total HT
         $totalHT = $prixChambres + $prixTransport + $prixActivites;
@@ -744,5 +796,49 @@ class ReservationController extends Controller
         DB::table('reservation')
             ->where('numreservation', $numreservation)
             ->update(['prixtotal' => $totalTTC]);
+    }
+
+    // --- C'EST ICI LA MÉTHODE MANQUANTE AJOUTÉE ---
+    
+    /**
+     * Affiche la page d'ajout d'activités pour une réservation existante.
+     */
+    public function showAddActivities($numreservation)
+    {
+        // 1. Récupérer la réservation et vérifier l'appartenance
+        $reservation = \App\Models\Reservation::with(['resort'])
+            ->where('numreservation', $numreservation)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        // 2. Récupérer le partenaire du resort
+        $partnerName = 'Service ' . $reservation->resort->nomresort;
+        $partner = Partenaire::where('nompartenaire', $partnerName)->first();
+
+        // 3. Récupérer les activités "À la carte" (payantes) proposées par ce partenaire
+        // On exclut celles qui sont "incluses" (est_incluse = true) car elles sont gratuites
+        $activites = collect();
+        if ($partner) {
+            $activites = DB::table('activite')
+                ->join('fourni', 'activite.numactivite', '=', 'fourni.numactivite')
+                ->join('typeactivite', 'activite.numtypeactivite', '=', 'typeactivite.numtypeactivite')
+                ->where('fourni.numpartenaire', $partner->numpartenaire)
+                ->where('fourni.est_incluse', false) // Uniquement les payantes
+                ->select(
+                    'activite.*',
+                    'typeactivite.nomtypeactivite',
+                    'fourni.prix as prix_resort' // Le prix spécifique au resort
+                )
+                ->get();
+        }
+
+        // On mappe pour la vue qui attend 'prixmin' (standardisation)
+        $activites->transform(function($act) {
+            $act->prixmin = $act->prix_resort ?? 0;
+            return $act;
+        });
+
+        // 4. Retourner la vue (Variable $activites avec un E)
+        return view('reservation.add-activities', compact('reservation', 'activites'));
     }
 }
