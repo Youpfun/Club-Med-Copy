@@ -93,6 +93,8 @@ Route::middleware(['auth', 'marketing'])->prefix('marketing')->group(function ()
     Route::post('/bulk-promo', [MarketingController::class, 'applyBulkPromo'])->name('marketing.bulk_promo');
     Route::post('/reset-promos', [MarketingController::class, 'resetPromos'])->name('marketing.reset_promos');
     
+    // GESTION INDISPONIBILITÉS & OCCUPATIONS (Modifié)
+    Route::get('/indisponibilite/occupancy', [IndisponibiliteController::class, 'occupancy'])->name('marketing.indisponibilite.occupancy');
     Route::get('/indisponibilite/select', [IndisponibiliteController::class, 'selectResort'])->name('marketing.indisponibilite.select');
     Route::get('/indisponibilite/create/{numresort}', [IndisponibiliteController::class, 'create'])->name('marketing.indisponibilite.create');
     Route::post('/indisponibilite', [IndisponibiliteController::class, 'store'])->name('marketing.indisponibilite.store');
