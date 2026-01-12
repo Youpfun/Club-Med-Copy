@@ -121,6 +121,25 @@
                 </div>
             </div>
 
+            {{-- 6. PROJETS DE SÉJOUR --}}
+            <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-indigo-500 hover:shadow-lg transition">
+                <div class="flex items-center mb-4">
+                    <span class="text-3xl mr-3 bg-indigo-100 p-2 rounded-lg">📋</span>
+                    <div>
+                        <h3 class="text-lg font-bold font-serif text-gray-900">Projets de Séjour</h3>
+                        <p class="text-sm text-gray-500">Soumettre au Directeur</p>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <a href="{{ route('marketing.projet-sejour.create') }}" class="block w-full text-center px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg font-bold transition flex items-center justify-center gap-2 text-sm">
+                        Nouveau projet
+                    </a>
+                    <a href="{{ route('marketing.projet-sejour.index') }}" class="block w-full text-center px-4 py-2 bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-50 rounded-lg font-bold transition flex items-center justify-center gap-2 text-sm">
+                        Voir les projets
+                    </a>
+                </div>
+            </div>
+
         </div>
 
         {{-- ==============================

@@ -26,6 +26,7 @@ use App\Http\Controllers\AlternativeResortController;
 use App\Http\Controllers\DemandeDisponibiliteController;
 use App\Http\Controllers\ProspectionResortController;
 use App\Http\Controllers\ProspectionPartenaireController;
+use App\Http\Controllers\ProjetSejourController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\PersonalDataController;
 use App\Http\Controllers\BotManController;
@@ -120,6 +121,20 @@ Route::middleware(['auth', 'marketing'])->prefix('marketing')->group(function ()
     Route::put('/prospection-partenaire/{numprospection}/statut', [ProspectionPartenaireController::class, 'updateStatut'])->name('marketing.prospection-partenaire.update-statut');
     Route::post('/prospection-partenaire/{numprospection}/resend', [ProspectionPartenaireController::class, 'resend'])->name('marketing.prospection-partenaire.resend');
     Route::delete('/prospection-partenaire/{numprospection}', [ProspectionPartenaireController::class, 'destroy'])->name('marketing.prospection-partenaire.destroy');
+
+    // Projets de séjour (workflow marketing -> directeur ventes)
+    Route::get('/projet-sejour', [ProjetSejourController::class, 'index'])->name('marketing.projet-sejour.index');
+    Route::get('/projet-sejour/create', [ProjetSejourController::class, 'create'])->name('marketing.projet-sejour.create');
+    Route::post('/projet-sejour', [ProjetSejourController::class, 'store'])->name('marketing.projet-sejour.store');
+    Route::get('/projet-sejour/{numprojet}', [ProjetSejourController::class, 'show'])->name('marketing.projet-sejour.show');
+    Route::get('/projet-sejour/{numprojet}/edit', [ProjetSejourController::class, 'edit'])->name('marketing.projet-sejour.edit');
+    Route::put('/projet-sejour/{numprojet}', [ProjetSejourController::class, 'update'])->name('marketing.projet-sejour.update');
+    Route::post('/projet-sejour/{numprojet}/submit', [ProjetSejourController::class, 'submit'])->name('marketing.projet-sejour.submit');
+    Route::post('/projet-sejour/{numprojet}/approve', [ProjetSejourController::class, 'approve'])->name('marketing.projet-sejour.approve');
+    Route::post('/projet-sejour/{numprojet}/request-revision', [ProjetSejourController::class, 'requestRevision'])->name('marketing.projet-sejour.request-revision');
+    Route::post('/projet-sejour/{numprojet}/reject', [ProjetSejourController::class, 'reject'])->name('marketing.projet-sejour.reject');
+    Route::post('/projet-sejour/{numprojet}/start-creation', [ProjetSejourController::class, 'startCreation'])->name('marketing.projet-sejour.start-creation');
+    Route::delete('/projet-sejour/{numprojet}', [ProjetSejourController::class, 'destroy'])->name('marketing.projet-sejour.destroy');
 });
 
 // Routes accessibles sans connexion pour voir les dates/prix/activités
