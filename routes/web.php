@@ -150,6 +150,10 @@ Route::middleware([
     Route::post('/profile/request-deletion', [PersonalDataController::class, 'requestDeletion'])->name('profile.request-deletion');
     Route::post('/profile/cancel-deletion', [PersonalDataController::class, 'cancelDeletion'])->name('profile.cancel-deletion');
     
+    // RGPD - Gestion des données (Anonymisation et Suppression)
+    Route::get('/profile/gdpr-request', [PersonalDataController::class, 'showGdprRequest'])->name('profile.gdpr-request');
+    Route::post('/profile/gdpr-request', [PersonalDataController::class, 'processGdprRequest'])->name('profile.process-gdpr-request');
+    
     Route::post('/logout', function () {
         Auth::guard('web')->logout();
         request()->session()->invalidate();
