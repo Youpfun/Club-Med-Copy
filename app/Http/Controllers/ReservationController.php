@@ -307,25 +307,32 @@ class ReservationController extends Controller
         foreach ($activites as $numactivite => $participants) {
             if (is_array($participants) && count($participants) > 0) {
                 $partenaireRecord = DB::table('fourni')->where('numactivite', $numactivite)->first();
-                $prixUnitaire = $partenaireRecord ? $partenaireRecord->prix : 0;
+                $prixUnitaire = $partenaireRecord ? $partenaireRecord->prix : null;
                 
-                // Fallback
-                if (!$partenaireRecord) {
+                if ($prixUnitaire === null) {
                      $activiteALaCarte = DB::table('activitealacarte')->where('numactivite', $numactivite)->first();
-                     $prixUnitaire = $activiteALaCarte ? $activiteALaCarte->prixmin : 0;
+                     $prixUnitaire = $activiteALaCarte && $activiteALaCarte->prixmin ? $activiteALaCarte->prixmin : null;
                 }
 
-                if ($partenaireRecord && $partenaireRecord->numpartenaire) {
-                    DB::table('reservation_activite')->insert([
-                        'numreservation' => $numreservation,
-                        'numactivite' => $numactivite,
-                        'prix_unitaire' => $prixUnitaire,
-                        'quantite' => count($participants),
-                        'numpartenaire' => $partenaireRecord->numpartenaire,
-                        'partenaire_validation_status' => 'pending',
-                        'created_at' => now(),
-                    ]);
+                if ($prixUnitaire === null) {
+                    $activiteGeneral = DB::table('activite')->where('numactivite', $numactivite)->first();
+                    $prixUnitaire = 0;
                 }
+
+                $dataReservationActivite = [
+                    'numreservation' => $numreservation,
+                    'numactivite' => $numactivite,
+                    'prix_unitaire' => $prixUnitaire ?? 0,
+                    'quantite' => count($participants),
+                    'created_at' => now(),
+                ];
+
+                if ($partenaireRecord && $partenaireRecord->numpartenaire) {
+                    $dataReservationActivite['numpartenaire'] = $partenaireRecord->numpartenaire;
+                    $dataReservationActivite['partenaire_validation_status'] = 'pending';
+                }
+
+                DB::table('reservation_activite')->insert($dataReservationActivite);
 
                 foreach ($participants as $participantKey) {
                     if (isset($participantsMap[$participantKey])) {
