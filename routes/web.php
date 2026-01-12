@@ -94,6 +94,8 @@ Route::middleware(['auth', 'marketing'])->prefix('marketing')->group(function ()
     Route::post('/bulk-promo', [MarketingController::class, 'applyBulkPromo'])->name('marketing.bulk_promo');
     Route::post('/reset-promos', [MarketingController::class, 'resetPromos'])->name('marketing.reset_promos');
     
+    // GESTION INDISPONIBILITÉS & OCCUPATIONS (Modifié)
+    Route::get('/indisponibilite/occupancy', [IndisponibiliteController::class, 'occupancy'])->name('marketing.indisponibilite.occupancy');
     Route::get('/indisponibilite/select', [IndisponibiliteController::class, 'selectResort'])->name('marketing.indisponibilite.select');
     Route::get('/indisponibilite/create/{numresort}', [IndisponibiliteController::class, 'create'])->name('marketing.indisponibilite.create');
     Route::post('/indisponibilite', [IndisponibiliteController::class, 'store'])->name('marketing.indisponibilite.store');
@@ -162,6 +164,10 @@ Route::middleware([
     Route::get('/profile/delete-account', [PersonalDataController::class, 'showDeleteForm'])->name('profile.delete-account');
     Route::post('/profile/request-deletion', [PersonalDataController::class, 'requestDeletion'])->name('profile.request-deletion');
     Route::post('/profile/cancel-deletion', [PersonalDataController::class, 'cancelDeletion'])->name('profile.cancel-deletion');
+    
+    // RGPD - Gestion des données (Anonymisation et Suppression)
+    Route::get('/profile/gdpr-request', [PersonalDataController::class, 'showGdprRequest'])->name('profile.gdpr-request');
+    Route::post('/profile/gdpr-request', [PersonalDataController::class, 'processGdprRequest'])->name('profile.process-gdpr-request');
     
     Route::post('/logout', function () {
         Auth::guard('web')->logout();

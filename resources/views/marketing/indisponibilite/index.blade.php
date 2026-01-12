@@ -17,9 +17,14 @@
                     <h1 class="text-3xl font-bold text-gray-900 font-serif">Chambres Bloquées</h1>
                     <p class="text-gray-600 mt-1">Liste des chambres actuellement fermées à la vente.</p>
                 </div>
-                <a href="{{ route('marketing.indisponibilite.select') }}" class="mt-4 md:mt-0 inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full font-bold shadow transition">
-                    + Bloquer une autre chambre
-                </a>
+                <div class="mt-4 md:mt-0 space-x-2">
+                    <a href="{{ route('marketing.indisponibilite.occupancy') }}" class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-bold shadow transition">
+                        📅 Voir Planning / Occupations
+                    </a>
+                    <a href="{{ route('marketing.indisponibilite.select') }}" class="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full font-bold shadow transition">
+                        + Bloquer une chambre
+                    </a>
+                </div>
             </div>
 
             @if(session('success'))
@@ -59,6 +64,8 @@
                                                     </div>
                                                     <div class="text-sm text-gray-500">
                                                         {{ $indispo->chambre->typechambre->nomtype ?? 'Type inconnu' }}
+                                                        <br>
+                                                        <span class="text-xs text-gray-400">{{ $indispo->chambre->typechambre->resorts->first()->nomresort ?? '' }}</span>
                                                     </div>
                                                 </div>
                                             </div>

@@ -17,8 +17,8 @@
                     </p>
                 </div>
                 <div class="flex flex-wrap gap-3">
-                    <button onclick="rejectAllCookies()" class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors">
-                        Refuser
+                    <button onclick="rejectAllCookies()" class="px-5 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-full transition-colors shadow-md">
+                        Tout refuser
                     </button>
                     <button onclick="toggleCookieDetails()" class="px-5 py-2.5 text-sm font-medium text-clubmed-blue border border-clubmed-blue hover:bg-clubmed-blue hover:text-white rounded-full transition-colors">
                         Personnaliser
@@ -48,7 +48,7 @@
                         <div class="flex items-center justify-between mb-2">
                             <span class="font-semibold text-gray-900">Cookies fonctionnels</span>
                             <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="cookie-functional" class="sr-only peer" checked>
+                                <input type="checkbox" id="cookie-functional" class="sr-only peer">
                                 <div class="w-11 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-clubmed-gold rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-clubmed-gold"></div>
                             </label>
                         </div>
@@ -60,7 +60,7 @@
                         <div class="flex items-center justify-between mb-2">
                             <span class="font-semibold text-gray-900">Cookies analytiques</span>
                             <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="cookie-analytics" class="sr-only peer" checked>
+                                <input type="checkbox" id="cookie-analytics" class="sr-only peer">
                                 <div class="w-11 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-clubmed-gold rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-clubmed-gold"></div>
                             </label>
                         </div>
