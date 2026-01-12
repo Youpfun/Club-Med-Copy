@@ -43,7 +43,12 @@
             </div>
 
             <div class="mb-6">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Mot de passe</label>
+                <div class="flex justify-between items-center mb-2">
+                    <label class="text-sm font-semibold text-gray-700">Mot de passe</label>
+                    <a href="{{ route('password.request') }}" class="text-sm font-medium text-clubmed-blue hover:text-clubmed-blue-dark transition-colors">
+                        Mot de passe oublié ?
+                    </a>
+                </div>
                 <input type="password" name="password" 
                        class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-clubmed-gold focus:ring-2 focus:ring-clubmed-gold/20 outline-none transition-all" 
                        placeholder="••••••••"

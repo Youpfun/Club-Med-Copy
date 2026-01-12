@@ -1,0 +1,11 @@
+{
+    "Hello!": "Bonjour !",
+    "You are receiving this email because we received a password reset request for your account.": "Vous recevez cet email car nous avons reçu une demande de réinitialisation de mot de passe pour votre compte.",
+    "Reset Password": "Réinitialiser le mot de passe",
+    "This password reset link will expire in :count minutes.": "Ce lien de réinitialisation de mot de passe expirera dans :count minutes.",
+    "If you did not request a password reset, no further action is required.": "Si vous n'avez pas demandé de réinitialisation de mot de passe, aucune autre action n'est requise.",
+    "Regards,": "Cordialement,",
+    "If you're having trouble clicking the \":actionText\" button, copy and paste the URL below\ninto your web browser:": "Si vous rencontrez des difficultés pour cliquer sur le bouton \":actionText\", copiez et collez l'URL ci-dessous\ndans votre navigateur web :",
+    "Whoops!": "Oups !",
+    "All rights reserved.": "Tous droits réservés."
+}
