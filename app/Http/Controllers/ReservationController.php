@@ -365,10 +365,13 @@ class ReservationController extends Controller
         $resortEmail = $resort->emailresort ?? config('mail.from.address');
         $resortLink = url('/resort/validate/' . $resortToken);
 
-        try {
-            Mail::to($resortEmail)->send(new ResortValidationMail($reservationLoaded, $resort, $resortLink));
-        } catch (\Exception $e) {
-            \Log::error('Envoi email resort échec: ' . $e->getMessage());
+        // Vérifier si la réservation est payée avant d'envoyer l'email
+        if ($reservationLoaded->statut === 'Payée') {
+            try {
+                Mail::to($resortEmail)->send(new ResortValidationMail($reservationLoaded, $resort, $resortLink));
+            } catch (\Exception $e) {
+                \Log::error('Envoi email resort échec: ' . $e->getMessage());
+            }
         }
 
         // Stocker les détails de réservation en session
