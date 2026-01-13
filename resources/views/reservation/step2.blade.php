@@ -278,7 +278,7 @@
                                     @foreach($chambres as $numtype => $qty)
                                         @if($qty > 0)
                                             @php
-                                                $typeChambre = \App\Models\Typechambre::find($numtype);
+                                                $typeChambre = \App\Models\TypeChambre::find($numtype);
                                             @endphp
                                             <p class="font-semibold text-gray-800">{{ $qty }}x {{ $typeChambre->nomtype ?? 'Chambre' }}</p>
                                         @endif
