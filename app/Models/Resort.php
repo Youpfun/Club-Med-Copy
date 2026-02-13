@@ -30,24 +30,19 @@ class Resort extends Model
     public function typechambres() { return $this->belongsToMany(TypeChambre::class, 'proposer', 'numresort', 'numtype')->withPivot('nbchambres'); }
     public function tarifs() { return $this->hasMany(Tarifer::class, 'numresort', 'numresort'); }
     public function avis() { return $this->hasMany(Avis::class, 'numresort', 'numresort'); }
-    public function typeclubs() { return $this->belongsToMany(Typeclub::class, 'classer', 'numresort', 'numtypeclub'); }
+    
+    // --- LIGNE CORRIGÉE CI-DESSOUS (TypeClub avec C majuscule) ---
+    public function typeclubs() { return $this->belongsToMany(TypeClub::class, 'classer', 'numresort', 'numtypeclub'); }
+    
     public function localisations() { return $this->belongsToMany(Localisation::class, 'situer2', 'numresort', 'numlocalisation'); }
     
-    // Relation générale (Types d'activités disponibles)
     public function typesActivites() { return $this->belongsToMany(TypeActivite::class, 'partager', 'numresort', 'numtypeactivite'); }
 
-    /**
-     * NOUVELLE MÉTHODE : Récupère le partenaire lié au Resort (par convention de nom)
-     */
     public function partenaire()
     {
-        // On cherche le partenaire dont le nom est "Service [NomResort]"
         return Partenaire::where('nompartenaire', 'Service ' . $this->nomresort)->first();
     }
 
-    /**
-     * NOUVELLE MÉTHODE : Récupère les activités SPÉCIFIQUES configurées pour ce resort
-     */
     public function activitesSpecifiques()
     {
         $partner = $this->partenaire();
@@ -63,8 +58,8 @@ class Resort extends Model
             ->select(
                 'activite.*', 
                 'typeactivite.nomtypeactivite', 
-                'fourni.est_incluse as pivot_inclus', // Valeur spécifique au resort
-                'fourni.prix as pivot_prix'           // Prix spécifique au resort
+                'fourni.est_incluse as pivot_inclus',
+                'fourni.prix as pivot_prix'
             )
             ->get();
     }
