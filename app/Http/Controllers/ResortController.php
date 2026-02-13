@@ -28,8 +28,6 @@ class ResortController extends Controller
 
     public function index(Request $request)
     {
-        $resorts = Resort::all();
-        dd($resorts);
         $typeclub = $request->input('typeclub');
         $localisation = $request->input('localisation');
         $pays = $request->input('pays');
